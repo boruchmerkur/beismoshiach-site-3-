@@ -1,0 +1,7 @@
+# Netlify config for beismoshiach.org
+[build]
+  publish = "."
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
