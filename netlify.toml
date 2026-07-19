@@ -1,6 +1,10 @@
 # Netlify config for beismoshiach.org
 [build]
   publish = "."
+
+[build.environment]
+  LILY_SITE = "beismoshiach"
+
 [[headers]]
   for = "/*"
   [headers.values]

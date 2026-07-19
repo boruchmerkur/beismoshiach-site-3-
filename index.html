@@ -8,10 +8,10 @@
 <link rel="stylesheet" href="assets/site.css">
 <style>
   html,body{height:100%;} body{margin:0;display:flex;flex-direction:column;background:#0F1A24;}
-  :root{ --embed-clip:56px; --sbw:0px; }
+  :root{ --sbw:0px; }
   .bm-topbar{padding-right:var(--sbw) !important;}
   .feed-wrap{flex:1 1 auto;position:relative;min-height:0;overflow:hidden;background:var(--parchment);}
-  .feed-wrap iframe{position:absolute;left:0;right:0;top:calc(-1 * var(--embed-clip));width:100%;height:calc(100% + var(--embed-clip));border:0;display:block;}
+  .feed-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}
   .feed-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;font-family:var(--body);color:var(--royal);z-index:-1;}
   .feed-fallback a{color:var(--gold);border-bottom:2px solid var(--gold);text-decoration:none;}
 </style></head><body>
