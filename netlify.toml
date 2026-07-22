@@ -5,15 +5,25 @@
 [build.environment]
   LILY_SITE = "beismoshiach"
 
+# v2 functions in netlify/functions are auto-detected and bundled by Netlify's
+# own pipeline. Do NOT set node_bundler here -- "esbuild" is the v1 setting and
+# forcing it can reject these v2 (export default (req, context) => Response)
+# functions for a "missing handler".
 [functions]
-  node_bundler = "esbuild"
   directory = "netlify/functions"
 
-[[redirects]]
-  from = "/api/lily"
-  to = "/.netlify/functions/lily-collect"
-  status = 200
-  force = true
+# NOTE: the edge function lily-edge is declared INLINE in
+# netlify/edge-functions/lily-edge.js via `export const config = { path: '/*' }`.
+# It is intentionally NOT declared here as well -- a second [[edge_functions]]
+# block would double-register it and can fail the deploy.
+
+# NO /api/lily redirect here on purpose.
+# lily-collect is a v2 function that already claims /api/lily via its inline
+# `export const config = { path: '/api/lily' }`, so it is served AT /api/lily
+# directly. A v2 function with a custom path is NOT exposed at the legacy
+# /.netlify/functions/lily-collect URL -- so a forced redirect pointing there
+# rewrote every /api/lily request to a dead URL and returned 404. That redirect
+# was added 2026-07-21 and is exactly when this site stopped reporting.
 
 [[headers]]
   for = "/*"
