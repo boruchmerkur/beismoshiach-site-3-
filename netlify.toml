@@ -5,6 +5,10 @@
 [build.environment]
   LILY_SITE = "beismoshiach"
 
+[functions]
+  node_bundler = "esbuild"
+  directory = "netlify/functions"
+
 [[redirects]]
   from = "/api/lily"
   to = "/.netlify/functions/lily-collect"
