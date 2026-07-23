@@ -1,0 +1,12 @@
+# Never commit archive bundles into this static-site repo.
+# Avtzon.zip is a 189 MB image bundle that lives in the parent Downloads folder
+# and repeatedly "sneaks into" storage/ during copy/build steps. GitHub rejects
+# any file over 100 MB, so a single stray Avtzon.zip breaks the whole push.
+# A published website never needs a .zip, so ignore them all as a safety net.
+Avtzon.zip
+*.zip
+
+# OS / editor junk that has no place in the deploy
+Thumbs.db
+.DS_Store
+desktop.ini
