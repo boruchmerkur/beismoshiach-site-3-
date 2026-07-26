@@ -229,3 +229,20 @@ html{scrollbar-gutter:stable;}
 .artlist .lt:hover{color:var(--gold);text-decoration-color:var(--gold);}
 .artlist .lsum{display:block;font-size:13.5px;color:var(--ink);opacity:.72;margin-top:5px;line-height:1.5;max-width:75ch;}
 .he-body .artlist .lsum{font-family:'Frank Ruhl Libre',serif;font-size:15px;}
+
+
+/* --- series navigation (Likkutei Mekoros etc.) --- */
+.series-strip{max-width:720px;margin:2px auto 10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--royal)}
+.series-strip a{color:var(--royal);text-decoration:none;border-bottom:1px solid transparent}
+.series-strip a:hover{border-bottom-color:var(--royal)}
+.series-nav{max-width:720px;margin:34px auto 0;padding-top:18px;border-top:1px solid var(--rule)}
+.series-nav .sn-home{display:block;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--royal);text-decoration:none;margin-bottom:12px}
+.series-nav .sn-home:hover{text-decoration:underline}
+.series-nav .sn-row{display:flex;gap:12px;align-items:stretch}
+.series-nav a.sn-btn{flex:1;min-width:0;display:block;padding:11px 15px;border:1px solid var(--parchment-edge);border-radius:4px;background:var(--parchment-deep);text-decoration:none;color:inherit}
+.series-nav a.sn-btn:hover{border-color:var(--royal)}
+.series-nav .sn-next{text-align:right}
+.series-nav .sn-k{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--royal);margin-bottom:4px}
+.series-nav .sn-t{font-family:var(--display);font-size:15px;line-height:1.25}
+.series-nav .sn-spacer{flex:1}
+@media(max-width:560px){.series-nav .sn-row{flex-direction:column}}
