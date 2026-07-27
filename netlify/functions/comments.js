@@ -30,6 +30,21 @@ export default async (req) => {
   const url = new URL(req.url);
 
   if (req.method === "GET") {
+    // admin: list every article that has comments (moderation view)
+    if (url.searchParams.get("all") === "1") {
+      const admin = req.headers.get("x-admin-key");
+      if (!process.env.COMMENTS_ADMIN_KEY || admin !== process.env.COMMENTS_ADMIN_KEY) {
+        return json({ error: "Unauthorized." }, 401);
+      }
+      const { blobs } = await store.list({ prefix: "art/" });
+      const items = [];
+      for (const b of blobs) {
+        const list = (await store.get(b.key, { type: "json" })) || [];
+        if (list.length) items.push({ slug: b.key.replace(/^art\//, ""), comments: list });
+      }
+      items.sort((a, z) => z.comments[z.comments.length - 1].ts - a.comments[a.comments.length - 1].ts);
+      return json({ items });
+    }
     const slug = clean(url.searchParams.get("slug"));
     if (!slug) return json({ comments: [] });
     const list = (await store.get(key(slug), { type: "json" })) || [];
