@@ -263,3 +263,29 @@ html{scrollbar-gutter:stable;}
 .lm-meta{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--royal);white-space:nowrap;margin-left:auto}
 .lm-list{margin:0;padding:0 16px 10px 22px;border-top:1px solid var(--rule)}
 .lm-list li{padding:11px 0}
+
+
+/* --- reader comments (no login, native, no trackers) --- */
+.comments{max-width:680px;margin:36px auto 8px;padding:0 20px}
+.cm-h{font-family:var(--display);font-size:20px;font-weight:500;color:var(--royal);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+.cm-list{margin:0 0 26px}
+.cm-empty{font-family:var(--display);font-style:italic;color:var(--ink-soft,#666);margin:6px 0 0}
+.cm-item{padding:14px 0;border-bottom:1px solid var(--rule)}
+.cm-item:last-child{border-bottom:none}
+.cm-item p{margin:6px 0 0;line-height:1.6}
+.cm-meta{display:flex;align-items:baseline;gap:10px}
+.cm-who{font-family:var(--display);font-weight:600;color:var(--ink,#1a1a1a)}
+.cm-when{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--royal);opacity:.75}
+.cm-new{animation:cmIn .5s ease}
+@keyframes cmIn{from{background:var(--parchment-deep);opacity:.3}to{background:transparent;opacity:1}}
+.cm-form{background:var(--parchment-deep);border:1px solid var(--parchment-edge);border-radius:7px;padding:18px 18px 16px}
+.cm-lead{font-family:var(--display);font-size:15px;margin:0 0 12px;color:var(--ink,#1a1a1a)}
+.cm-name,.cm-body{width:100%;box-sizing:border-box;font:inherit;font-size:15px;color:var(--ink,#1a1a1a);background:var(--surface,#fff);border:1px solid var(--parchment-edge);border-radius:5px;padding:10px 12px;margin-bottom:10px}
+.cm-body{resize:vertical;min-height:88px;line-height:1.5}
+.cm-name:focus,.cm-body:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 2px rgba(41,55,120,.12)}
+.cm-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.cm-row{display:flex;align-items:center;gap:14px}
+.cm-post{font-family:var(--display);font-size:15px;font-weight:500;color:#fff;background:var(--royal);border:none;border-radius:5px;padding:10px 20px;cursor:pointer;transition:opacity .15s}
+.cm-post:hover{opacity:.9}
+.cm-post:disabled{opacity:.5;cursor:default}
+.cm-msg{font-family:var(--display);font-size:13px;color:var(--royal)}
