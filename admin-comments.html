@@ -26,8 +26,13 @@
   .mod-c .who{font-weight:600}
   .mod-c .when{font-family:var(--mono);font-size:11px;color:var(--royal);opacity:.75;margin-left:8px}
   .mod-c p{margin:5px 0 0;line-height:1.5;white-space:pre-wrap}
+  .mod-actions{display:flex;flex-direction:column;gap:6px}
   .mod-c button{font:inherit;font-size:13px;color:#a12;background:transparent;border:1px solid #d99;border-radius:4px;padding:5px 12px;cursor:pointer;white-space:nowrap}
   .mod-c button:hover{background:#a12;color:#fff}
+  .mod-c button.mod-approve{color:#161;border-color:#9c9}
+  .mod-c button.mod-approve:hover{background:#161;color:#fff}
+  .mod-pending{background:rgba(200,150,0,.08)}
+  .mod-badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#a70;border:1px solid #e0b060;border-radius:3px;padding:1px 6px;margin-left:8px}
   .mod-empty{color:var(--ink-soft,#666);font-style:italic}
 </style>
 </head>
@@ -73,17 +78,27 @@
 
   function render(items) {
     var total = items.reduce(function (n, it) { return n + it.comments.length; }, 0);
+    var pending = items.reduce(function (n, it) {
+      return n + it.comments.filter(function (c) { return c.pending; }).length;
+    }, 0);
     statusEl.textContent = items.length
-      ? total + " comment" + (total === 1 ? "" : "s") + " across " + items.length + " article" + (items.length === 1 ? "" : "s") + "."
+      ? total + " comment" + (total === 1 ? "" : "s") + " across " + items.length + " article" +
+        (items.length === 1 ? "" : "s") + (pending ? " · " + pending + " awaiting approval" : "") + "."
       : "";
     if (!items.length) { listEl.innerHTML = '<p class="mod-empty">No comments yet.</p>'; return; }
     listEl.innerHTML = items.map(function (it) {
       var rows = it.comments.map(function (c) {
-        return '<div class="mod-c" data-id="' + esc(c.id) + '"><div class="body">' +
+        var pend = !!c.pending;
+        var approve = pend
+          ? '<button class="mod-approve" data-act="approve" data-slug="' + esc(it.slug) + '" data-id="' + esc(c.id) + '">Approve</button>'
+          : "";
+        return '<div class="mod-c' + (pend ? ' mod-pending' : '') + '" data-id="' + esc(c.id) + '"><div class="body">' +
           '<span class="who">' + esc(c.name || "Anonymous") + '</span>' +
+          (pend ? '<span class="mod-badge">Pending</span>' : "") +
           '<span class="when">' + when(c.ts) + '</span>' +
           '<p>' + esc(c.body || "") + '</p></div>' +
-          '<button data-slug="' + esc(it.slug) + '" data-id="' + esc(c.id) + '">Delete</button></div>';
+          '<div class="mod-actions">' + approve +
+          '<button data-act="delete" data-slug="' + esc(it.slug) + '" data-id="' + esc(c.id) + '">Delete</button></div></div>';
       }).join("");
       var href = "/articles/" + encodeURIComponent(it.slug) + ".html";
       return '<div class="mod-art"><h2><a href="' + href + '" target="_blank" rel="noopener">' +
@@ -94,11 +109,28 @@
   listEl.addEventListener("click", function (e) {
     var btn = e.target.closest("button[data-id]");
     if (!btn) return;
-    if (!confirm("Delete this comment permanently?")) return;
     var key = keyEl.value.trim();
+    var q = "/api/comments?slug=" + encodeURIComponent(btn.dataset.slug) + "&id=" + encodeURIComponent(btn.dataset.id);
+
+    if (btn.dataset.act === "approve") {
+      btn.disabled = true; btn.textContent = "…";
+      fetch(q, { method: "PATCH", headers: { "x-admin-key": key } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ok) throw new Error();
+          var row = btn.closest(".mod-c");
+          row.classList.remove("mod-pending");
+          var badge = row.querySelector(".mod-badge");
+          if (badge) badge.remove();
+          btn.remove();
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = "Approve"; alert("Could not approve."); });
+      return;
+    }
+
+    if (!confirm("Delete this comment permanently?")) return;
     btn.disabled = true; btn.textContent = "…";
-    fetch("/api/comments?slug=" + encodeURIComponent(btn.dataset.slug) + "&id=" + encodeURIComponent(btn.dataset.id),
-      { method: "DELETE", headers: { "x-admin-key": key } })
+    fetch(q, { method: "DELETE", headers: { "x-admin-key": key } })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (!d.ok) throw new Error(d.error || "error");

@@ -31,7 +31,7 @@
     '<h2 class="cm-h">Comments</h2>' +
     '<div class="cm-list" aria-live="polite"><p class="cm-empty">Loading…</p></div>' +
     '<form class="cm-form" novalidate>' +
-    '<p class="cm-lead">Share a thought on this article.</p>' +
+    '<p class="cm-lead">Share a thought on this article. Comments are reviewed before they appear.</p>' +
     '<input class="cm-name" name="name" type="text" maxlength="60" placeholder="Your name (optional)" autocomplete="name">' +
     '<textarea class="cm-body" name="body" rows="4" maxlength="4000" placeholder="Your comment…" required></textarea>' +
     '<input class="cm-hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">' +
@@ -88,18 +88,10 @@
     })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
-        if (!res.ok || !res.d.comment) throw new Error(res.d.error || "error");
-        // clear the empty-state and prepend the new comment
-        if (listEl.querySelector(".cm-empty")) listEl.innerHTML = "";
-        var c = res.d.comment;
-        var html =
-          '<article class="cm-item cm-new"><div class="cm-meta">' +
-          '<span class="cm-who">' + esc(c.name || "Anonymous") + "</span>" +
-          '<span class="cm-when">' + when(c.ts) + "</span></div>" +
-          "<p>" + para(c.body || "") + "</p></article>";
-        listEl.insertAdjacentHTML("afterbegin", html);
+        if (!res.ok || !res.d.pending) throw new Error(res.d.error || "error");
+        // comment is held for approval — do NOT show it to the visitor yet
         form.body.value = "";
-        msg.textContent = "Thank you — your comment is posted.";
+        msg.textContent = "Thank you — your comment will appear once it’s approved.";
       })
       .catch(function (err) {
         msg.textContent = (err && err.message) || "Could not post. Please try again.";

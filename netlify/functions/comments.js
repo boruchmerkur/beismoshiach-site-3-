@@ -1,16 +1,20 @@
 // Reader comments for beismoshiach.org — v2 Netlify Function.
 // Storage is Netlify Blobs (lives in this site's own Netlify account; no third
 // party, no tracking). One blob per article slug holds the comment array.
-//   GET    /api/comments?slug=SLUG          -> { comments: [...] }
-//   POST   /api/comments  {slug,name,body}  -> { comment: {...} }   (appears at once)
-//   DELETE /api/comments?slug=SLUG&id=ID     -> { ok }   (needs x-admin-key)
+// Comments are HELD FOR APPROVAL: a new comment is stored with pending:true and
+// is invisible to visitors until an admin approves it.
+//   GET    /api/comments?slug=SLUG          -> { comments: [...] }   (approved only)
+//   GET    /api/comments?all=1              -> { items: [...] }      (admin; incl. pending)
+//   POST   /api/comments  {slug,name,body}  -> { pending: true }     (held for review)
+//   PATCH  /api/comments?slug=SLUG&id=ID     -> { ok }   approve (needs x-admin-key)
+//   DELETE /api/comments?slug=SLUG&id=ID     -> { ok }   delete  (needs x-admin-key)
 import { getStore } from "@netlify/blobs";
 
 export const config = { path: "/api/comments" };
 
 const MAX_NAME = 60;
 const MAX_BODY = 4000;
-// collapse control chars (keep normal spaces/newlines), then trim
+// keep printable chars + normal whitespace, drop control chars, then trim
 const clean = (s) =>
   Array.from(String(s ?? ""))
     .filter((c) => { const n = c.charCodeAt(0); return n >= 32 || n === 9 || n === 10 || n === 13; })
@@ -23,32 +27,37 @@ const json = (obj, status = 200) =>
     status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
   });
-const publicOf = ({ hidden, ...c }) => c;
+// what a visitor is allowed to see (no moderation flags)
+const publicOf = ({ hidden, pending, ...c }) => c;
+const isAdmin = (req) =>
+  !!process.env.COMMENTS_ADMIN_KEY && req.headers.get("x-admin-key") === process.env.COMMENTS_ADMIN_KEY;
 
 export default async (req) => {
   const store = getStore({ name: "comments", consistency: "strong" });
   const url = new URL(req.url);
 
   if (req.method === "GET") {
-    // admin: list every article that has comments (moderation view)
+    // admin: list every article's comments, pending flag intact (moderation view)
     if (url.searchParams.get("all") === "1") {
-      const admin = req.headers.get("x-admin-key");
-      if (!process.env.COMMENTS_ADMIN_KEY || admin !== process.env.COMMENTS_ADMIN_KEY) {
-        return json({ error: "Unauthorized." }, 401);
-      }
+      if (!isAdmin(req)) return json({ error: "Unauthorized." }, 401);
       const { blobs } = await store.list({ prefix: "art/" });
       const items = [];
       for (const b of blobs) {
         const list = (await store.get(b.key, { type: "json" })) || [];
         if (list.length) items.push({ slug: b.key.replace(/^art\//, ""), comments: list });
       }
-      items.sort((a, z) => z.comments[z.comments.length - 1].ts - a.comments[a.comments.length - 1].ts);
+      // articles with pending comments first, then by most recent activity
+      const pend = (it) => it.comments.some((c) => c.pending);
+      items.sort((a, z) =>
+        (pend(z) - pend(a)) ||
+        (z.comments[z.comments.length - 1].ts - a.comments[a.comments.length - 1].ts));
       return json({ items });
     }
+    // public: approved comments only
     const slug = clean(url.searchParams.get("slug"));
     if (!slug) return json({ comments: [] });
     const list = (await store.get(key(slug), { type: "json" })) || [];
-    const visible = list.filter((c) => !c.hidden).map(publicOf);
+    const visible = list.filter((c) => !c.hidden && !c.pending).map(publicOf);
     return json({ comments: visible });
   }
 
@@ -59,7 +68,7 @@ export default async (req) => {
     } catch {
       return json({ error: "Malformed request." }, 400);
     }
-    if (clean(b.website)) return json({ ok: true }); // honeypot: silently drop bots
+    if (clean(b.website)) return json({ pending: true }); // honeypot: silently drop bots
     const slug = clean(b.slug);
     const name = clean(b.name).slice(0, MAX_NAME) || "Anonymous";
     const body = clean(b.body).slice(0, MAX_BODY);
@@ -69,19 +78,27 @@ export default async (req) => {
     // reject an exact duplicate of the most recent comment (double-submit / flood)
     const last = list[list.length - 1];
     if (last && last.body === body && last.name === name) {
-      return json({ comment: publicOf(last) }, 200);
+      return json({ pending: true }, 200);
     }
-    const c = { id: rid(), name, body, ts: Date.now() };
-    list.push(c);
+    list.push({ id: rid(), name, body, ts: Date.now(), pending: true });
     await store.setJSON(key(slug), list);
-    return json({ comment: publicOf(c) }, 201);
+    return json({ pending: true }, 201); // held for approval; not shown to visitor
+  }
+
+  if (req.method === "PATCH") {
+    // approve a pending comment
+    if (!isAdmin(req)) return json({ error: "Unauthorized." }, 401);
+    const slug = clean(url.searchParams.get("slug"));
+    const id = clean(url.searchParams.get("id"));
+    const list = (await store.get(key(slug), { type: "json" })) || [];
+    let found = false;
+    for (const c of list) if (c.id === id) { delete c.pending; found = true; }
+    if (found) await store.setJSON(key(slug), list);
+    return json({ ok: found });
   }
 
   if (req.method === "DELETE") {
-    const admin = req.headers.get("x-admin-key");
-    if (!admin || admin !== process.env.COMMENTS_ADMIN_KEY) {
-      return json({ error: "Unauthorized." }, 401);
-    }
+    if (!isAdmin(req)) return json({ error: "Unauthorized." }, 401);
     const slug = clean(url.searchParams.get("slug"));
     const id = clean(url.searchParams.get("id"));
     const list = (await store.get(key(slug), { type: "json" })) || [];
