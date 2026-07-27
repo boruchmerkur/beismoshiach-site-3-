@@ -246,3 +246,20 @@ html{scrollbar-gutter:stable;}
 .series-nav .sn-t{font-family:var(--display);font-size:15px;line-height:1.25}
 .series-nav .sn-spacer{flex:1}
 @media(max-width:560px){.series-nav .sn-row{flex-direction:column}}
+
+
+/* --- Likkutei Mekoros collapsible chapter contents --- */
+.lm-toc{max-width:760px;margin:16px auto 0}
+.lm-vol{font-family:var(--display);font-size:15px;font-weight:500;color:var(--royal);text-transform:uppercase;letter-spacing:.08em;margin:22px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--rule)}
+.lm-chap{border:1px solid var(--parchment-edge);border-radius:5px;background:var(--parchment-deep);margin:8px 0;overflow:hidden}
+.lm-chap[open]{background:var(--surface,transparent)}
+.lm-chap>summary{list-style:none;cursor:pointer;padding:13px 16px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.lm-chap>summary::-webkit-details-marker{display:none}
+.lm-chap>summary::before{content:"›";font-family:var(--mono);color:var(--royal);margin-right:8px;transition:transform .15s;display:inline-block}
+.lm-chap[open]>summary::before{transform:rotate(90deg)}
+.lm-chap>summary:hover{background:rgba(0,0,0,.02)}
+.lm-ch{font-family:var(--display);font-size:16px;font-weight:500}
+.lm-theme{flex:1 1 100%;font-family:var(--display);font-size:14px;color:var(--ink-soft,#555);padding-left:22px;line-height:1.4}
+.lm-meta{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--royal);white-space:nowrap;margin-left:auto}
+.lm-list{margin:0;padding:0 16px 10px 22px;border-top:1px solid var(--rule)}
+.lm-list li{padding:11px 0}
