@@ -269,6 +269,10 @@ html{scrollbar-gutter:stable;}
 .lh-portrait{flex:0 0 auto;width:138px;height:auto;background:#fff;padding:6px;border:1px solid var(--parchment-edge);border-radius:2px;box-shadow:0 3px 12px rgba(30,20,10,.16)}
 .lh-body{flex:1 1 auto;min-width:0}
 @media(max-width:640px){.listhead.lh-rebbe{gap:16px}.lh-portrait{width:104px}}
+/* wide archival banner (collections index) */
+.coll-banner{margin:0 0 26px;padding:0;background:#fff;border:1px solid var(--parchment-edge);border-radius:3px;box-shadow:0 3px 14px rgba(30,20,10,.14);overflow:hidden}
+.coll-banner img{display:block;width:100%;height:190px;object-fit:cover;object-position:center 62%}
+@media(max-width:640px){.coll-banner img{height:130px}}
 
 
 /* --- reader comments (no login, native, no trackers) --- */
