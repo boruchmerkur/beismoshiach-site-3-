@@ -1,9 +1,23 @@
 :root{
-  --parchment:#DEE5EB; --parchment-deep:#FBF8F1; --parchment-edge:#C1CEDA;
-  --ink:#16222E; --royal:#5F7689; --gold:#D97E14; --gold-bright:#F2A33C;
-  --oxblood:#B5650C; --rule:rgba(22,34,46,.11);
+  /* Palette sampled off award-winning CULTURE sites (archives, museums,
+     long-form) via EXHIBITA, Aug 2026: ground + accent taken from one row.
+     #F0E3CF #FEF1D0 cream · #0A0A0B ink · #0042AF blue · #FDCB40 gold · #58595B grey */
+  --parchment:#F0E3CF; --parchment-deep:#FEF1D0; --parchment-edge:#DCC9A8;
+  --ink:#0A0A0B; --ink-soft:#58595B; --royal:#0042AF; --royal-soft:#0042AF14;
+  --gold:#8A5B00; --gold-bright:#FDCB40; --oxblood:#FD4401;
+  --rule:rgba(10,10,11,.12); --surface:#FFFDF7;
   --display:"Fraunces",Georgia,serif; --body:"Geist","system-ui",sans-serif;
   --hebrew:"David Libre","Frank Ruhl Libre",serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --parchment:#0A0A0B; --parchment-deep:#141416; --parchment-edge:#2C2C2F;
+    --ink:#F0E3CF; --ink-soft:#9A9B9D; --royal:#7FA8FF; --royal-soft:#7FA8FF1c;
+    --gold:#FDCB40; --gold-bright:#FDCB40; --oxblood:#FF6A3D;
+    --rule:rgba(240,227,207,.14); --surface:#141416;
+  }
+  img{filter:brightness(.94)}
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -19,7 +33,7 @@ hr.rule-gold{height:2px;border:0;background:linear-gradient(90deg,transparent,va
 .biglink:hover{color:var(--ink);}
 
 .masthead{position:sticky;top:0;z-index:20;height:46px;display:flex;align-items:center;padding:0;
-  background:#0F1A24;border-bottom:1px solid rgba(217,126,20,.45);}
+  background:var(--ink);border-bottom:1px solid rgba(217,126,20,.45);}
 .head-row{display:flex;align-items:center;gap:20px;width:100%;}
 .brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;}
 .brand::before{content:"";width:6px;height:6px;background:var(--gold);border-radius:1px;transform:rotate(45deg);flex:0 0 auto;}
@@ -54,14 +68,14 @@ hr.rule-gold{height:2px;border:0;background:linear-gradient(90deg,transparent,va
 .tagrow a:hover{border-color:var(--gold);color:var(--ink);}
 
 .citebox{margin:34px 0 10px;padding:16px 18px;background:var(--parchment-deep);border:1px solid var(--parchment-edge);border-radius:3px;}
-.citebox .cl{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.citebox .cl{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
 .citebox code{font-family:var(--body);font-size:14.5px;color:var(--ink);}
 .citebox button{margin-top:10px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
   background:var(--royal);color:var(--parchment);border:0;border-radius:2px;padding:7px 14px;cursor:pointer;}
 .citebox button:hover{background:var(--ink);}
 
 .more-issue{max-width:720px;margin:20px auto 0;padding:20px 0 0;border-top:1px solid var(--rule);}
-.more-issue h3{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;}
+.more-issue h3{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;}
 .more-issue ul{list-style:none;margin:0;padding:0;}
 .more-issue li{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-top:1px solid var(--rule);}
 .more-issue li a{font-family:var(--display);font-size:17px;}
@@ -96,7 +110,7 @@ hr.rule-gold{height:2px;border:0;background:linear-gradient(90deg,transparent,va
 .hero-lead h1 a:hover{color:var(--gold);}
 .hero-lead .byline{font-family:var(--mono);font-size:12px;color:var(--royal);margin-top:16px;}
 .recent{background:var(--parchment-deep);border:1px solid var(--parchment-edge);border-radius:3px;padding:20px;}
-.recent h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
+.recent h3{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
 .recent ul{list-style:none;margin:0;padding:0;}
 .recent li{padding:9px 0;border-top:1px solid var(--rule);}
 .recent li a{font-family:var(--display);font-size:17px;}
@@ -120,7 +134,7 @@ hr.rule-gold{height:2px;border:0;background:linear-gradient(90deg,transparent,va
 /* issue picker (archives) */
 .issuepick{margin:6px 0 8px;}
 .ip-recent{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px;}
-.ip-recent .ip-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-right:6px;}
+.ip-recent .ip-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-right:6px;}
 .ip-recent a{font-family:var(--mono);font-size:13px;padding:6px 11px;border:1px solid var(--rule);border-radius:2px;color:var(--ink);}
 .ip-recent a:hover{border-color:var(--gold);color:var(--gold);background:var(--parchment-deep);}
 .ip-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -158,19 +172,19 @@ hr.rule-gold{height:2px;border:0;background:linear-gradient(90deg,transparent,va
 
 /* ===== shared topbar (matches moshiach101.info) ===== */
 html{scrollbar-gutter:stable;}
-.bm-topbar{position:sticky;top:0;z-index:100;background:#0F1A24;
+.bm-topbar{position:sticky;top:0;z-index:100;background:var(--ink);
   border-bottom:1px solid rgba(217,126,20,0.45);font-family:'JetBrains Mono',ui-monospace,monospace;}
 .bm-inner{max-width:1400px;margin:0 auto;padding:0 clamp(1.25rem,4vw,4rem);min-height:52px;
   display:flex;align-items:center;gap:1.5rem;}
-.bm-topbar .bm-wordmark{font-size:13px;letter-spacing:.13em;color:#E7EEF3;text-decoration:none;
+.bm-topbar .bm-wordmark{font-size:13px;letter-spacing:.1em;color:var(--parchment-deep);text-decoration:none;
   display:inline-flex;align-items:center;gap:8px;white-space:nowrap;}
-.bm-topbar .bm-wordmark::before{content:"";width:6px;height:6px;background:#D97E14;border-radius:1px;
+.bm-topbar .bm-wordmark::before{content:"";width:6px;height:6px;background:var(--gold-bright);border-radius:1px;
   transform:rotate(45deg);flex-shrink:0;}
-.bm-topbar .bm-wordmark .bm-tld{color:#D97E14;}
+.bm-topbar .bm-wordmark .bm-tld{color:var(--gold-bright);}
 .bm-topbar nav{margin-left:auto;display:flex;gap:26px;}
-.bm-topbar nav a{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:#8AA0B2;
+.bm-topbar nav a{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9A9B9D;
   text-decoration:none;transition:color .15s;}
-.bm-topbar nav a:hover{color:#D97E14;}
+.bm-topbar nav a:hover{color:var(--gold-bright);}
 @media (max-width:720px){.bm-topbar nav{display:none;}}
 
 /* parsha / holiday chip on list rows */
