@@ -110,7 +110,7 @@ def looks_broken(a):
             t.lower().startswith(("translated ", "by ")) or not t)
 
 # ------------------------------------------------------------------ tag sources
-def from_parsha_page():
+def from_parsha_page(names=None):
     out = {}
     p = os.path.join(ROOT, "parsha.html")
     if not os.path.isfile(p):
@@ -120,6 +120,8 @@ def from_parsha_page():
         r'<h2 class="grp" id="([^"]+)">(.*?)<span class="gc">(\d+)</span></h2>\s*<ul class="artlist">(.*?)</ul>',
         t, re.S):
         out.setdefault(slug, [])
+        if names is not None:
+            names[slug] = strip(_name)
         for href in re.findall(r'<a class="lt" href="articles/([a-z0-9\-]+)\.html"', body):
             if href not in out[slug]:
                 out[slug].append(href)
@@ -192,6 +194,30 @@ SEASON_TAGS.update({"sukkos", "pesach", "chanukah", "purim", "shavuos",
                     "beis-nissan", "yud-alef-nissan", "basi-l-gani",
                     "chai-elul", "elul", "menachem-av", "tishrei", "selichos"})
 
+SMALL = {"of", "the", "and", "b", "l"}
+
+def prettify(slug):
+    """menachem-av -> Menachem Av; yud-tes-kislev -> Yud-Tes Kislev."""
+    parts = slug.split("-")
+    out = []
+    for i, w in enumerate(parts):
+        out.append(w if (w in SMALL and i) else w.capitalize())
+    s = " ".join(out)
+    return (s.replace("Yud Tes", "Yud-Tes").replace("Yud Beis", "Yud-Beis")
+             .replace("Chof Beis", "Chof-Beis").replace("Yud Alef", "Yud-Alef")
+             .replace("Lag Baomer", "Lag BaOmer").replace("Lag Bomer", "Lag BaOmer")
+             .replace("Tu B Shvat", "Tu B'Shvat").replace("Tisha B Av", "Tisha B'Av")
+             .replace("Basi L Gani", "Basi L'Gani"))
+
+def label_for(tag, labels, parsha_name, parsha_tag):
+    """What to tell the reader about why this is here."""
+    if tag == parsha_tag and parsha_name:
+        return "Parshas " + parsha_name
+    nm = labels.get(tag)
+    if nm:
+        return nm
+    return prettify(tag)
+
 def pick_slug(cands, index):
     for c in cands:
         if index.get(c):
@@ -205,7 +231,8 @@ def main():
     except ImportError:
         sys.exit("pyluach is required:  python3 -m pip install pyluach")
 
-    tagmap = from_parsha_page()
+    LABELS = {}
+    tagmap = from_parsha_page(LABELS)
     for k, v in from_tag_pages().items():       # merge; parsha.html is richer where it exists
         tagmap.setdefault(k, [])
         for s in v:
@@ -249,6 +276,9 @@ def main():
                 if sl and sl not in tags:
                     tags.append(sl)
         sched.append({"w": sat.isoformat(), "p": pname or "", "tags": tags,
+                      "ptag": tags[0] if (pname and tags) else "",
+                      "labels": {t: label_for(t, LABELS, pname, tags[0] if (pname and tags) else "")
+                                 for t in tags},
                       "hd": "%d %s %d" % (hsat.day, hsat.month_name(), hsat.year)})
         for t in tags:
             need.update(tagmap.get(t, [])[:14])
@@ -319,13 +349,13 @@ def pick(data, wk, n=7):
         tags = set(season.get(s, []))
         return (not tags) or bool(tags & here)
 
-    out, seen = [], set()
+    out, seen, why = [], set(), {}
     for t in wk["tags"]:
         for s in data["tags"].get(t, []):
             # a piece can sit under this week's parsha and still be a Sukkos
             # piece; the date tag wins either way
             if s not in seen and in_season(s):
-                seen.add(s); out.append(s)
+                seen.add(s); out.append(s); why[s] = t
     if len(out) < n:
         ev = data["evergreen"]
         if ev:
@@ -340,6 +370,7 @@ def pick(data, wk, n=7):
                 seen.add(s); out.append(s)
                 if len(out) >= n:
                     break
+    pick.why = why
     return out[:n]
 
 def esc(s):
@@ -406,21 +437,28 @@ def is_art(a):
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
     meta = " · ".join(x for x in [a.get("a"), a.get("c"), ("#%s" % a["i"]) if a.get("i") else ""] if x)
+    # say plainly what makes this timely, rather than only the department
+    # the timeliness reason if there is one, else the department it ran in,
+    # so every card says what it is
+    why = a.get("_why") or ""
+    chip = why or a.get("c") or "From the archive"
+    tag = '<span class="why%s">%s</span>' % ("" if why else " plain", esc(chip))
     if big:
         img = a.get("img") or FALLBACK_IMG
         used.add(img)
         return ('<a class="lead" href="articles/{s}.html">'
                 '<figure class="lead-shot"><img src="{img}" alt="" loading="eager" fetchpriority="high"></figure>'
-                '<div class="lead-txt"><h1>{t}</h1><p class="dek">{d}</p>'
+                '<div class="lead-txt">{why}<h1>{t}</h1><p class="dek">{d}</p>'
                 '<p class="meta">{m}</p></div></a>').format(
-            s=esc(a["s"]), img=esc(img), t=esc(a["t"]), d=esc(a.get("d", "")), m=esc(meta))
+            s=esc(a["s"]), img=esc(img), t=esc(a["t"]), d=esc(a.get("d", "")),
+            m=esc(meta), why=tag)
     # a picture only if it is a real one, and only once per page
     if is_art(a) and a["img"] not in used:
         used.add(a["img"])
         return ('<a class="card" href="articles/{s}.html">'
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
-                '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta))
+                '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag)
     # a commissioned image for the season/department, if one exists yet
     for art in art_for(a, a.get("_season", ())):
         if art in used:
@@ -428,10 +466,10 @@ def card_html(a, big=False, used=None):
         used.add(art)
         return ('<a class="card" href="articles/{s}.html">'
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
-                '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-            s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta))
+                '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+            s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta), why=tag)
     # otherwise let the type carry it
-    dept = esc(a.get("c") or "From the archive")
+    dept = esc(why or a.get("c") or "From the archive")
     return ('<a class="card txt" href="articles/{s}.html">'
             '<span class="dept">{dept}</span><h3>{t}</h3><p class="meta">{m}</p></a>').format(
         s=esc(a["s"]), dept=dept, t=esc(a["t"]), m=esc(meta))
@@ -481,11 +519,18 @@ def render_landing(data):
     kicker = " · ".join(x for x in [("Parshas " + wk["p"]) if wk["p"] else "",
                                     ("Shabbos " + wk["hd"]) if wk["hd"] else ""] if x)
 
+    # Tell the reader why each piece is here this week — "Parshas Re'eh",
+    # "Menachem Av" — rather than only naming the department it ran in.
+    labels = wk.get("labels", {})
+    whyof = getattr(pick, "why", {}) or {}
+    def dress(a):
+        return dict(a, _season=wk["tags"], _why=labels.get(whyof.get(a["s"], ""), ""))
+
     used = set()
     page = LANDING.replace("{{KICKER}}", esc(kicker)) \
-                  .replace("{{LEAD}}", card_html(lead, big=True, used=used)) \
-                  .replace("{{CARDS}}", "".join(card_html(dict(a, _season=wk["tags"]), used=used) for a in rest)) \
-                  .replace("{{EVER}}", "".join(card_html(dict(a, _season=wk["tags"]), used=used) for a in ever)) \
+                  .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
+                  .replace("{{CARDS}}", "".join(card_html(dress(a), used=used) for a in rest)) \
+                  .replace("{{EVER}}", "".join(card_html(dress(a), used=used) for a in ever)) \
                   .replace("{{WEEK}}", esc(wk["w"]))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(page)
     print("index.html: lead '%s' + %d cards + %d evergreen (week %s)"
@@ -542,6 +587,12 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
   .card.txt .dept{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
         color:var(--royal);margin-bottom:.5rem}
   .card.txt h3{font-size:1.3rem}
+  /* Why this piece is here this week — the parsha or the date it belongs to. */
+  .why{display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;
+        text-transform:uppercase;color:var(--royal);background:var(--royal-soft);
+        border-radius:2px;padding:.28rem .5rem;margin:0 0 .5rem}
+  .lead-txt .why{font-size:.64rem;margin-bottom:.9rem}
+  .why.plain{color:var(--ink-soft);background:transparent;padding-left:0}
   .ways{display:flex;flex-wrap:wrap;gap:.6rem;padding-bottom:clamp(2.5rem,6vw,4rem)}
   .ways a{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
         border:1px solid var(--parchment-edge);border-radius:999px;padding:.6rem 1.1rem;color:var(--ink);
@@ -596,8 +647,9 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     (wk.tags||[]).forEach(function(t){here[t]=1;});
     var inSeason=function(s){var st=(d.season||{})[s]||[];
       return !st.length||st.some(function(x){return here[x];});};
+    var why={};
     (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){
-      if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);}});});
+      if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);why[s]=t;}});});
     if(list.length<7&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
       for(var j=0;j<d.evergreen.length&&list.length<7;j++){
@@ -607,7 +659,8 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
         seen[s]=1;list.push(s);
       }
     }
-    var arts=list.map(function(s){return d.articles[s];}).filter(Boolean);
+    var arts=list.map(function(s){var a=d.articles[s];
+      return a?Object.assign({},a,{_why:why[s]||''}):null;}).filter(Boolean);
     if(!arts.length) return;
     var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -616,10 +669,14 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     var used={};
     var art=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
     var AM=d.art||{season:{},dept:{}};
+    var LB=wk.labels||{};
+    var whyOf=function(a){return LB[a._why||'']||'';};
+    var chip=function(a){var w=whyOf(a);
+      return '<span class="why'+(w?'':' plain')+'">'+esc(w||a.c||'From the archive')+'</span>';};
     var picCard=function(a,src){ used[src]=1;
       return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
         '<figure><img src="'+esc(src)+'" alt="" loading="lazy"></figure>'+
-        '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+        chip(a)+'<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
     var artFor=function(a){                       /* season art first, then dept */
       var o=[];
       (wk.tags||[]).forEach(function(t){var f=AM.season[t]; if(f&&o.indexOf(f)<0)o.push(f);});
@@ -630,7 +687,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
       var cand=artFor(a);
       for(var i=0;i<cand.length;i++){ if(!used[cand[i]]) return picCard(a,cand[i]); }
       return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
-        '<span class="dept">'+esc(a.c||'From the archive')+'</span>'+
+        '<span class="dept">'+esc(whyOf(a)||a.c||'From the archive')+'</span>'+
         '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
     /* lead on the strongest picture — headshots read poorly at hero size */
     var photo=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
@@ -647,7 +704,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
       ((wk.p?('Parshas '+wk.p):'')+(wk.p&&wk.hd?' · ':'')+(wk.hd?('Shabbos '+wk.hd):''));
     document.getElementById('lead').innerHTML='<a class="lead" href="articles/'+esc(L.s)+'.html">'+
       '<figure class="lead-shot"><img src="'+esc(L.img||FB)+'" alt=""></figure>'+
-      '<div class="lead-txt"><h1>'+esc(L.t)+'</h1><p class="dek">'+esc(L.d||'')+'</p>'+
+      '<div class="lead-txt">'+chip(L)+'<h1>'+esc(L.t)+'</h1><p class="dek">'+esc(L.d||'')+'</p>'+
       '<p class="meta">'+esc(meta(L))+'</p></div></a>';
     document.getElementById('cards').innerHTML=arts.slice(1,5).map(card).join('');
     main.dataset.week=wk.w;
