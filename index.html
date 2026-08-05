@@ -39,6 +39,16 @@
   .card h3{font-family:var(--display);font-weight:600;font-size:1.12rem;line-height:1.25;
         margin:0 0 .4rem;color:var(--ink)}
   .card:hover h3{color:var(--royal)}
+  /* No picture worth printing? Let the type carry it — a set-in card rather
+     than a columnist's headshot stretched into a photograph. */
+  .card.txt{display:flex;flex-direction:column;justify-content:center;min-height:170px;
+        padding:1.1rem 1.2rem;background:var(--parchment-deep);border:1px solid var(--parchment-edge);
+        border-left:3px solid var(--gold-bright);border-radius:3px;
+        transition:border-color .2s,transform .3s var(--ease)}
+  .card.txt:hover{transform:translateY(-2px);border-color:var(--royal);border-left-color:var(--royal)}
+  .card.txt .dept{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--royal);margin-bottom:.5rem}
+  .card.txt h3{font-size:1.3rem}
   .ways{display:flex;flex-wrap:wrap;gap:.6rem;padding-bottom:clamp(2.5rem,6vw,4rem)}
   .ways a{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
         border:1px solid var(--parchment-edge);border-radius:999px;padding:.6rem 1.1rem;color:var(--ink);
@@ -63,9 +73,9 @@
   <p class="kick" id="kick">This week · Parshas Re&#x27;eh · Shabbos 25 Av 5786</p>
   <div id="lead"><a class="lead" href="articles/kos-shel-bracha-in-the-month-of-av.html"><figure class="lead-shot"><img src="storage/images-5/1080/1080 KOS SHEL BRACHA IN AV.jpg" alt="" loading="eager" fetchpriority="high"></figure><div class="lead-txt"><h1>Kos Shel Bracha in the Month of Av</h1><p class="dek">Menachem Av 5733: Once again we get a glimpse into the events of the month in 770, from the diar...</p><p class="meta">Berger · Chabad History · #1080</p></div></a></div>
   <p class="kick">More for this week</p>
-  <div class="row reveal" id="cards"><a class="card" href="articles/avraham-or-moshiach-who-is-superior.html"><figure><img src="storage/category-pics/GreenbergParshaThoughtBW.jpg" alt="" loading="lazy"></figure><h3>Avraham or Moshiach: Who Is Superior?</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #939</p></a><a class="card" href="articles/the-brother-of-a-poor-man.html"><figure><img src="storage/images/greenberg03.jpg" alt="" loading="lazy"></figure><h3>The Brother of a Poor Man</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #890</p></a><a class="card" href="articles/a-blessing-and-a-curse-but-nothing-negative-descends-from-ab.html"><figure><img src="storage/Dvar Malchut.JPG" alt="" loading="lazy"></figure><h3>A Blessing and a Curse? but Nothing Negative Descends from Above!</h3><p class="meta">The Rebbe · D&#x27;var Malchus · #846</p></a><a class="card" href="articles/a-true-pnimi-is-someone-who-declares-yechi.html"><figure><img src="storage/category-pics/Avtzon.jpg" alt="" loading="lazy"></figure><h3>A True P’nimi Is Someone Who Declares “Yechi&quot;</h3><p class="meta">Rabbi Sholom Ber Avtzon · Ha’yom Yom &amp; Moshiach · #1077</p></a></div>
+  <div class="row reveal" id="cards"><a class="card txt" href="articles/avraham-or-moshiach-who-is-superior.html"><span class="dept">Parsha Thought</span><h3>Avraham or Moshiach: Who Is Superior?</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #939</p></a><a class="card txt" href="articles/the-brother-of-a-poor-man.html"><span class="dept">Parsha Thought</span><h3>The Brother of a Poor Man</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #890</p></a><a class="card txt" href="articles/a-blessing-and-a-curse-but-nothing-negative-descends-from-ab.html"><span class="dept">D&#x27;var Malchus</span><h3>A Blessing and a Curse? but Nothing Negative Descends from Above!</h3><p class="meta">The Rebbe · D&#x27;var Malchus · #846</p></a><a class="card txt" href="articles/a-true-pnimi-is-someone-who-declares-yechi.html"><span class="dept">Ha’yom Yom &amp; Moshiach</span><h3>A True P’nimi Is Someone Who Declares “Yechi&quot;</h3><p class="meta">Rabbi Sholom Ber Avtzon · Ha’yom Yom &amp; Moshiach · #1077</p></a></div>
   <p class="kick">From the archive</p>
-  <div class="row reveal" id="ever"><a class="card" href="articles/a-slap-in-the-face-of-silence.html"><figure><img src="storage/landing/topics.jpg" alt="" loading="lazy"></figure><h3>A Slap in the Face of Silence</h3><p class="meta">Rabbi Boruch Merkur · Editorial · #1188</p></a><a class="card" href="articles/lose-the-stupid-smartphone.html"><figure><img src="storage/images/IMG_6075b.jpg" alt="" loading="lazy"></figure><h3>Lose the Stupid Smartphone!</h3><p class="meta">Rabbi Boruch Merkur · Editorial · #1186</p></a><a class="card" href="articles/g-d-my-bestie.html"><figure><img src="storage/images/RiDW10658829.jpg" alt="" loading="lazy"></figure><h3>G-d, My Bestie</h3><p class="meta">Rabbi Boruch Merkur · Editorial · #1185</p></a></div>
+  <div class="row reveal" id="ever"><a class="card txt" href="articles/a-slap-in-the-face-of-silence.html"><span class="dept">Editorial</span><h3>A Slap in the Face of Silence</h3><p class="meta">Rabbi Boruch Merkur · Editorial · #1188</p></a><a class="card" href="articles/lose-the-stupid-smartphone.html"><figure><img src="storage/images/IMG_6075b.jpg" alt="" loading="lazy"></figure><h3>Lose the Stupid Smartphone!</h3><p class="meta">Rabbi Boruch Merkur · Editorial · #1186</p></a><a class="card" href="articles/g-ds-first-and-finest.html"><figure><img src="storage/images/99dad7e19eaaa69dc0b93a8665562a62.jpg" alt="" loading="lazy"></figure><h3>G-d&#x27;s First and Finest</h3><p class="meta">Rabbi Boruch Merkur · Editorial · #1183</p></a></div>
   <p class="kick">Ways in</p>
   <nav class="ways reveal">
     <a href="/collections">Collections</a><a href="/archives">The archive · 3,541 articles</a>
@@ -89,12 +99,19 @@
     var wk=null;
     for(var i=0;i<d.schedule.length;i++){ if(d.schedule[i].w>=today){ wk=d.schedule[i]; break; } }
     if(!wk||wk.w===main.dataset.week) return;               // already current
-    var seen={},list=[];
-    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){if(!seen[s]){seen[s]=1;list.push(s);}});});
+    var seen={},list=[],here={};
+    (wk.tags||[]).forEach(function(t){here[t]=1;});
+    var inSeason=function(s){var st=(d.season||{})[s]||[];
+      return !st.length||st.some(function(x){return here[x];});};
+    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){
+      if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);}});});
     if(list.length<7&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
       for(var j=0;j<d.evergreen.length&&list.length<7;j++){
-        var s=d.evergreen[(off+j)%d.evergreen.length]; if(!seen[s]){seen[s]=1;list.push(s);}
+        var s=d.evergreen[(off+j)%d.evergreen.length];
+        if(seen[s]) continue;
+        if(!inSeason(s)) continue;               /* out of season? wait its turn */
+        seen[s]=1;list.push(s);
       }
     }
     var arts=list.map(function(s){return d.articles[s];}).filter(Boolean);
@@ -103,13 +120,21 @@
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var meta=function(a){return [a.a,a.c,a.i?('#'+a.i):''].filter(Boolean).join(' · ');};
     var FB='storage/landing/topics.jpg';
-    var card=function(a){return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
-      '<figure><img src="'+esc(a.img||FB)+'" alt="" loading="lazy"></figure>'+
-      '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+    var used={};
+    var art=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var card=function(a){
+      if(art(a)&&!used[a.img]){ used[a.img]=1;
+        return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
+          '<figure><img src="'+esc(a.img)+'" alt="" loading="lazy"></figure>'+
+          '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>'; }
+      return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
+        '<span class="dept">'+esc(a.c||'From the archive')+'</span>'+
+        '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
     /* lead on the strongest picture — headshots read poorly at hero size */
-    var photo=function(a){return a.img&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var photo=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
     var HEROES=['storage/landing/topics.jpg','storage/landing/archive.jpg','storage/landing/parsha.jpg','storage/landing/dvar-malchus.jpg','storage/landing/moshiach-geula.jpg'];
     var L=arts.filter(photo)[0];
+    if(L) used[L.img]=1;
     if(!L){L=Object.assign({},arts[0]);L.img=HEROES[Math.floor(Date.parse(wk.w)/6048e5)%HEROES.length];}
     arts=[L].concat(arts.filter(function(a){return a.s!==L.s;}));
     document.getElementById('kick').textContent='This week · '+

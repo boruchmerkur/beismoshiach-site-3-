@@ -179,6 +179,19 @@ OCCASIONS = {
 }
 MONTH_TAGS = {5: ["menachem-av"], 6: ["elul"], 7: ["tishrei"]}
 
+# Every tag that is bound to a point in the year. An article carrying one of
+# these is only ever shown in its own week.
+SEASON_TAGS = set()
+for _c in list(OCCASIONS.values()) + list(MONTH_TAGS.values()):
+    SEASON_TAGS.update(_c)
+SEASON_TAGS.update({"sukkos", "pesach", "chanukah", "purim", "shavuos",
+                    "rosh-hashanah", "rosh-hashana", "yom-kippur",
+                    "simchas-torah", "lag-baomer", "lag-bomer", "tu-b-shvat",
+                    "tisha-b-av", "yud-tes-kislev", "chof-beis-shvat",
+                    "yud-shvat", "gimmel-tammuz", "yud-beis-tammuz",
+                    "beis-nissan", "yud-alef-nissan", "basi-l-gani",
+                    "chai-elul", "elul", "menachem-av", "tishrei", "selichos"})
+
 def pick_slug(cands, index):
     for c in cands:
         if index.get(c):
@@ -262,8 +275,14 @@ def main():
     ever = [s for s in ever if s in arts]
 
     keep = {t: v for t, v in tagmap.items() if v}
+    # which date-bound tags each article carries, so nothing shows out of season
+    season = {}
+    for t, slugs in keep.items():
+        if t in SEASON_TAGS:
+            for s in slugs:
+                season.setdefault(s, []).append(t)
     data = {"built": today.isoformat(), "articles": arts, "tags": keep,
-            "evergreen": ever, "schedule": sched}
+            "evergreen": ever, "season": season, "schedule": sched}
     outp = os.path.join(ROOT, "assets", "weekly.json")
     with open(outp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
@@ -282,21 +301,37 @@ def week_for(data, today=None):
 
 def pick(data, wk, n=7):
     """The week's own material first, topped up from the evergreen pool so a
-    thin parsha week still fills the page."""
+    thin parsha week still fills the page.
+
+    The top-ups are filtered by season: a piece tagged Sukkos has no business
+    on the page in Av. Anything carrying a date tag other than this week's own
+    is held back until its time comes round."""
+    season = data.get("season", {})
+    here = set(wk["tags"])
+
+    def in_season(s):
+        tags = set(season.get(s, []))
+        return (not tags) or bool(tags & here)
+
     out, seen = [], set()
     for t in wk["tags"]:
         for s in data["tags"].get(t, []):
-            if s not in seen:
+            # a piece can sit under this week's parsha and still be a Sukkos
+            # piece; the date tag wins either way
+            if s not in seen and in_season(s):
                 seen.add(s); out.append(s)
     if len(out) < n:
-        # rotate the evergreen pool by week so it isn't the same picks forever
         ev = data["evergreen"]
         if ev:
+            # rotate the pool by week so it isn't the same picks forever
             off = (datetime.date.fromisoformat(wk["w"]).toordinal() // 7) % len(ev)
             for i in range(len(ev)):
                 s = ev[(off + i) % len(ev)]
-                if s not in seen:
-                    seen.add(s); out.append(s)
+                if s in seen:
+                    continue
+                if not in_season(s):
+                    continue          # out of season — wait for its week
+                seen.add(s); out.append(s)
                 if len(out) >= n:
                     break
     return out[:n]
@@ -310,19 +345,37 @@ HEROES = ["storage/landing/topics.jpg", "storage/landing/archive.jpg",
           "storage/landing/parsha.jpg", "storage/landing/dvar-malchus.jpg",
           "storage/landing/moshiach-geula.jpg"]
 
-def card_html(a, big=False):
-    img = a.get("img") or FALLBACK_IMG
+def is_art(a):
+    """Worth showing as a picture. Author headshots live in category-pics and
+    are bylines, not editorial images — two different portraits of the same
+    columnist on one page looks like a mistake, because it is one."""
+    img = a.get("img")
+    return (bool(img) and "category-pics" not in img
+            and a.get("w", 0) >= 430 and a["w"] / max(a.get("h", 1), 1) >= 1.15)
+
+def card_html(a, big=False, used=None):
+    used = used if used is not None else set()
     meta = " · ".join(x for x in [a.get("a"), a.get("c"), ("#%s" % a["i"]) if a.get("i") else ""] if x)
     if big:
+        img = a.get("img") or FALLBACK_IMG
+        used.add(img)
         return ('<a class="lead" href="articles/{s}.html">'
                 '<figure class="lead-shot"><img src="{img}" alt="" loading="eager" fetchpriority="high"></figure>'
                 '<div class="lead-txt"><h1>{t}</h1><p class="dek">{d}</p>'
                 '<p class="meta">{m}</p></div></a>').format(
             s=esc(a["s"]), img=esc(img), t=esc(a["t"]), d=esc(a.get("d", "")), m=esc(meta))
-    return ('<a class="card" href="articles/{s}.html">'
-            '<figure><img src="{img}" alt="" loading="lazy"></figure>'
-            '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-        s=esc(a["s"]), img=esc(img), t=esc(a["t"]), m=esc(meta))
+    # a picture only if it is a real one, and only once per page
+    if is_art(a) and a["img"] not in used:
+        used.add(a["img"])
+        return ('<a class="card" href="articles/{s}.html">'
+                '<figure><img src="{img}" alt="" loading="lazy"></figure>'
+                '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta))
+    # otherwise let the type carry it
+    dept = esc(a.get("c") or "From the archive")
+    return ('<a class="card txt" href="articles/{s}.html">'
+            '<span class="dept">{dept}</span><h3>{t}</h3><p class="meta">{m}</p></a>').format(
+        s=esc(a["s"]), dept=dept, t=esc(a["t"]), m=esc(meta))
 
 def render_landing(data):
     wk = week_for(data)
@@ -347,14 +400,29 @@ def render_landing(data):
     if not is_photo(lead):
         wkno = datetime.date.fromisoformat(wk["w"]).toordinal() // 7
         lead = dict(lead, img=HEROES[wkno % len(HEROES)])
-    ever = [data["articles"][s] for s in data["evergreen"] if s in data["articles"]][:3]
+    # The archive row runs through the same season gate as everything else —
+    # it is where the Sukkos piece was turning up in Av — and never repeats
+    # something already on the page.
+    shown = {lead["s"]} | {a["s"] for a in rest}
+    season, here = data.get("season", {}), set(wk["tags"])
+    ever = []
+    for s in data["evergreen"]:
+        if s in shown or s not in data["articles"]:
+            continue
+        tags = set(season.get(s, []))
+        if tags and not (tags & here):
+            continue
+        ever.append(data["articles"][s])
+        if len(ever) == 3:
+            break
     kicker = " · ".join(x for x in [("Parshas " + wk["p"]) if wk["p"] else "",
                                     ("Shabbos " + wk["hd"]) if wk["hd"] else ""] if x)
 
+    used = set()
     page = LANDING.replace("{{KICKER}}", esc(kicker)) \
-                  .replace("{{LEAD}}", card_html(lead, big=True)) \
-                  .replace("{{CARDS}}", "".join(card_html(a) for a in rest)) \
-                  .replace("{{EVER}}", "".join(card_html(a) for a in ever)) \
+                  .replace("{{LEAD}}", card_html(lead, big=True, used=used)) \
+                  .replace("{{CARDS}}", "".join(card_html(a, used=used) for a in rest)) \
+                  .replace("{{EVER}}", "".join(card_html(a, used=used) for a in ever)) \
                   .replace("{{WEEK}}", esc(wk["w"]))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(page)
     print("index.html: lead '%s' + %d cards + %d evergreen (week %s)"
@@ -401,6 +469,16 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
   .card h3{font-family:var(--display);font-weight:600;font-size:1.12rem;line-height:1.25;
         margin:0 0 .4rem;color:var(--ink)}
   .card:hover h3{color:var(--royal)}
+  /* No picture worth printing? Let the type carry it — a set-in card rather
+     than a columnist's headshot stretched into a photograph. */
+  .card.txt{display:flex;flex-direction:column;justify-content:center;min-height:170px;
+        padding:1.1rem 1.2rem;background:var(--parchment-deep);border:1px solid var(--parchment-edge);
+        border-left:3px solid var(--gold-bright);border-radius:3px;
+        transition:border-color .2s,transform .3s var(--ease)}
+  .card.txt:hover{transform:translateY(-2px);border-color:var(--royal);border-left-color:var(--royal)}
+  .card.txt .dept{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--royal);margin-bottom:.5rem}
+  .card.txt h3{font-size:1.3rem}
   .ways{display:flex;flex-wrap:wrap;gap:.6rem;padding-bottom:clamp(2.5rem,6vw,4rem)}
   .ways a{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;
         border:1px solid var(--parchment-edge);border-radius:999px;padding:.6rem 1.1rem;color:var(--ink);
@@ -451,12 +529,19 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     var wk=null;
     for(var i=0;i<d.schedule.length;i++){ if(d.schedule[i].w>=today){ wk=d.schedule[i]; break; } }
     if(!wk||wk.w===main.dataset.week) return;               // already current
-    var seen={},list=[];
-    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){if(!seen[s]){seen[s]=1;list.push(s);}});});
+    var seen={},list=[],here={};
+    (wk.tags||[]).forEach(function(t){here[t]=1;});
+    var inSeason=function(s){var st=(d.season||{})[s]||[];
+      return !st.length||st.some(function(x){return here[x];});};
+    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){
+      if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);}});});
     if(list.length<7&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
       for(var j=0;j<d.evergreen.length&&list.length<7;j++){
-        var s=d.evergreen[(off+j)%d.evergreen.length]; if(!seen[s]){seen[s]=1;list.push(s);}
+        var s=d.evergreen[(off+j)%d.evergreen.length];
+        if(seen[s]) continue;
+        if(!inSeason(s)) continue;               /* out of season? wait its turn */
+        seen[s]=1;list.push(s);
       }
     }
     var arts=list.map(function(s){return d.articles[s];}).filter(Boolean);
@@ -465,13 +550,21 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
     var meta=function(a){return [a.a,a.c,a.i?('#'+a.i):''].filter(Boolean).join(' · ');};
     var FB='storage/landing/topics.jpg';
-    var card=function(a){return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
-      '<figure><img src="'+esc(a.img||FB)+'" alt="" loading="lazy"></figure>'+
-      '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+    var used={};
+    var art=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var card=function(a){
+      if(art(a)&&!used[a.img]){ used[a.img]=1;
+        return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
+          '<figure><img src="'+esc(a.img)+'" alt="" loading="lazy"></figure>'+
+          '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>'; }
+      return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
+        '<span class="dept">'+esc(a.c||'From the archive')+'</span>'+
+        '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
     /* lead on the strongest picture — headshots read poorly at hero size */
-    var photo=function(a){return a.img&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var photo=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
     var HEROES=['storage/landing/topics.jpg','storage/landing/archive.jpg','storage/landing/parsha.jpg','storage/landing/dvar-malchus.jpg','storage/landing/moshiach-geula.jpg'];
     var L=arts.filter(photo)[0];
+    if(L) used[L.img]=1;
     if(!L){L=Object.assign({},arts[0]);L.img=HEROES[Math.floor(Date.parse(wk.w)/6048e5)%HEROES.length];}
     arts=[L].concat(arts.filter(function(a){return a.s!==L.s;}));
     document.getElementById('kick').textContent='This week · '+
