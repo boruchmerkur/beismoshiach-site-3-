@@ -345,6 +345,42 @@ HEROES = ["storage/landing/topics.jpg", "storage/landing/archive.jpg",
           "storage/landing/parsha.jpg", "storage/landing/dvar-malchus.jpg",
           "storage/landing/moshiach-geula.jpg"]
 
+# Commissioned editorial art, keyed by department and by season. Drop a file
+# into storage/art/ and it is used automatically the next time this runs; until
+# then the card is set as type. Deliberately no likenesses — the Rebbe's own
+# photographs are used for that, and are not something to generate.
+DEPT_ART = {
+    "D'var Malchus": "sichah.jpg", "Moshiach & Geula": "geula.jpg",
+    "Moshiach & Hakhel": "geula.jpg", "Parsha Thought": "parsha.jpg",
+    "Chabad History": "history.jpg", "Memoirs": "memoirs.jpg",
+    "Diary": "memoirs.jpg", "Halacha 2 Go": "halacha.jpg",
+    "Miracle Story": "miracle.jpg", "Chinuch": "chinuch.jpg",
+    "Editorial": "editorial.jpg", "Ha'yom Yom & Moshiach": "hayomyom.jpg",
+    "Feature": "feature.jpg", "Profile": "feature.jpg", "Interview": "feature.jpg",
+    "Shlichus Stories": "shlichus.jpg", "Tzivos Hashem": "chinuch.jpg",
+}
+SEASON_ART = {
+    "elul": "elul.jpg", "menachem-av": "av.jpg", "tishrei": "tishrei.jpg",
+    "rosh-hashanah": "tishrei.jpg", "rosh-hashana": "tishrei.jpg",
+    "yom-kippur": "tishrei.jpg", "sukkos": "sukkos.jpg",
+    "simchas-torah": "sukkos.jpg", "chanukah": "chanukah.jpg",
+    "purim": "purim.jpg", "pesach": "pesach.jpg", "shavuos": "shavuos.jpg",
+    "lag-baomer": "lagbaomer.jpg", "lag-bomer": "lagbaomer.jpg",
+    "tisha-b-av": "av.jpg", "yud-shvat": "yudshvat.jpg",
+    "basi-l-gani": "yudshvat.jpg", "yud-tes-kislev": "kislev.jpg",
+}
+
+def art_for(a, season_tags=()):
+    """A commissioned image for this piece, if one has been made yet."""
+    for t in season_tags:
+        f = SEASON_ART.get(t)
+        if f and os.path.isfile(os.path.join(ROOT, "storage", "art", f)):
+            return "storage/art/" + f
+    f = DEPT_ART.get((a.get("c") or "").strip())
+    if f and os.path.isfile(os.path.join(ROOT, "storage", "art", f)):
+        return "storage/art/" + f
+    return None
+
 def is_art(a):
     """Worth showing as a picture. Author headshots live in category-pics and
     are bylines, not editorial images — two different portraits of the same
@@ -371,6 +407,14 @@ def card_html(a, big=False, used=None):
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
                 '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta))
+    # a commissioned image for the department/season, if one exists yet
+    art = art_for(a, a.get("_season", ()))
+    if art and art not in used:
+        used.add(art)
+        return ('<a class="card" href="articles/{s}.html">'
+                '<figure><img src="{img}" alt="" loading="lazy"></figure>'
+                '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+            s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta))
     # otherwise let the type carry it
     dept = esc(a.get("c") or "From the archive")
     return ('<a class="card txt" href="articles/{s}.html">'
@@ -398,8 +442,12 @@ def render_landing(data):
     lead = order[0]
     rest = [a for a in arts if a["s"] != lead["s"]][:4]
     if not is_photo(lead):
-        wkno = datetime.date.fromisoformat(wk["w"]).toordinal() // 7
-        lead = dict(lead, img=HEROES[wkno % len(HEROES)])
+        commissioned = art_for(lead, wk["tags"])
+        if commissioned:
+            lead = dict(lead, img=commissioned)
+        else:
+            wkno = datetime.date.fromisoformat(wk["w"]).toordinal() // 7
+            lead = dict(lead, img=HEROES[wkno % len(HEROES)])
     # The archive row runs through the same season gate as everything else —
     # it is where the Sukkos piece was turning up in Av — and never repeats
     # something already on the page.
@@ -421,7 +469,7 @@ def render_landing(data):
     used = set()
     page = LANDING.replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(lead, big=True, used=used)) \
-                  .replace("{{CARDS}}", "".join(card_html(a, used=used) for a in rest)) \
+                  .replace("{{CARDS}}", "".join(card_html(dict(a, _season=wk["tags"]), used=used) for a in rest)) \
                   .replace("{{EVER}}", "".join(card_html(a, used=used) for a in ever)) \
                   .replace("{{WEEK}}", esc(wk["w"]))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(page)
