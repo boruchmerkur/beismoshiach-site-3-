@@ -281,8 +281,14 @@ def main():
         if t in SEASON_TAGS:
             for s in slugs:
                 season.setdefault(s, []).append(t)
+    def have(f):
+        return os.path.isfile(os.path.join(ROOT, "storage", "art", f))
+    artmap = {
+        "season": {t: "storage/art/" + f for t, f in SEASON_ART.items() if have(f)},
+        "dept": {d: "storage/art/" + f for d, f in DEPT_ART.items() if have(f)},
+    }
     data = {"built": today.isoformat(), "articles": arts, "tags": keep,
-            "evergreen": ever, "season": season, "schedule": sched}
+            "evergreen": ever, "season": season, "art": artmap, "schedule": sched}
     outp = os.path.join(ROOT, "assets", "weekly.json")
     with open(outp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
@@ -371,15 +377,23 @@ SEASON_ART = {
 }
 
 def art_for(a, season_tags=()):
-    """A commissioned image for this piece, if one has been made yet."""
+    """Commissioned images for this piece, best first: the season's own art,
+    then the department's. Returns every candidate so a card whose first
+    choice is already on the page can fall back to its second rather than
+    dropping to type."""
+    out = []
     for t in season_tags:
         f = SEASON_ART.get(t)
         if f and os.path.isfile(os.path.join(ROOT, "storage", "art", f)):
-            return "storage/art/" + f
+            p = "storage/art/" + f
+            if p not in out:
+                out.append(p)
     f = DEPT_ART.get((a.get("c") or "").strip())
     if f and os.path.isfile(os.path.join(ROOT, "storage", "art", f)):
-        return "storage/art/" + f
-    return None
+        p = "storage/art/" + f
+        if p not in out:
+            out.append(p)
+    return out
 
 def is_art(a):
     """Worth showing as a picture. Author headshots live in category-pics and
@@ -407,9 +421,10 @@ def card_html(a, big=False, used=None):
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
                 '<h3>{t}</h3><p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta))
-    # a commissioned image for the department/season, if one exists yet
-    art = art_for(a, a.get("_season", ()))
-    if art and art not in used:
+    # a commissioned image for the season/department, if one exists yet
+    for art in art_for(a, a.get("_season", ())):
+        if art in used:
+            continue
         used.add(art)
         return ('<a class="card" href="articles/{s}.html">'
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
@@ -444,7 +459,7 @@ def render_landing(data):
     if not is_photo(lead):
         commissioned = art_for(lead, wk["tags"])
         if commissioned:
-            lead = dict(lead, img=commissioned)
+            lead = dict(lead, img=commissioned[0])
         else:
             wkno = datetime.date.fromisoformat(wk["w"]).toordinal() // 7
             lead = dict(lead, img=HEROES[wkno % len(HEROES)])
@@ -470,7 +485,7 @@ def render_landing(data):
     page = LANDING.replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(lead, big=True, used=used)) \
                   .replace("{{CARDS}}", "".join(card_html(dict(a, _season=wk["tags"]), used=used) for a in rest)) \
-                  .replace("{{EVER}}", "".join(card_html(a, used=used) for a in ever)) \
+                  .replace("{{EVER}}", "".join(card_html(dict(a, _season=wk["tags"]), used=used) for a in ever)) \
                   .replace("{{WEEK}}", esc(wk["w"]))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(page)
     print("index.html: lead '%s' + %d cards + %d evergreen (week %s)"
@@ -600,11 +615,20 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     var FB='storage/landing/topics.jpg';
     var used={};
     var art=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var AM=d.art||{season:{},dept:{}};
+    var picCard=function(a,src){ used[src]=1;
+      return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
+        '<figure><img src="'+esc(src)+'" alt="" loading="lazy"></figure>'+
+        '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+    var artFor=function(a){                       /* season art first, then dept */
+      var o=[];
+      (wk.tags||[]).forEach(function(t){var f=AM.season[t]; if(f&&o.indexOf(f)<0)o.push(f);});
+      var g=AM.dept[(a.c||'').trim()]; if(g&&o.indexOf(g)<0)o.push(g);
+      return o;};
     var card=function(a){
-      if(art(a)&&!used[a.img]){ used[a.img]=1;
-        return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
-          '<figure><img src="'+esc(a.img)+'" alt="" loading="lazy"></figure>'+
-          '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>'; }
+      if(art(a)&&!used[a.img]) return picCard(a,a.img);
+      var cand=artFor(a);
+      for(var i=0;i<cand.length;i++){ if(!used[cand[i]]) return picCard(a,cand[i]); }
       return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
         '<span class="dept">'+esc(a.c||'From the archive')+'</span>'+
         '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
@@ -613,7 +637,11 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     var HEROES=['storage/landing/topics.jpg','storage/landing/archive.jpg','storage/landing/parsha.jpg','storage/landing/dvar-malchus.jpg','storage/landing/moshiach-geula.jpg'];
     var L=arts.filter(photo)[0];
     if(L) used[L.img]=1;
-    if(!L){L=Object.assign({},arts[0]);L.img=HEROES[Math.floor(Date.parse(wk.w)/6048e5)%HEROES.length];}
+    if(!L){L=Object.assign({},arts[0]);
+      var AM0=d.art||{season:{},dept:{}},hero=null;
+      (wk.tags||[]).forEach(function(t){if(!hero&&AM0.season[t])hero=AM0.season[t];});
+      if(!hero)hero=AM0.dept[(L.c||'').trim()];
+      L.img=hero||HEROES[Math.floor(Date.parse(wk.w)/6048e5)%HEROES.length];}
     arts=[L].concat(arts.filter(function(a){return a.s!==L.s;}));
     document.getElementById('kick').textContent='This week · '+
       ((wk.p?('Parshas '+wk.p):'')+(wk.p&&wk.hd?' · ':'')+(wk.hd?('Shabbos '+wk.hd):''));
