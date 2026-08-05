@@ -40,6 +40,41 @@ def clean_img(src):
             return None
     return src if os.path.isfile(os.path.join(ROOT, src.replace("/", os.sep))) else None
 
+PNG_MAGIC = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+JPEG_SOI = bytes([0xFF, 0xD8])
+FF = bytes([0xFF])
+EOI = bytes([0xD9])
+
+def dims(path):
+    """Width/height without a decoder dependency (PNG IHDR + JPEG SOF scan)."""
+    import struct
+    try:
+        with open(path, "rb") as f:
+            head = f.read(24)
+            if head[:8] == PNG_MAGIC:
+                w, h = struct.unpack(">II", head[16:24])
+                return w, h
+            if head[:2] == JPEG_SOI:
+                f.seek(2)
+                b = f.read(1)
+                while b and b != EOI:
+                    while b and b != FF:
+                        b = f.read(1)
+                    while b == FF:
+                        b = f.read(1)
+                    if not b:
+                        break
+                    if 0xC0 <= b[0] <= 0xCF and b[0] not in (0xC4, 0xC8, 0xCC):
+                        f.read(3)
+                        h, w = struct.unpack(">HH", f.read(4))
+                        return w, h
+                    size = struct.unpack(">H", f.read(2))[0]
+                    f.read(size - 2)
+                    b = f.read(1)
+    except Exception:
+        pass
+    return None
+
 def strip(s):
     return html.unescape(re.sub(r"<[^>]+>", " ", s or "")).replace("\xa0", " ").strip()
 
@@ -56,6 +91,8 @@ def read_article(slug):
     desc = re.search(r'<meta name="description" content="([^"]*)"', t)
     img = re.search(r'<div class="entry-body">.*?<img[^>]+src="([^"]+)"', t, re.S)
     summ = strip(desc.group(1)) if desc else ""
+    src = clean_img(img.group(1)) if img else None
+    wh = dims(os.path.join(ROOT, src.replace("/", os.sep))) if src else None
     return {
         "s": slug,
         "t": title,
@@ -63,7 +100,7 @@ def read_article(slug):
         "c": strip(dept.group(1)) if dept else "",
         "i": int(iss.group(1)) if iss else None,
         "d": (summ[:190] + "…") if len(summ) > 190 else summ,
-        "img": clean_img(img.group(1)) if img else None,
+        "img": src, "w": (wh or (0, 0))[0], "h": (wh or (0, 0))[1],
     }
 
 def looks_broken(a):
@@ -268,6 +305,10 @@ def esc(s):
     return html.escape(str(s or ""), quote=True)
 
 FALLBACK_IMG = "storage/landing/topics.jpg"
+# Curated stand-ins for a week whose own pictures will not carry a hero.
+HEROES = ["storage/landing/topics.jpg", "storage/landing/archive.jpg",
+          "storage/landing/parsha.jpg", "storage/landing/dvar-malchus.jpg",
+          "storage/landing/moshiach-geula.jpg"]
 
 def card_html(a, big=False):
     img = a.get("img") or FALLBACK_IMG
@@ -289,7 +330,23 @@ def render_landing(data):
     arts = [data["articles"][s] for s in slugs if s in data["articles"]]
     if not arts:
         print("landing: no articles for this week — index.html left alone"); return
-    lead, rest = arts[0], arts[1:5]
+    # Lead on the week's strongest picture. Over half the archive's images are
+    # author headshots from category-pics — fine at card size, weak blown up to
+    # a hero. Everything in `arts` is already this week's material, so choosing
+    # among them on image strength costs nothing in relevance.
+    def is_photo(a):
+        """Good enough to blow up: a real width and a landscape-ish crop.
+        Headshots are small and tall, and they fall out on the numbers rather
+        than on a guess about the filename."""
+        return (bool(a.get("img")) and a.get("w", 0) >= 430
+                and a["w"] / max(a.get("h", 1), 1) >= 1.15)
+    order = ([a for a in arts if is_photo(a)] +
+             [a for a in arts if not is_photo(a)])
+    lead = order[0]
+    rest = [a for a in arts if a["s"] != lead["s"]][:4]
+    if not is_photo(lead):
+        wkno = datetime.date.fromisoformat(wk["w"]).toordinal() // 7
+        lead = dict(lead, img=HEROES[wkno % len(HEROES)])
     ever = [data["articles"][s] for s in data["evergreen"] if s in data["articles"]][:3]
     kicker = " · ".join(x for x in [("Parshas " + wk["p"]) if wk["p"] else "",
                                     ("Shabbos " + wk["hd"]) if wk["hd"] else ""] if x)
@@ -411,7 +468,12 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     var card=function(a){return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
       '<figure><img src="'+esc(a.img||FB)+'" alt="" loading="lazy"></figure>'+
       '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
-    var L=arts[0];
+    /* lead on the strongest picture — headshots read poorly at hero size */
+    var photo=function(a){return a.img&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var HEROES=['storage/landing/topics.jpg','storage/landing/archive.jpg','storage/landing/parsha.jpg','storage/landing/dvar-malchus.jpg','storage/landing/moshiach-geula.jpg'];
+    var L=arts.filter(photo)[0];
+    if(!L){L=Object.assign({},arts[0]);L.img=HEROES[Math.floor(Date.parse(wk.w)/6048e5)%HEROES.length];}
+    arts=[L].concat(arts.filter(function(a){return a.s!==L.s;}));
     document.getElementById('kick').textContent='This week · '+
       ((wk.p?('Parshas '+wk.p):'')+(wk.p&&wk.hd?' · ':'')+(wk.hd?('Shabbos '+wk.hd):''));
     document.getElementById('lead').innerHTML='<a class="lead" href="articles/'+esc(L.s)+'.html">'+
