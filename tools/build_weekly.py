@@ -536,7 +536,19 @@ def render_landing(data):
     print("index.html: lead '%s' + %d cards + %d evergreen (week %s)"
           % (lead["t"][:44], len(rest), len(ever), wk["w"]))
 
-LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+LANDING = r"""<!DOCTYPE html><html lang="en"><head>
+<!-- pwa:start -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Beis Moshiach">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0042AF">
+<script defer src="/pwa.js"></script>
+<!-- pwa:end -->
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Beis Moshiach — Moshiach, Geula &amp; Chassidus</title>
 <meta name="description" content="A weekly reading from the Beis Moshiach archive — chosen for this week's parsha and the Chabad calendar, from 3,541 articles.">
@@ -628,6 +640,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     <a href="/collections">Collections</a><a href="/archives">The archive · 3,541 articles</a>
     <a href="/topics">Topics</a><a href="/parsha">By parsha</a><a href="/search">Search</a>
     <a href="https://www.moshiach101.info/" target="_blank" rel="noopener">Moshiach 101 ↗</a>
+    <a id="installapp" href="#" hidden>Install the app</a>
   </nav>
 </main>
 <footer class="colophon"><div class="wrap">
@@ -712,6 +725,26 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
     document.getElementById('cards').innerHTML=arts.slice(1,5).map(card).join('');
     main.dataset.week=wk.w;
   }).catch(function(){/* the rendered week stands */});
+})();
+</script>
+<script>
+/* Offer the app where the other ways in are listed. The link only appears
+   when the browser says the site is actually installable. */
+(function(){
+  var a=document.getElementById('installapp'); if(!a) return;
+  var deferred=null;
+  addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); deferred=e; a.hidden=false;
+  });
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    if(!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function(){ deferred=null; a.hidden=true; });
+  });
+  addEventListener('appinstalled',function(){ a.hidden=true; });
+  // already running as an installed app? then there is nothing to offer
+  if(matchMedia('(display-mode: standalone)').matches) a.hidden=true;
 })();
 </script>
 <script src="https://dreamsitedesign.com/imago-dreamsite.js" defer
