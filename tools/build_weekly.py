@@ -560,8 +560,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
   .lead{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.5rem,4vw,3.2rem);align-items:center;
         padding-bottom:clamp(2rem,5vw,3.5rem);border-bottom:1px solid var(--rule)}
   .lead-shot{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
-  .lead-shot img{display:block;width:100%;height:clamp(260px,42vw,520px);object-fit:cover;
-        transform:scale(1.04);transition:transform 1.4s var(--ease)}
+  /* Photographs of the Rebbe are never cropped to fit a box. The art is 3:2
+     and the archive photos are close to it, so heights stay even anyway. */
+  .lead-shot img{display:block;width:100%;height:auto;
+        transform:scale(1.02);transition:transform 1.4s var(--ease)}
   .lead:hover .lead-shot img{transform:scale(1)}
   .lead h1{font-family:var(--display);font-weight:900;font-size:clamp(2.1rem,5.4vw,4.2rem);
         line-height:.98;letter-spacing:-.02em;margin:0 0 1rem;color:var(--ink)}
@@ -572,14 +574,15 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
        padding-bottom:clamp(2rem,5vw,3.5rem)}
   .card{display:block;color:inherit}
   .card figure{margin:0 0 .8rem;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
-  .card img{display:block;width:100%;height:170px;object-fit:cover;transition:transform .7s var(--ease)}
+  .card img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;
+        background:var(--parchment-deep);transition:transform .7s var(--ease)}
   .card:hover img{transform:scale(1.05)}
   .card h3{font-family:var(--display);font-weight:600;font-size:1.12rem;line-height:1.25;
         margin:0 0 .4rem;color:var(--ink)}
   .card:hover h3{color:var(--royal)}
   /* No picture worth printing? Let the type carry it — a set-in card rather
      than a columnist's headshot stretched into a photograph. */
-  .card.txt{display:flex;flex-direction:column;justify-content:center;min-height:170px;
+  .card.txt{display:flex;flex-direction:column;justify-content:center;min-height:0;aspect-ratio:3/2;
         padding:1.1rem 1.2rem;background:var(--parchment-deep);border:1px solid var(--parchment-edge);
         border-left:3px solid var(--gold-bright);border-radius:3px;
         transition:border-color .2s,transform .3s var(--ease)}
