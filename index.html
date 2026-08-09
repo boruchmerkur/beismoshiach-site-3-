@@ -45,8 +45,10 @@
   .lead:hover h1{color:var(--royal)}
   .dek{font-size:1.05rem;line-height:1.6;color:var(--ink-soft);margin:0 0 1.1rem;max-width:46ch}
   .meta{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--royal);margin:0}
-  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(1rem,2.5vw,1.8rem);
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.5vw,1.8rem);
        padding-bottom:clamp(2rem,5vw,3.5rem)}
+  @media(max-width:900px){.row{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
   .card{display:block;color:inherit}
   .card figure{margin:0 0 .8rem;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
   .card img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;
@@ -93,9 +95,9 @@
   <p class="kick" id="kick">This week · Parshas Shoftim · Shabbos 2 Elul 5786</p>
   <div id="lead"><a class="lead" href="articles/not-so-aht-aht.html"><figure class="lead-shot"><img src="storage/art/editorial.jpg" alt="" loading="eager" fetchpriority="high"></figure><div class="lead-txt"><span class="why">Parshas Shoftim</span><h1>Not So Aht Aht</h1><p class="dek">So many years have passed since then – even decades. It’s an absolute disgra...</p><p class="meta">Rabbi Boruch Merkur · Editorial · #1151</p></div></a></div>
   <p class="kick">More for this week</p>
-  <div class="row reveal" id="cards"><a class="card" href="articles/when-does-the-end-ever-justify-the-means.html"><figure><img src="storage/category-pics/med Rabbi Heschel Greenberg.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>When Does the End Ever Justify the Means!?</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #1131</p></a><a class="card" href="articles/the-three-roads-to-geula.html"><figure><img src="storage/art/parsha.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>The Three Roads to Geula</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #1082</p></a><a class="card" href="articles/the-rebbe-is-the-eternal-foundation-stone.html"><figure><img src="storage/art/sichah.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>The Rebbe Is the Eternal Foundation Stone</h3><p class="meta">Sholom Ber Majeski · D&#x27;var Malchus · #966</p></a><a class="card txt" href="articles/fleeing-to-a-safe-city.html"><span class="why">Parshas Shoftim</span><h3>Fleeing to a Safe City</h3><p class="meta">Beis Moshiach (staff) · Parsha of the Future</p></a></div>
+  <div class="row reveal" id="cards"><a class="card" href="articles/when-does-the-end-ever-justify-the-means.html"><figure><img src="storage/category-pics/med Rabbi Heschel Greenberg.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>When Does the End Ever Justify the Means!?</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #1131</p></a><a class="card" href="articles/the-three-roads-to-geula.html"><figure><img src="storage/art/parsha.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>The Three Roads to Geula</h3><p class="meta">Rabbi Greenberg · Parsha Thought · #1082</p></a><a class="card" href="articles/the-rebbe-is-the-eternal-foundation-stone.html"><figure><img src="storage/art/sichah.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>The Rebbe Is the Eternal Foundation Stone</h3><p class="meta">Sholom Ber Majeski · D&#x27;var Malchus · #966</p></a><a class="card txt" href="articles/fleeing-to-a-safe-city.html"><span class="why">Parshas Shoftim</span><h3>Fleeing to a Safe City</h3><p class="meta">Beis Moshiach (staff) · Parsha of the Future</p></a><a class="card" href="articles/advice-of-the-prophet-defund-the-police.html"><figure><img src="storage/lubavitcher-rebbe-with-torah-sam-shacked.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Shoftim</span><h3>Advice of the Prophet: Defund the Police</h3><p class="meta">Rabbi Boruch Merkur · Moshiach &amp; Geula</p></a><a class="card txt" href="articles/see-what-you-want-to-see.html"><span class="why plain">D&#x27;var Malchus</span><h3>See What You Want to See</h3><p class="meta">Sholom Ber Majeski · D&#x27;var Malchus · #984</p></a></div>
   <p class="kick">From the archive</p>
-  <div class="row reveal" id="ever"><a class="card txt" href="articles/evacuate-settlements-in-honor-of-shabbos.html"><span class="why plain">Crossroads</span><h3>Why Does the Rebbe Oppose Autonomy?</h3><p class="meta">Sholom Ber Crombie · Crossroads · #864</p></a><a class="card" href="articles/hiskashrus-as-an-educational-tool.html"><figure><img src="storage/images2/999/999     .jpg" alt="" loading="lazy"></figure><span class="why plain">Hiskashrus</span><h3>Hiskashrus as an Educational Tool</h3><p class="meta">Nosson Avrohom · Hiskashrus · #1009</p></a><a class="card" href="articles/the-teachers-teacher.html"><figure><img src="storage/images2/993/993 THE TEACHERS TEACHER.jpg" alt="" loading="lazy"></figure><span class="why plain">Profile</span><h3>The Teachers Teacher</h3><p class="meta">Menachem Ziegelboim · Profile · #993</p></a></div>
+  <div class="row reveal" id="ever"><a class="card txt" href="articles/evacuate-settlements-in-honor-of-shabbos.html"><span class="why plain">Crossroads</span><h3>Why Does the Rebbe Oppose Autonomy?</h3><p class="meta">Sholom Ber Crombie · Crossroads · #864</p></a><a class="card" href="articles/hiskashrus-as-an-educational-tool.html"><figure><img src="storage/images2/999/999     .jpg" alt="" loading="lazy"></figure><span class="why plain">Hiskashrus</span><h3>Hiskashrus as an Educational Tool</h3><p class="meta">Nosson Avrohom · Hiskashrus · #1009</p></a><a class="card" href="articles/the-teachers-teacher.html"><figure><img src="storage/images2/993/993 THE TEACHERS TEACHER.jpg" alt="" loading="lazy"></figure><span class="why plain">Profile</span><h3>The Teachers Teacher</h3><p class="meta">Menachem Ziegelboim · Profile · #993</p></a><a class="card" href="articles/moshiach-the-derech-hayeshara-to-hiskashrus.html"><figure><img src="storage/images2/959/beis-moshiach-959pg15hiskashrus.jpg" alt="" loading="lazy"></figure><span class="why plain">Hiskashrus</span><h3>Moshiach – The Derech Ha’yeshara to Hiskashrus</h3><p class="meta">Y. Lapidot · Hiskashrus · #959</p></a><a class="card" href="articles/miracles-in-lebanon.html"><figure><img src="storage/images/855/Turgeman_855.jpg" alt="" loading="lazy"></figure><span class="why plain">Feature</span><h3>Miracles in Lebanon</h3><p class="meta">Nosson Avrohom · Feature · #855</p></a><a class="card" href="articles/learn-to-yearn-for-the-beis-hamikdash.html"><figure><img src="storage/images7/1126/Michael Ben-Ari.jpg" alt="" loading="lazy"></figure><span class="why plain">Feature</span><h3>Learn to Yearn for the Beis Ha’mikdash</h3><p class="meta">Sholom Ber Crombie · Feature · #1126</p></a></div>
   <p class="kick">Ways in</p>
   <nav class="ways reveal">
     <a href="/collections">Collections</a><a href="/archives">The archive · 3,541 articles</a>
@@ -127,9 +129,9 @@
     var why={};
     (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){
       if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);why[s]=t;}});});
-    if(list.length<7&&d.evergreen.length){
+    if(list.length<13&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
-      for(var j=0;j<d.evergreen.length&&list.length<7;j++){
+      for(var j=0;j<d.evergreen.length&&list.length<13;j++){
         var s=d.evergreen[(off+j)%d.evergreen.length];
         if(seen[s]) continue;
         if(!inSeason(s)) continue;               /* out of season? wait its turn */
@@ -138,6 +140,23 @@
     }
     var arts=list.map(function(s){var a=d.articles[s];
       return a?Object.assign({},a,{_why:why[s]||''}):null;}).filter(Boolean);
+    /* the same rules the builder applies, so a week that turns over without a
+       rebuild does not slide back to one columnist and lifted sentences */
+    var akey=function(n){n=(n||'').toLowerCase().replace(/\b(rabbi|reb|rav|harav)\b/g,' ')
+        .replace(/\b[a-z]\./g,' ').replace(/[^a-z ]/g,' ').trim().split(/\s+/);
+      return n.length?n[n.length-1]:'?';};
+    var headline=function(a){var ti=(a.t||'').trim();
+      if(!ti||ti.split(/\s+/).length<2) return false;
+      if(ti[0]===ti[0].toLowerCase()&&ti[0]!==ti[0].toUpperCase()) return false;
+      if(/^(it|he|she|they|there|we|this|that)\s+(was|were|is|are|had|have|has|will|would|could|began|went)/i.test(ti)) return false;
+      if(/[?!]$/.test(ti)) return true;
+      return ti.length<=45||ti.split(/\s+/).length<=8;};
+    var seenA={},kept=[];
+    arts.forEach(function(a){var k=akey(a.a);
+      if((seenA[k]||0)>=2) return; seenA[k]=(seenA[k]||0)+1; kept.push(a);});
+    if(kept.length>1){var h=kept.slice(1).sort(function(x,y){
+      return (headline(x)?0:1)-(headline(y)?0:1);}); kept=[kept[0]].concat(h);}
+    arts=kept;
     if(!arts.length) return;
     var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -182,7 +201,7 @@
       '<figure class="lead-shot"><img src="'+esc(L.img||FB)+'" alt=""></figure>'+
       '<div class="lead-txt">'+chip(L)+'<h1>'+esc(L.t)+'</h1><p class="dek">'+esc(L.d||'')+'</p>'+
       '<p class="meta">'+esc(meta(L))+'</p></div></a>';
-    document.getElementById('cards').innerHTML=arts.slice(1,5).map(card).join('');
+    document.getElementById('cards').innerHTML=arts.slice(1,7).map(card).join('');
     main.dataset.week=wk.w;
   }).catch(function(){/* the rendered week stands */});
 })();

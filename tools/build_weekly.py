@@ -494,18 +494,32 @@ def reads_as_headline(a):
     A headline is short, or asks a question; a lifted sentence runs long and
     just stops."""
     ti = (a.get("t") or "").strip()
-    if len(ti) <= 45:
-        return True
+    if not ti or len(ti.split()) < 2:
+        return False
+    if ti[0].islower():                      # "goes out" — cut mid-sentence
+        return False
+    # "It was a surreal sight" — a line of narration, not a headline
+    if re.match(r"(?i)^(it|he|she|they|there|we|this|that)\s+"
+                r"(was|were|is|are|had|have|has|will|would|could|began|went)", ti):
+        return False
     if ti.endswith(("?", "!")):
         return True
-    return len(ti.split()) <= 8
+    return len(ti) <= 45 or len(ti.split()) <= 8
+
+def author_key(name):
+    """The archive spells the same writer several ways — "Rabbi Greenberg",
+    "Rabbi H. Greenberg" — so cap on the surname, not the byline."""
+    n = re.sub(r"(rabbi|reb|r\.|rav|ha?rav)", " ", (name or "").lower())
+    n = re.sub(r"[a-z]\.", " ", n)          # initials
+    n = re.sub(r"[^a-z ]", " ", n).split()
+    return n[-1] if n else "?"
 
 def spread(items, cap=2, key="a"):
     """Keep the page from becoming one columnist. Order is preserved; anything
     over the cap for a given writer is dropped."""
     out, seen = [], {}
     for a in items:
-        k = (a.get(key) or "?").strip()
+        k = author_key(a.get(key))
         if seen.get(k, 0) >= cap:
             continue
         seen[k] = seen.get(k, 0) + 1
@@ -517,17 +531,20 @@ def render_landing(data):
     # ask for a deeper pool than the page needs, so capping a prolific
     # columnist still leaves real choices underneath rather than forcing a
     # third piece by the same writer
-    slugs = pick(data, wk, 16)
+    slugs = pick(data, wk, 24)
     arts = [data["articles"][s] for s in slugs if s in data["articles"]]
-    arts = spread(arts, cap=2)[:7]                # not one columnist's page
-    if len(arts) < 5:                             # top back up if the cap bit hard,
-        have = {(a.get("a") or "").strip() for a in arts}   # new writers first
+    arts = spread(arts, cap=2)
+    lead_first = arts[:1]
+    arts = lead_first + sorted(arts[1:], key=lambda x: not reads_as_headline(x))
+    arts = arts[:9]           # not one columnist's page, and no lifted sentences
+    if len(arts) < 7:                             # top back up if the cap bit hard,
+        have = {author_key(a.get("a")) for a in arts}       # new writers first
         rest = [data["articles"][s] for s in slugs
                 if s in data["articles"] and data["articles"][s] not in arts]
-        rest.sort(key=lambda x: (x.get("a") or "").strip() in have)
+        rest.sort(key=lambda x: (author_key(x.get("a")) in have, not reads_as_headline(x)))
         for a in rest:
             arts.append(a)
-            if len(arts) >= 5:
+            if len(arts) >= 7:
                 break
     if not arts:
         print("landing: no articles for this week — index.html left alone"); return
@@ -544,7 +561,7 @@ def render_landing(data):
     order = ([a for a in arts if is_photo(a)] +
              [a for a in arts if not is_photo(a)])
     lead = order[0]
-    rest = [a for a in arts if a["s"] != lead["s"]][:4]
+    rest = [a for a in arts if a["s"] != lead["s"]][:6]
     if not is_photo(lead):
         lead = dict(lead, _whytag=(getattr(pick, "why", {}) or {}).get(lead["s"], ""))
         commissioned = art_for(lead, wk["tags"])
@@ -566,30 +583,38 @@ def render_landing(data):
 
     # Shleimus HaAretz always has a place on the page — it is a standing
     # concern of the magazine, not an occasional topic.
-    ever, cand, used_authors = [], [], {a["a"] for a in arts if a.get("a")}
+    ever, cand, used_authors = [], [], {author_key(a.get("a")) for a in arts if a.get("a")}
     shleimus = [data["articles"][s] for s in data["tags"].get("shleimus-ha-aretz", [])
                 if eligible(s)]
     for a in sorted(shleimus, key=lambda x: not reads_as_headline(x)):
         ever.append(a); break
     for s in data["evergreen"]:
-        if len(ever) >= 3:
+        if len(ever) >= 6:
             break
         if not eligible(s) or any(e["s"] == s for e in ever):
             continue
         a = data["articles"][s]
-        if (a.get("a") or "").strip() in used_authors:
+        if author_key(a.get("a")) in used_authors:
             continue                              # a writer already on the page
         cand.append(a)
-    cand.sort(key=lambda x: not is_art(x))        # real photographs first
+    # A lifted sentence only gets a slot if nothing else can fill it.
+    heads = [a for a in cand if reads_as_headline(a)]
+    cand = heads + [a for a in cand if a not in heads] if len(heads) < 6 else heads
+    cand.sort(key=lambda x: (not reads_as_headline(x), not is_art(x)))  # headlines, then photos
     for a in cand:
-        if len(ever) >= 3:
+        if len(ever) >= 6:
             break
-        ever.append(a); used_authors.add((a.get("a") or "").strip())
-    for s in data["evergreen"]:                   # fill if the rules left it short
-        if len(ever) >= 3:
-            break
-        if eligible(s) and not any(e["s"] == s for e in ever):
-            ever.append(data["articles"][s])
+        ever.append(a); used_authors.add(author_key(a.get("a")))
+    for want_headline in (True, False):           # fill if the rules left it short
+        for s in data["evergreen"]:
+            if len(ever) >= 6:
+                break
+            a = data["articles"].get(s)
+            if not a or not eligible(s) or any(e["s"] == s for e in ever):
+                continue
+            if want_headline and not reads_as_headline(a):
+                continue
+            ever.append(a)
     kicker = " · ".join(x for x in [("Parshas " + wk["p"]) if wk["p"] else "",
                                     ("Shabbos " + wk["hd"]) if wk["hd"] else ""] if x)
 
@@ -658,8 +683,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .lead:hover h1{color:var(--royal)}
   .dek{font-size:1.05rem;line-height:1.6;color:var(--ink-soft);margin:0 0 1.1rem;max-width:46ch}
   .meta{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--royal);margin:0}
-  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:clamp(1rem,2.5vw,1.8rem);
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.5vw,1.8rem);
        padding-bottom:clamp(2rem,5vw,3.5rem)}
+  @media(max-width:900px){.row{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
   .card{display:block;color:inherit}
   .card figure{margin:0 0 .8rem;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
   .card img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;
@@ -740,9 +767,9 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var why={};
     (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){
       if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);why[s]=t;}});});
-    if(list.length<7&&d.evergreen.length){
+    if(list.length<13&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
-      for(var j=0;j<d.evergreen.length&&list.length<7;j++){
+      for(var j=0;j<d.evergreen.length&&list.length<13;j++){
         var s=d.evergreen[(off+j)%d.evergreen.length];
         if(seen[s]) continue;
         if(!inSeason(s)) continue;               /* out of season? wait its turn */
@@ -751,6 +778,23 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     }
     var arts=list.map(function(s){var a=d.articles[s];
       return a?Object.assign({},a,{_why:why[s]||''}):null;}).filter(Boolean);
+    /* the same rules the builder applies, so a week that turns over without a
+       rebuild does not slide back to one columnist and lifted sentences */
+    var akey=function(n){n=(n||'').toLowerCase().replace(/\b(rabbi|reb|rav|harav)\b/g,' ')
+        .replace(/\b[a-z]\./g,' ').replace(/[^a-z ]/g,' ').trim().split(/\s+/);
+      return n.length?n[n.length-1]:'?';};
+    var headline=function(a){var ti=(a.t||'').trim();
+      if(!ti||ti.split(/\s+/).length<2) return false;
+      if(ti[0]===ti[0].toLowerCase()&&ti[0]!==ti[0].toUpperCase()) return false;
+      if(/^(it|he|she|they|there|we|this|that)\s+(was|were|is|are|had|have|has|will|would|could|began|went)/i.test(ti)) return false;
+      if(/[?!]$/.test(ti)) return true;
+      return ti.length<=45||ti.split(/\s+/).length<=8;};
+    var seenA={},kept=[];
+    arts.forEach(function(a){var k=akey(a.a);
+      if((seenA[k]||0)>=2) return; seenA[k]=(seenA[k]||0)+1; kept.push(a);});
+    if(kept.length>1){var h=kept.slice(1).sort(function(x,y){
+      return (headline(x)?0:1)-(headline(y)?0:1);}); kept=[kept[0]].concat(h);}
+    arts=kept;
     if(!arts.length) return;
     var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -795,7 +839,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
       '<figure class="lead-shot"><img src="'+esc(L.img||FB)+'" alt=""></figure>'+
       '<div class="lead-txt">'+chip(L)+'<h1>'+esc(L.t)+'</h1><p class="dek">'+esc(L.d||'')+'</p>'+
       '<p class="meta">'+esc(meta(L))+'</p></div></a>';
-    document.getElementById('cards').innerHTML=arts.slice(1,5).map(card).join('');
+    document.getElementById('cards').innerHTML=arts.slice(1,7).map(card).join('');
     main.dataset.week=wk.w;
   }).catch(function(){/* the rendered week stands */});
 })();
