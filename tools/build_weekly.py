@@ -285,12 +285,14 @@ def main():
         day += datetime.timedelta(days=7)
 
     # ---- evergreen pool: strong, always-relevant departments
+    pools = [tagmap.get(t, [])[:12] for t in
+             ["moshiach-geula", "shleimus-ha-aretz", "chai-vkayam", "miracle-story",
+              "beis-hamikdash", "chinuch", "igrot-kodesh", "rebbe"]]
     ever = []
-    for t in ["moshiach-geula", "chai-vkayam", "beis-hamikdash", "igrot-kodesh",
-              "rebbe", "miracle-story", "chinuch", "shleimus-ha-aretz"]:
-        for s in tagmap.get(t, [])[:12]:
-            if s not in ever:
-                ever.append(s)
+    for i in range(12):                      # round robin, so no single column
+        for pool in pools:                   # can monopolise the top of the pool
+            if i < len(pool) and pool[i] not in ever:
+                ever.append(pool[i])
     need.update(ever)
 
     # ---- resolve articles
@@ -429,12 +431,16 @@ def art_for(a, season_tags=()):
     return out
 
 def is_art(a):
-    """Worth showing as a picture. Author headshots live in category-pics and
-    are bylines, not editorial images — two different portraits of the same
-    columnist on one page looks like a mistake, because it is one."""
+    """A real photograph from the article itself — always preferred over
+    commissioned art, which is only ever a stand-in. Author headshots from
+    category-pics stay out: two portraits of the same columnist on one page
+    reads as a mistake, because it is one."""
     img = a.get("img")
-    return (bool(img) and "category-pics" not in img
-            and a.get("w", 0) >= 430 and a["w"] / max(a.get("h", 1), 1) >= 1.15)
+    return bool(img) and "category-pics" not in img and a.get("w", 0) >= 300
+
+def is_byline(a):
+    img = a.get("img")
+    return bool(img) and "category-pics" in img
 
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
@@ -461,6 +467,14 @@ def card_html(a, big=False, used=None):
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
                 '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag)
+    # the writer's own byline portrait — the article's real picture, but only
+    # one to a page
+    if is_byline(a) and a["img"] not in used and not any("category-pics" in u for u in used):
+        used.add(a["img"])
+        return ('<a class="card" href="articles/{s}.html">'
+                '<figure><img src="{img}" alt="" loading="lazy"></figure>'
+                '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag)
     # a commissioned image for the season/department, if one exists yet
     for art in art_for(a, a.get("_season", ())):
         if art in used:
@@ -475,10 +489,46 @@ def card_html(a, big=False, used=None):
             '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
         s=esc(a["s"]), why=tag, t=esc(a["t"]), m=esc(meta))
 
+def reads_as_headline(a):
+    """The export left some articles with a line of body text as their <h1>.
+    A headline is short, or asks a question; a lifted sentence runs long and
+    just stops."""
+    ti = (a.get("t") or "").strip()
+    if len(ti) <= 45:
+        return True
+    if ti.endswith(("?", "!")):
+        return True
+    return len(ti.split()) <= 8
+
+def spread(items, cap=2, key="a"):
+    """Keep the page from becoming one columnist. Order is preserved; anything
+    over the cap for a given writer is dropped."""
+    out, seen = [], {}
+    for a in items:
+        k = (a.get(key) or "?").strip()
+        if seen.get(k, 0) >= cap:
+            continue
+        seen[k] = seen.get(k, 0) + 1
+        out.append(a)
+    return out
+
 def render_landing(data):
     wk = week_for(data)
-    slugs = pick(data, wk, 7)
+    # ask for a deeper pool than the page needs, so capping a prolific
+    # columnist still leaves real choices underneath rather than forcing a
+    # third piece by the same writer
+    slugs = pick(data, wk, 16)
     arts = [data["articles"][s] for s in slugs if s in data["articles"]]
+    arts = spread(arts, cap=2)[:7]                # not one columnist's page
+    if len(arts) < 5:                             # top back up if the cap bit hard,
+        have = {(a.get("a") or "").strip() for a in arts}   # new writers first
+        rest = [data["articles"][s] for s in slugs
+                if s in data["articles"] and data["articles"][s] not in arts]
+        rest.sort(key=lambda x: (x.get("a") or "").strip() in have)
+        for a in rest:
+            arts.append(a)
+            if len(arts) >= 5:
+                break
     if not arts:
         print("landing: no articles for this week — index.html left alone"); return
     # Lead on the week's strongest picture. Over half the archive's images are
@@ -508,16 +558,38 @@ def render_landing(data):
     # something already on the page.
     shown = {lead["s"]} | {a["s"] for a in rest}
     season, here = data.get("season", {}), set(wk["tags"])
-    ever = []
-    for s in data["evergreen"]:
+    def eligible(s):
         if s in shown or s not in data["articles"]:
-            continue
+            return False
         tags = set(season.get(s, []))
-        if tags and not (tags & here):
-            continue
-        ever.append(data["articles"][s])
-        if len(ever) == 3:
+        return not (tags and not (tags & here))
+
+    # Shleimus HaAretz always has a place on the page — it is a standing
+    # concern of the magazine, not an occasional topic.
+    ever, cand, used_authors = [], [], {a["a"] for a in arts if a.get("a")}
+    shleimus = [data["articles"][s] for s in data["tags"].get("shleimus-ha-aretz", [])
+                if eligible(s)]
+    for a in sorted(shleimus, key=lambda x: not reads_as_headline(x)):
+        ever.append(a); break
+    for s in data["evergreen"]:
+        if len(ever) >= 3:
             break
+        if not eligible(s) or any(e["s"] == s for e in ever):
+            continue
+        a = data["articles"][s]
+        if (a.get("a") or "").strip() in used_authors:
+            continue                              # a writer already on the page
+        cand.append(a)
+    cand.sort(key=lambda x: not is_art(x))        # real photographs first
+    for a in cand:
+        if len(ever) >= 3:
+            break
+        ever.append(a); used_authors.add((a.get("a") or "").strip())
+    for s in data["evergreen"]:                   # fill if the rules left it short
+        if len(ever) >= 3:
+            break
+        if eligible(s) and not any(e["s"] == s for e in ever):
+            ever.append(data["articles"][s])
     kicker = " · ".join(x for x in [("Parshas " + wk["p"]) if wk["p"] else "",
                                     ("Shabbos " + wk["hd"]) if wk["hd"] else ""] if x)
 
@@ -552,6 +624,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 <script defer src="/pwa.js"></script>
 <!-- pwa:end -->
 <meta charset="UTF-8">
+<link rel="icon" href="data:image/png;base64,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">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Beis Moshiach — Moshiach, Geula &amp; Chassidus</title>
 <meta name="description" content="A weekly reading from the Beis Moshiach archive — chosen for this week's parsha and the Chabad calendar, from 3,541 articles.">
