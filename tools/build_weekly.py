@@ -408,22 +408,24 @@ SEASON_ART = {
 }
 
 def art_for(a, season_tags=()):
-    """Commissioned images for this piece, best first: the season's own art,
-    then the department's. Returns every candidate so a card whose first
-    choice is already on the page can fall back to its second rather than
-    dropping to type."""
+    """Commissioned images for this piece, best first.
+
+    The piece's OWN reason comes first: a Shoftim piece must not be illustrated
+    with the Elul wheat while its badge reads "Parshas Shoftim". Only then the
+    week's other season art, then the department's. Every candidate is returned
+    so a card whose first choice is taken falls back rather than dropping to type."""
     out = []
-    for t in season_tags:
-        f = SEASON_ART.get(t)
+    def add(f):
         if f and os.path.isfile(os.path.join(ROOT, "storage", "art", f)):
-            p = "storage/art/" + f
-            if p not in out:
-                out.append(p)
-    f = DEPT_ART.get((a.get("c") or "").strip())
-    if f and os.path.isfile(os.path.join(ROOT, "storage", "art", f)):
-        p = "storage/art/" + f
-        if p not in out:
-            out.append(p)
+            q = "storage/art/" + f
+            if q not in out:
+                out.append(q)
+    own = a.get("_whytag")
+    add(SEASON_ART.get(own))                      # the date this piece is here for
+    add(DEPT_ART.get((a.get("c") or "").strip())) # else what the piece is
+    # deliberately NOT another date's art: a piece badged "Parshas Shoftim"
+    # illustrated with the Elul wheat contradicts its own label. A neutral
+    # photograph is a better fallback than a wrong one.
     return out
 
 def is_art(a):
@@ -469,10 +471,9 @@ def card_html(a, big=False, used=None):
                 '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta), why=tag)
     # otherwise let the type carry it
-    dept = esc(why or a.get("c") or "From the archive")
     return ('<a class="card txt" href="articles/{s}.html">'
-            '<span class="dept">{dept}</span><h3>{t}</h3><p class="meta">{m}</p></a>').format(
-        s=esc(a["s"]), dept=dept, t=esc(a["t"]), m=esc(meta))
+            '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+        s=esc(a["s"]), why=tag, t=esc(a["t"]), m=esc(meta))
 
 def render_landing(data):
     wk = week_for(data)
@@ -495,6 +496,7 @@ def render_landing(data):
     lead = order[0]
     rest = [a for a in arts if a["s"] != lead["s"]][:4]
     if not is_photo(lead):
+        lead = dict(lead, _whytag=(getattr(pick, "why", {}) or {}).get(lead["s"], ""))
         commissioned = art_for(lead, wk["tags"])
         if commissioned:
             lead = dict(lead, img=commissioned[0])
@@ -524,7 +526,8 @@ def render_landing(data):
     labels = wk.get("labels", {})
     whyof = getattr(pick, "why", {}) or {}
     def dress(a):
-        return dict(a, _season=wk["tags"], _why=labels.get(whyof.get(a["s"], ""), ""))
+        wt = whyof.get(a["s"], "")
+        return dict(a, _season=wk["tags"], _whytag=wt, _why=labels.get(wt, ""))
 
     used = set()
     page = LANDING.replace("{{KICKER}}", esc(kicker)) \
@@ -599,8 +602,6 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
         border-left:3px solid var(--gold-bright);border-radius:3px;
         transition:border-color .2s,transform .3s var(--ease)}
   .card.txt:hover{transform:translateY(-2px);border-color:var(--royal);border-left-color:var(--royal)}
-  .card.txt .dept{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
-        color:var(--royal);margin-bottom:.5rem}
   .card.txt h3{font-size:1.3rem}
   /* Why this piece is here this week — the parsha or the date it belongs to. */
   .why{display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;
@@ -693,18 +694,17 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
       return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
         '<figure><img src="'+esc(src)+'" alt="" loading="lazy"></figure>'+
         chip(a)+'<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
-    var artFor=function(a){                       /* season art first, then dept */
-      var o=[];
-      (wk.tags||[]).forEach(function(t){var f=AM.season[t]; if(f&&o.indexOf(f)<0)o.push(f);});
-      var g=AM.dept[(a.c||'').trim()]; if(g&&o.indexOf(g)<0)o.push(g);
-      return o;};
+    var artFor=function(a){        /* the piece's own reason first, then the week's, then dept */
+      var o=[],own=a._why,push=function(f){if(f&&o.indexOf(f)<0)o.push(f);};
+      push(AM.season[own]);                       /* the date it is here for */
+      push(AM.dept[(a.c||'').trim()]);            /* else what it is */
+      return o;};   /* never another date's art — it would contradict the badge */
     var card=function(a){
       if(art(a)&&!used[a.img]) return picCard(a,a.img);
       var cand=artFor(a);
       for(var i=0;i<cand.length;i++){ if(!used[cand[i]]) return picCard(a,cand[i]); }
       return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
-        '<span class="dept">'+esc(whyOf(a)||a.c||'From the archive')+'</span>'+
-        '<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+        chip(a)+'<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
     /* lead on the strongest picture — headshots read poorly at hero size */
     var photo=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
     var HEROES=['storage/landing/topics.jpg','storage/landing/archive.jpg','storage/landing/parsha.jpg','storage/landing/dvar-malchus.jpg','storage/landing/moshiach-geula.jpg'];
