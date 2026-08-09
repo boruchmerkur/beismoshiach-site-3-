@@ -436,11 +436,16 @@ def is_art(a):
     category-pics stay out: two portraits of the same columnist on one page
     reads as a mistake, because it is one."""
     img = a.get("img")
-    return bool(img) and "category-pics" not in img and a.get("w", 0) >= 300
+    return bool(img) and "category-pics" not in img and a.get("w", 0) >= 400
 
 def is_byline(a):
     img = a.get("img")
     return bool(img) and "category-pics" in img
+
+def portrait_class(a):
+    """Tall pictures need the crop anchored high or the subject loses his head."""
+    w, h = a.get("w", 0), a.get("h", 1) or 1
+    return " class=\"port\"" if w and w / h < 1.15 else ""
 
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
@@ -464,17 +469,19 @@ def card_html(a, big=False, used=None):
     if is_art(a) and a["img"] not in used:
         used.add(a["img"])
         return ('<a class="card" href="articles/{s}.html">'
-                '<figure><img src="{img}" alt="" loading="lazy"></figure>'
+                '<figure><img src="{img}"{pc} alt="" loading="lazy"></figure>'
                 '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag)
+            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag,
+            pc=portrait_class(a))
     # the writer's own byline portrait — the article's real picture, but only
     # one to a page
     if is_byline(a) and a["img"] not in used and not any("category-pics" in u for u in used):
         used.add(a["img"])
         return ('<a class="card" href="articles/{s}.html">'
-                '<figure><img src="{img}" alt="" loading="lazy"></figure>'
+                '<figure><img src="{img}"{pc} alt="" loading="lazy"></figure>'
                 '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag)
+            s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag,
+            pc=portrait_class(a))
     # a commissioned image for the season/department, if one exists yet
     for art in art_for(a, a.get("_season", ())):
         if art in used:
@@ -683,21 +690,22 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .lead:hover h1{color:var(--royal)}
   .dek{font-size:1.05rem;line-height:1.6;color:var(--ink-soft);margin:0 0 1.1rem;max-width:46ch}
   .meta{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--royal);margin:0}
-  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.5vw,1.8rem);
+  .row{display:grid;align-items:start;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.5vw,1.8rem);
        padding-bottom:clamp(2rem,5vw,3.5rem)}
   @media(max-width:900px){.row{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:560px){.row{grid-template-columns:1fr}}
   .card{display:block;color:inherit}
   .card figure{margin:0 0 .8rem;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
-  .card img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:contain;
-        background:var(--parchment-deep);transition:transform .7s var(--ease)}
+  .card img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;
+        object-position:center;background:var(--parchment-deep);transition:transform .7s var(--ease)}
+  .card img.port{object-position:center 18%}   /* keep heads in frame */
   .card:hover img{transform:scale(1.05)}
   .card h3{font-family:var(--display);font-weight:600;font-size:1.12rem;line-height:1.25;
         margin:0 0 .4rem;color:var(--ink)}
   .card:hover h3{color:var(--royal)}
   /* No picture worth printing? Let the type carry it — a set-in card rather
      than a columnist's headshot stretched into a photograph. */
-  .card.txt{display:flex;flex-direction:column;justify-content:center;min-height:0;aspect-ratio:3/2;
+  .card.txt{display:flex;flex-direction:column;justify-content:center;align-self:start;
         padding:1.1rem 1.2rem;background:var(--parchment-deep);border:1px solid var(--parchment-edge);
         border-left:3px solid var(--gold-bright);border-radius:3px;
         transition:border-color .2s,transform .3s var(--ease)}
@@ -801,7 +809,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var meta=function(a){return [a.a,a.c,a.i?('#'+a.i):''].filter(Boolean).join(' · ');};
     var FB='storage/landing/topics.jpg';
     var used={};
-    var art=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
+    var art=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=400;};
     var AM=d.art||{season:{},dept:{}};
     var LB=wk.labels||{};
     var whyOf=function(a){return LB[a._why||'']||'';};
