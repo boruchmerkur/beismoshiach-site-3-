@@ -78,6 +78,86 @@ def dims(path):
 def strip(s):
     return html.unescape(re.sub(r"<[^>]+>", " ", s or "")).replace("\xa0", " ").strip()
 
+def tidy(s):
+    """Collapse whitespace, and close up the gaps our own tag-stripping opens.
+
+    The export wraps fragments in spans — <span>MH</span>”M — so replacing a
+    tag with a space invents one that was never in the text. This puts back
+    only what we displaced; no character of the writing is changed."""
+    s = re.sub(r"\s+", " ", s or "").strip()
+    s = re.sub(r" +([’'”\"),.;:!?״׳])", r"\1", s)
+    s = re.sub(r"([(“]) +", r"\1", s)
+    # a drop cap is set in its own tag — <strong>R</strong>abbi — so stripping
+    # the tag leaves "R abbi". Put the initial back on its word. Never for A or
+    # I: they are words in their own right, and "A family" must stay two.
+    s = re.sub(r"^([B-HJ-Z]) (?=[a-z]{2})", r"\1", s)
+    return s
+
+# lines that are apparatus, not writing: credits, separators, captions
+SKIP_P = re.compile(
+    r"(?i)^\s*(\*+\s*$|\[|\(photo|photos? by|translated (and|by)|reprinted|"
+    r"presented by|by [A-Z][a-z]+ [A-Z]|article originally|"
+    r"for more information|to subscribe|continued (on|from))")
+
+def cut(s, n):
+    """Trim to a length the layout can hold, on a sentence if one lands near
+    the end, otherwise on a word. The text itself is never altered."""
+    s = tidy(s)
+    if len(s) <= n:
+        return s
+    head = s[:n]
+    stop = max(head.rfind(". "), head.rfind("? "), head.rfind("! "))
+    if stop >= n * 0.55:                     # a whole sentence, cleanly
+        return head[:stop + 1]
+    return head[:head.rfind(" ")].rstrip(" ,;:—-") + "…"
+
+# the dek convention is clause * clause; a clause that only credits a source is
+# apparatus — it belongs on the article, not on a card. It sits at either end.
+CRED = (r"(from (chapter|the )|translated |presented by|adapted |part \w+ of|"
+        r"excerpt|reprinted|source[sd]?\b|based on|by [A-Z])")
+CREDIT_END = re.compile(r"(?i)\s*\*\s*" + CRED + r"[^*]*$")
+CREDIT_START = re.compile(r"(?i)^" + CRED + r"[^*]*?(\*\s*|(?<=[.)])\s+(?=[A-Z0-9“]))")
+# a caption travels inside the paragraph it illustrates; it is not the writing
+CAPTION = re.compile(r'(?is)<span class="thumbnail-caption".*?</span>')
+# a dek that opens like this is a quote lifted from the middle of the argument:
+# true to the piece, but it cannot introduce it
+MIDWAY = re.compile(r"(?i)^(this|that|these|those|it|he|she|they|such|so|also|"
+                    r"thus|therefore|hence|but|however|and|yet|in addition|"
+                    r"furthermore|moreover|the above|as (a result|mentioned))\b")
+
+def lede(t):
+    """The magazine's own dek if it wrote one, plus the opening of the piece.
+
+    Both are lifted verbatim — the point is to show the writing, so nothing is
+    summarised, rewritten or generated."""
+    pull = re.search(r'<p class="entry-pull">(.*?)</p>', t, re.S)
+    dek = tidy(strip(pull.group(1))) if pull else ""
+    dek = CREDIT_START.sub("", CREDIT_END.sub("", dek)).strip()
+    if re.match(r"(?i)^" + CRED, dek):       # nothing but the credit line
+        dek = ""
+    # the export dropped some drop-cap initials, leaving the dek headless
+    # ("s the new school year begins…") — a fragment can't introduce anything
+    if dek and not (dek[0].isupper() or dek[0].isdigit() or dek[0] in "“\"‘'"):
+        dek = ""
+    body = re.search(r'<div class="entry-body">(.*)', t, re.S)
+    first = ""
+    if body:
+        for p in re.findall(r"<p[^>]*>(.*?)</p>", CAPTION.sub("", body.group(1)), re.S):
+            p = tidy(strip(p))
+            if len(p) < 60 or SKIP_P.match(p):
+                continue
+            if not (p[0].isupper() or p[0].isdigit() or p[0] in "“\"‘'"):
+                continue                     # another headless drop cap
+            first = p
+            break
+    if not dek:                              # no dek written — open with the piece
+        return cut(first, 340), ""
+    if first[:40] and dek[:40] and first[:40] == dek[:40]:
+        return cut(dek, 340), ""             # the dek is the opening; don't repeat it
+    if MIDWAY.match(dek) and first:
+        return cut(first, 300), cut(dek, 300)   # let the piece open itself
+    return cut(dek, 300), cut(first, 300)
+
 def read_article(slug):
     p = os.path.join(ART, slug + ".html")
     if not os.path.isfile(p):
@@ -88,9 +168,8 @@ def read_article(slug):
     au = re.search(r'class="au">([^<]+)<', t)
     dept = re.search(r'class="dept"[^>]*>([^<]+)<', t)
     iss = re.search(r'href="tag/(\d+)\.html"', t)
-    desc = re.search(r'<meta name="description" content="([^"]*)"', t)
     img = re.search(r'<div class="entry-body">.*?<img[^>]+src="([^"]+)"', t, re.S)
-    summ = strip(desc.group(1)) if desc else ""
+    dek, open_ = lede(t)
     src = clean_img(img.group(1)) if img else None
     wh = dims(os.path.join(ROOT, src.replace("/", os.sep))) if src else None
     return {
@@ -99,15 +178,18 @@ def read_article(slug):
         "a": strip(au.group(1)) if au else "",
         "c": strip(dept.group(1)) if dept else "",
         "i": int(iss.group(1)) if iss else None,
-        "d": (summ[:190] + "…") if len(summ) > 190 else summ,
+        "d": dek, "x": open_,
         "img": src, "w": (wh or (0, 0))[0], "h": (wh or (0, 0))[1],
     }
 
 def looks_broken(a):
-    """Some export titles are body text or the 'Recent Articles' shell."""
+    """Some export titles are body text or the 'Recent Articles' shell; a few
+    entries are an embedded video with no prose, which has nothing to show on
+    a card."""
     t = a["t"]
     return (t.startswith("Beis Moshiach Magazine") or len(t) > 72 or
-            t.lower().startswith(("translated ", "by ")) or not t)
+            t.lower().startswith(("translated ", "by ")) or not t or
+            not (a.get("d") or a.get("x")))
 
 # ------------------------------------------------------------------ tag sources
 def from_parsha_page(names=None):
@@ -447,6 +529,21 @@ def portrait_class(a):
     w, h = a.get("w", 0), a.get("h", 1) or 1
     return " class=\"port\"" if w and w / h < 1.15 else ""
 
+def blurb(a, txt=False):
+    """The magazine's own words — its dek, and on a type card the opening of
+    the piece as well. Verbatim; nothing here is written for it.
+
+    The one liberty is the separator: Beis Moshiach divides the clauses of a
+    dek with an asterisk, which on screen reads as a stray mark. It is set as
+    a middot instead — the same break, in the glyph the web uses for it."""
+    s = a.get("d") or a.get("x") or ""
+    # a type card has room for both; so does a card whose dek is a bare line
+    if a.get("d") and a.get("x") and (txt or len(a["d"]) < 110):
+        s = a["d"] + " * " + a["x"]   # set as a middot below
+    if not s:
+        return ""
+    return '<p class="blurb">%s</p>' % re.sub(r" \*+ ", " · ", esc(s))
+
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
     meta = " · ".join(x for x in [a.get("a"), a.get("c"), ("#%s" % a["i"]) if a.get("i") else ""] if x)
@@ -461,27 +558,28 @@ def card_html(a, big=False, used=None):
         used.add(img)
         return ('<a class="lead" href="articles/{s}.html">'
                 '<figure class="lead-shot"><img src="{img}" alt="" loading="eager" fetchpriority="high"></figure>'
-                '<div class="lead-txt">{why}<h1>{t}</h1><p class="dek">{d}</p>'
+                '<div class="lead-txt">{why}<h1>{t}</h1><p class="dek">{d}</p>{x}'
                 '<p class="meta">{m}</p></div></a>').format(
-            s=esc(a["s"]), img=esc(img), t=esc(a["t"]), d=esc(a.get("d", "")),
-            m=esc(meta), why=tag)
+            s=esc(a["s"]), img=esc(img), t=esc(a["t"]), d=re.sub(r" \*+ ", " · ", esc(a.get("d", ""))),
+            m=esc(meta), why=tag,
+            x=('<p class="open">%s</p>' % esc(a["x"])) if a.get("x") else "")
     # a picture only if it is a real one, and only once per page
     if is_art(a) and a["img"] not in used:
         used.add(a["img"])
         return ('<a class="card" href="articles/{s}.html">'
                 '<figure><img src="{img}"{pc} alt="" loading="lazy"></figure>'
-                '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+                '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag,
-            pc=portrait_class(a))
+            pc=portrait_class(a), b=blurb(a))
     # the writer's own byline portrait — the article's real picture, but only
     # one to a page
     if is_byline(a) and a["img"] not in used and not any("category-pics" in u for u in used):
         used.add(a["img"])
         return ('<a class="card" href="articles/{s}.html">'
                 '<figure><img src="{img}"{pc} alt="" loading="lazy"></figure>'
-                '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
+                '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag,
-            pc=portrait_class(a))
+            pc=portrait_class(a), b=blurb(a))
     # a commissioned image for the season/department, if one exists yet
     for art in art_for(a, a.get("_season", ())):
         if art in used:
@@ -489,12 +587,12 @@ def card_html(a, big=False, used=None):
         used.add(art)
         return ('<a class="card" href="articles/{s}.html">'
                 '<figure><img src="{img}" alt="" loading="lazy"></figure>'
-                '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-            s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta), why=tag)
+                '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
+            s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta), why=tag, b=blurb(a))
     # otherwise let the type carry it
     return ('<a class="card txt" href="articles/{s}.html">'
-            '{why}<h3>{t}</h3><p class="meta">{m}</p></a>').format(
-        s=esc(a["s"]), why=tag, t=esc(a["t"]), m=esc(meta))
+            '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
+        s=esc(a["s"]), why=tag, t=esc(a["t"]), m=esc(meta), b=blurb(a, txt=True))
 
 def reads_as_headline(a):
     """The export left some articles with a line of body text as their <h1>.
@@ -689,6 +787,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
         line-height:.98;letter-spacing:-.02em;margin:0 0 1rem;color:var(--ink)}
   .lead:hover h1{color:var(--royal)}
   .dek{font-size:1.05rem;line-height:1.6;color:var(--ink-soft);margin:0 0 1.1rem;max-width:46ch}
+  /* the piece's own opening, under the magazine's dek */
+  .lead-txt .open{font-size:.94rem;line-height:1.65;color:var(--ink-soft);opacity:.86;
+        margin:0 0 1.1rem;max-width:48ch;border-left:2px solid var(--parchment-edge);
+        padding-left:.9rem}
   .meta{font-family:var(--mono);font-size:.7rem;letter-spacing:.04em;color:var(--royal);margin:0}
   .row{display:grid;align-items:start;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.5vw,1.8rem);
        padding-bottom:clamp(2rem,5vw,3.5rem)}
@@ -703,6 +805,15 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .card h3{font-family:var(--display);font-weight:600;font-size:1.12rem;line-height:1.25;
         margin:0 0 .4rem;color:var(--ink)}
   .card:hover h3{color:var(--royal)}
+  /* A headline alone asks the reader to gamble. Give them the magazine's own
+     opening lines and let the writing do the inviting. Clamped so a long dek
+     and a short one still make a level row. */
+  .card .blurb{font-size:.9rem;line-height:1.55;color:var(--ink-soft);margin:0 0 .55rem;
+        display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;
+        line-clamp:3;overflow:hidden}
+  /* the type card has the whole box to itself, so it can afford to say more */
+  .card.txt .blurb{-webkit-line-clamp:7;line-clamp:7;font-size:.94rem;margin-bottom:.8rem}
+  @media(max-width:560px){.card .blurb{-webkit-line-clamp:4;line-clamp:4}}
   /* No picture worth printing? Let the type carry it — a set-in card rather
      than a columnist's headshot stretched into a photograph. */
   .card.txt{display:flex;flex-direction:column;justify-content:center;align-self:start;
@@ -815,10 +926,17 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var whyOf=function(a){return LB[a._why||'']||'';};
     var chip=function(a){var w=whyOf(a);
       return '<span class="why'+(w?'':' plain')+'">'+esc(w||a.c||'From the archive')+'</span>';};
+    /* Beis Moshiach separates dek clauses with an asterisk; set it as a
+       middot, which is what that break looks like on screen */
+    var sep=function(s){return s.replace(/ \*+ /g,' · ');};
+    /* the magazine's own dek, verbatim; a type card gets the opening too */
+    var blurb=function(a,txt){var s=a.d||a.x||'';
+      if(a.d&&a.x&&(txt||a.d.length<110)) s=a.d+' * '+a.x;
+      return s?'<p class="blurb">'+sep(esc(s))+'</p>':'';};
     var picCard=function(a,src){ used[src]=1;
       return '<a class="card" href="articles/'+esc(a.s)+'.html">'+
         '<figure><img src="'+esc(src)+'" alt="" loading="lazy"></figure>'+
-        chip(a)+'<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+        chip(a)+'<h3>'+esc(a.t)+'</h3>'+blurb(a)+'<p class="meta">'+esc(meta(a))+'</p></a>';};
     var artFor=function(a){        /* the piece's own reason first, then the week's, then dept */
       var o=[],own=a._why,push=function(f){if(f&&o.indexOf(f)<0)o.push(f);};
       push(AM.season[own]);                       /* the date it is here for */
@@ -829,7 +947,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
       var cand=artFor(a);
       for(var i=0;i<cand.length;i++){ if(!used[cand[i]]) return picCard(a,cand[i]); }
       return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
-        chip(a)+'<h3>'+esc(a.t)+'</h3><p class="meta">'+esc(meta(a))+'</p></a>';};
+        chip(a)+'<h3>'+esc(a.t)+'</h3>'+blurb(a,1)+'<p class="meta">'+esc(meta(a))+'</p></a>';};
     /* lead on the strongest picture — headshots read poorly at hero size */
     var photo=function(a){return a.img&&a.img.indexOf('category-pics')<0&&a.w>=430&&a.w/Math.max(a.h,1)>=1.15;};
     var HEROES=['storage/landing/topics.jpg','storage/landing/archive.jpg','storage/landing/parsha.jpg','storage/landing/dvar-malchus.jpg','storage/landing/moshiach-geula.jpg'];
@@ -845,7 +963,8 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
       ((wk.p?('Parshas '+wk.p):'')+(wk.p&&wk.hd?' · ':'')+(wk.hd?('Shabbos '+wk.hd):''));
     document.getElementById('lead').innerHTML='<a class="lead" href="articles/'+esc(L.s)+'.html">'+
       '<figure class="lead-shot"><img src="'+esc(L.img||FB)+'" alt=""></figure>'+
-      '<div class="lead-txt">'+chip(L)+'<h1>'+esc(L.t)+'</h1><p class="dek">'+esc(L.d||'')+'</p>'+
+      '<div class="lead-txt">'+chip(L)+'<h1>'+esc(L.t)+'</h1><p class="dek">'+sep(esc(L.d||''))+'</p>'+
+      (L.x?'<p class="open">'+esc(L.x)+'</p>':'')+
       '<p class="meta">'+esc(meta(L))+'</p></div></a>';
     document.getElementById('cards').innerHTML=arts.slice(1,7).map(card).join('');
     main.dataset.week=wk.w;
