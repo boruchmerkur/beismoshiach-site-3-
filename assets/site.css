@@ -185,7 +185,19 @@ html{scrollbar-gutter:stable;}
 .bm-topbar nav a{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9A9B9D;
   text-decoration:none;transition:color .15s;}
 .bm-topbar nav a:hover{color:var(--gold-bright);}
-@media (max-width:720px){.bm-topbar nav{display:none;}}
+/* Narrow window: the nav drops to its own line and scrolls sideways rather
+   than disappearing. It used to be display:none below 720px, which left a
+   phone — and an installed app window, which is narrower than a browser one —
+   with a header and no way out of the page. */
+@media (max-width:720px){
+  .bm-inner{flex-wrap:wrap;gap:0 1.5rem;padding-top:11px;}
+  .bm-topbar nav{margin-left:0;width:100%;gap:20px;padding:2px 0 9px;
+    overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;}
+  .bm-topbar nav::-webkit-scrollbar{display:none;}
+  .bm-topbar nav a{white-space:nowrap;padding:6px 0;}   /* a thumb-sized target */
+  .bm-topbar .langsw{margin-right:2px;}                 /* clears the scroll edge */
+}
 
 /* parsha / holiday chip on list rows */
 .artlist .lt + .occ, .artlist .occ{display:inline-block;font-family:var(--mono);font-size:10px;
@@ -313,3 +325,59 @@ html{scrollbar-gutter:stable;}
 .cm-post:hover{opacity:.9}
 .cm-post:disabled{opacity:.5;cursor:default}
 .cm-msg{font-family:var(--display);font-size:13px;color:var(--royal)}
+
+/* ---- the week's question -------------------------------------------------
+   Same cream card, same gold rule, same mono eyebrow as everything else on the
+   page: this is a department of the magazine, not a plugin bolted onto it.
+   Every colour is a variable, so the poll follows the light/dark scheme and any
+   future repalette without being touched. */
+.pl-card{background:var(--parchment-deep);border:1px solid var(--parchment-edge);border-radius:3px;
+  padding:22px 24px 20px;position:relative;overflow:hidden}
+.pl-card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent)}
+.pl-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--royal);margin:0 0 10px}
+.pl-q{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.25;margin:0;
+  letter-spacing:-.005em}
+.pl-sub{font-family:var(--display);font-style:italic;font-size:15px;color:var(--ink-soft);margin:8px 0 0}
+
+.pl-opts{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:8px}
+.pl-opt{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;cursor:pointer;
+  background:var(--surface);border:1px solid var(--parchment-edge);border-radius:3px;
+  transition:border-color .15s var(--ease),background .15s var(--ease)}
+.pl-opt:hover{border-color:var(--gold)}
+.pl-opt input{margin:3px 0 0;accent-color:var(--royal);flex:0 0 auto}
+.pl-opt:has(input:checked){border-color:var(--royal);background:var(--royal-soft)}
+.pl-opt:focus-within{outline:2px solid var(--royal);outline-offset:1px}
+.pl-opt-lab{font-size:16px;line-height:1.45}
+
+.pl-extra{margin:14px 0 0}
+.pl-note-lab{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+  color:var(--ink-soft);margin:0 0 6px}
+.pl-note{width:100%;font:inherit;font-size:15px;line-height:1.5;resize:vertical;
+  color:var(--ink);background:var(--surface);border:1px solid var(--parchment-edge);
+  border-radius:3px;padding:9px 11px}
+.pl-note:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 2px var(--royal-soft)}
+.pl-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
+.pl-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:16px 0 0}
+.pl-send{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+  color:#fff;background:var(--royal);border:none;border-radius:3px;padding:11px 22px;cursor:pointer;
+  transition:opacity .15s}
+.pl-send:hover{opacity:.9}
+.pl-send:disabled{opacity:.4;cursor:default}
+.pl-msg,.pl-foot{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--ink-soft)}
+
+.pl-results{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:13px;counter-reset:none}
+.pl-res-top{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.pl-res-lab{font-size:16px;line-height:1.35}
+.pl-yours{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--royal);white-space:nowrap}
+.pl-res-pc{font-family:var(--display);font-weight:700;font-size:17px;flex:0 0 auto}
+.pl-bar{height:7px;margin:6px 0 3px;background:var(--royal-soft);border-radius:2px;overflow:hidden}
+.pl-bar i{display:block;height:100%;background:var(--gold-bright);border-radius:2px;
+  transition:width .6s var(--ease)}
+.pl-res.is-you .pl-bar i{background:var(--royal)}
+.pl-res-n{font-family:var(--mono);font-size:11px;color:var(--ink-soft);opacity:.8}
+.pl-foot{margin:16px 0 0}
+@media (prefers-reduced-motion:reduce){.pl-bar i{transition:none}}
