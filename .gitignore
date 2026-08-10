@@ -10,3 +10,20 @@ Avtzon.zip
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# Local Netlify folder
+.netlify
+
+# Installed only to run `netlify dev` locally. Netlify installs from
+# package.json on its own, so a committed tree would just go stale.
+node_modules/
+package-lock.json
+
+# Local secrets for `netlify dev` (COMMENTS_ADMIN_KEY). The real one lives in
+# the Netlify site environment and must never be in the repo.
+.env
+.env.*
+
+# Python bytecode from the build scripts in tools/
+__pycache__/
+*.pyc

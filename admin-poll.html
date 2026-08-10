@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- pwa:start -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Beis Moshiach">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0042AF">
+<script defer src="/pwa.js"></script>
+<!-- pwa:end -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The week&rsquo;s question — beismoshiach.org</title>
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+  .mod{max-width:880px;margin:40px auto;padding:0 20px;font-family:var(--display),Georgia,serif}
+  .mod h1{font-size:24px;color:var(--royal);margin:0 0 6px}
+  .mod .sub{color:var(--ink-soft);margin:0 0 24px;font-size:14px}
+  .mod-key{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}
+  .mod-key input{flex:1 1 260px;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--parchment-edge);border-radius:5px;background:var(--surface);color:var(--ink)}
+  button{font:inherit;font-size:14px;font-weight:500;color:#fff;background:var(--royal);border:none;border-radius:5px;padding:9px 16px;cursor:pointer}
+  button:hover{opacity:.9}
+  button.ghost{background:transparent;color:var(--royal);border:1px solid var(--parchment-edge)}
+  button.warn{background:transparent;color:var(--oxblood);border:1px solid var(--parchment-edge)}
+  .mod-status{font-size:14px;color:var(--royal);min-height:20px;margin:0 0 18px}
+  fieldset{border:1px solid var(--parchment-edge);border-radius:7px;background:var(--parchment-deep);padding:18px;margin:0 0 26px}
+  legend{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--royal);padding:0 8px}
+  label.f{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--ink-soft);margin:14px 0 5px}
+  input[type=text],select,textarea{width:100%;font:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--parchment-edge);border-radius:5px;background:var(--surface);color:var(--ink)}
+  .opts{display:grid;gap:7px;margin-top:5px}
+  .chk{display:flex;align-items:center;gap:9px;font-size:14px;margin:16px 0 0}
+  .chk input{accent-color:var(--royal)}
+  .p{border:1px solid var(--parchment-edge);border-radius:7px;background:var(--parchment-deep);margin:0 0 16px;padding:16px 18px}
+  .p h2{font-size:17px;margin:0 0 3px}
+  .p .wk{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--royal)}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;border-radius:3px;padding:2px 7px;margin-left:8px;border:1px solid var(--parchment-edge);color:var(--ink-soft)}
+  .badge.live{color:#fff;background:var(--royal);border-color:var(--royal)}
+  .badge.shut{color:var(--oxblood);border-color:var(--oxblood)}
+  .tal{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:7px}
+  .tal li{display:grid;grid-template-columns:1fr 62px;gap:10px;align-items:baseline;font-size:15px}
+  .tal .bar{grid-column:1/-1;height:6px;background:var(--royal-soft);border-radius:2px;overflow:hidden}
+  .tal .bar i{display:block;height:100%;background:var(--gold-bright)}
+  .tal .n{font-family:var(--mono);font-size:12px;text-align:right;color:var(--ink-soft)}
+  .notes{margin:14px 0 0;border-top:1px solid var(--rule);padding-top:12px}
+  .notes h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 8px}
+  .notes p{margin:0 0 9px;font-size:15px;line-height:1.5}
+  .notes .who{font-family:var(--mono);font-size:11px;color:var(--royal);margin-right:8px}
+  .acts{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+  .empty{color:var(--ink-soft);font-style:italic}
+</style>
+</head>
+<body>
+<div class="mod">
+  <h1>The week&rsquo;s question</h1>
+  <p class="sub">Private. One question a week on the front page. Readers answer once;
+    what they write in the box under it is never published &mdash; it is here, for you.</p>
+
+  <div class="mod-key">
+    <input id="key" type="password" placeholder="Admin key" autocomplete="off">
+    <button id="load">Load</button>
+  </div>
+  <div class="mod-status" id="status"></div>
+
+  <fieldset id="writer" hidden>
+    <legend>Write a question</legend>
+    <label class="f" for="wk">Week (the Shabbos it belongs to)</label>
+    <select id="wk"></select>
+
+    <label class="f" for="q">The question</label>
+    <input id="q" type="text" maxlength="240" placeholder="e.g. What did the Rebbe mean by &ldquo;the only thing left&rdquo;?">
+
+    <label class="f" for="sub">A line under it, if it needs one (optional)</label>
+    <input id="sub" type="text" maxlength="60">
+
+    <label class="f">The answers &mdash; two to eight. Blank rows are ignored.</label>
+    <div class="opts" id="opts"></div>
+
+    <div class="chk"><input type="checkbox" id="cur" checked>
+      <label for="cur">Put this on the front page now</label></div>
+    <div class="chk"><input type="checkbox" id="always">
+      <label for="always">Show the standings before answering
+        (off = a reader sees the results only once they have answered)</label></div>
+
+    <div class="acts"><button id="save">Publish the question</button>
+      <span class="mod-status" id="saved" style="margin:0"></span></div>
+  </fieldset>
+
+  <div id="list"></div>
+</div>
+
+<script>
+/* Everything here is one fetch away from /api/poll. The only state kept is the
+   admin key, in sessionStorage under the SAME name the comment moderator uses,
+   so the key is typed once per sitting for both. */
+(function () {
+  var keyEl = document.getElementById("key"), statusEl = document.getElementById("status");
+  var listEl = document.getElementById("list"), writer = document.getElementById("writer");
+  var savedEl = document.getElementById("saved");
+  var wkEl = document.getElementById("wk"), optsEl = document.getElementById("opts");
+  var OPTS = 8, schedule = [];
+
+  var saved = sessionStorage.getItem("bm_admin_key");
+  if (saved) keyEl.value = saved;
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function key() { return keyEl.value.trim(); }
+  function when(ts) { try { return new Date(ts).toLocaleString(); } catch (e) { return ""; } }
+
+  for (var i = 0; i < OPTS; i++) {
+    var inp = document.createElement("input");
+    inp.type = "text"; inp.maxLength = 120; inp.className = "opt";
+    inp.placeholder = "Answer " + (i + 1) + (i < 2 ? " (required)" : "");
+    optsEl.appendChild(inp);
+  }
+
+  /* The week list is the SAME schedule the landing page runs on, so a question
+     can never be filed against a week the front page does not believe in. The
+     label is prefilled from it too — the parsha and the Hebrew date are already
+     computed there and re-typing them is how they drift. */
+  function loadWeeks() {
+    return fetch("/assets/weekly.json", { cache: "no-cache" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        schedule = d.schedule || [];
+        var today = new Date().toISOString().slice(0, 10), from = 0;
+        for (var i = 0; i < schedule.length; i++) { if (schedule[i].w >= today) { from = i; break; } }
+        /* Two weeks back and a quarter ahead: enough to fix last week's wording
+           and to write ahead before a yom tov, without a 315-long list. */
+        var span = schedule.slice(Math.max(0, from - 2), from + 14);
+        wkEl.innerHTML = span.map(function (s) {
+          return '<option value="' + esc(s.w) + '">' + esc(s.w) + " — " + esc(labelFor(s)) + "</option>";
+        }).join("");
+        wkEl.value = schedule[from] ? schedule[from].w : "";
+      })
+      .catch(function () { wkEl.innerHTML = '<option value="">weekly.json unavailable</option>'; });
+  }
+  function labelFor(s) {
+    if (!s) return "";
+    return [s.p ? "Parshas " + s.p : "", s.hd || ""].filter(Boolean).join(" · ");
+  }
+  function weekOf(w) {
+    for (var i = 0; i < schedule.length; i++) if (schedule[i].w === w) return schedule[i];
+    return null;
+  }
+
+  function load() {
+    if (!key()) { statusEl.textContent = "Enter your admin key."; return; }
+    sessionStorage.setItem("bm_admin_key", key());
+    statusEl.textContent = "Loading…";
+    fetch("/api/poll?all=1", { headers: { "x-admin-key": key() } })
+      .then(function (r) {
+        if (r.status === 401) throw new Error("Wrong key (or COMMENTS_ADMIN_KEY not set in Netlify).");
+        return r.json();
+      })
+      .then(function (d) {
+        writer.hidden = false;
+        render(d.polls || [], d.current || "");
+      })
+      .catch(function (e) { statusEl.textContent = e.message || "Failed to load."; });
+  }
+
+  function render(polls, current) {
+    var answers = polls.reduce(function (n, p) { return n + (p.votes || 0); }, 0);
+    statusEl.textContent = polls.length
+      ? polls.length + " question" + (polls.length === 1 ? "" : "s") + " · " +
+        answers + " answer" + (answers === 1 ? "" : "s") +
+        (current ? " · on the front page now: " + current : " · nothing on the front page")
+      : "No questions yet — write the first one.";
+    if (!polls.length) { listEl.innerHTML = ""; return; }
+
+    listEl.innerHTML = polls.map(function (p) {
+      var total = 0, c = p.counts || {};
+      p.options.forEach(function (o) { total += c[o.id] || 0; });
+      var tal = p.options.map(function (o) {
+        var n = c[o.id] || 0, pc = total ? Math.round((n / total) * 100) : 0;
+        return "<li><span>" + esc(o.label) + '</span><span class="n">' + n + " · " + pc +
+          '%</span><span class="bar"><i style="width:' + pc + '%"></i></span></li>';
+      }).join("");
+      var notes = p.notes && p.notes.length
+        ? '<div class="notes"><h3>' + p.notes.length + " note" + (p.notes.length === 1 ? "" : "s") +
+          " from readers — not published</h3>" +
+          p.notes.map(function (n) {
+            var lab = "";
+            p.options.forEach(function (o) { if (o.id === n.opt) lab = o.label; });
+            return "<p><span class='who'>" + esc(lab || n.opt) + "</span>" + esc(n.note) + "</p>";
+          }).join("") + "</div>"
+        : "";
+      return '<div class="p" data-w="' + esc(p.w) + '">' +
+        '<div class="wk">' + esc(p.w) + (p.label ? " · " + esc(p.label) : "") +
+        (p.current ? '<span class="badge live">front page</span>' : "") +
+        (p.open ? "" : '<span class="badge shut">closed</span>') +
+        (p.reveal === "always" ? '<span class="badge">open standings</span>' : "") + "</div>" +
+        "<h2>" + esc(p.q) + "</h2>" +
+        (p.sub ? '<p class="sub" style="margin:2px 0 0">' + esc(p.sub) + "</p>" : "") +
+        '<ol class="tal">' + tal + "</ol>" +
+        '<p class="wk" style="margin:10px 0 0">' + total + " answered" +
+        (p.cast !== total ? " (recount says " + p.cast + ")" : "") +
+        (p.edited ? " · last edited " + when(p.edited) : "") + "</p>" +
+        notes +
+        '<div class="acts">' +
+        (p.current ? "" : '<button class="ghost" data-act="current">Put on the front page</button>') +
+        '<button class="ghost" data-act="' + (p.open ? "close" : "open") + '">' +
+        (p.open ? "Close it" : "Re-open it") + "</button>" +
+        '<button class="ghost" data-act="recount">Recount</button>' +
+        '<button class="warn" data-act="delete">Delete</button></div></div>';
+    }).join("");
+  }
+
+  listEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-act]"); if (!b) return;
+    var w = b.closest(".p").dataset.w, act = b.dataset.act;
+    if (act === "delete" &&
+        !confirm("Delete this question and every answer to it? This cannot be undone.")) return;
+    b.disabled = true;
+    var req = act === "delete"
+      ? fetch("/api/poll?w=" + encodeURIComponent(w), { method: "DELETE", headers: { "x-admin-key": key() } })
+      : fetch("/api/poll?w=" + encodeURIComponent(w) + "&act=" + act,
+              { method: "PATCH", headers: { "x-admin-key": key() } });
+    req.then(function (r) { return r.json(); })
+      .then(function () { load(); })
+      .catch(function () { b.disabled = false; statusEl.textContent = "That did not go through."; });
+  });
+
+  document.getElementById("save").addEventListener("click", function () {
+    var w = wkEl.value;
+    var q = document.getElementById("q").value.trim();
+    var options = Array.prototype.map.call(optsEl.querySelectorAll(".opt"), function (i) {
+      return i.value.trim();
+    }).filter(Boolean);
+    if (!w) { savedEl.textContent = "Pick a week."; return; }
+    if (!q) { savedEl.textContent = "Write the question."; return; }
+    if (options.length < 2) { savedEl.textContent = "Give at least two answers."; return; }
+    savedEl.textContent = "Publishing…";
+    fetch("/api/poll", {
+      method: "PUT",
+      headers: { "content-type": "application/json", "x-admin-key": key() },
+      body: JSON.stringify({
+        w: w, q: q,
+        sub: document.getElementById("sub").value.trim(),
+        label: labelFor(weekOf(w)),
+        options: options,
+        current: document.getElementById("cur").checked,
+        reveal: document.getElementById("always").checked ? "always" : "after",
+      }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.d.error || "Could not publish.");
+        savedEl.textContent = "Published.";
+        document.getElementById("q").value = "";
+        document.getElementById("sub").value = "";
+        Array.prototype.forEach.call(optsEl.querySelectorAll(".opt"), function (i) { i.value = ""; });
+        load();
+      })
+      .catch(function (e) { savedEl.textContent = e.message || "Could not publish."; });
+  });
+
+  document.getElementById("load").addEventListener("click", load);
+  keyEl.addEventListener("keydown", function (e) { if (e.key === "Enter") load(); });
+  loadWeeks().then(function () { if (saved) load(); });
+})();
+</script>
+</body></html>

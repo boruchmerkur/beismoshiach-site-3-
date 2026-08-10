@@ -758,6 +758,9 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Beis Moshiach — Moshiach, Geula &amp; Chassidus</title>
 <meta name="description" content="A weekly reading from the Beis Moshiach archive — chosen for this week's parsha and the Chabad calendar, from 3,541 articles.">
+<!-- The imago badge holds the bottom-right corner (18px up, 37px tall), so the
+     install chip sits above it and leaves it clear once the chip is gone. -->
+<meta name="pwa-install-offset" content="66">
 <link rel="canonical" href="https://beismoshiach.org/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="beismoshiach.org">
 <meta property="og:title" content="Beis Moshiach — Moshiach, Geula &amp; Chassidus">
@@ -972,24 +975,28 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 })();
 </script>
 <script>
-/* Offer the app where the other ways in are listed. The link only appears
-   when the browser says the site is actually installable. */
-(function(){
+/* Offer the app where the other ways in are listed. The link only appears when
+   the browser says the site is actually installable.
+
+   pwa.js owns the install event and the record of having asked, so this defers
+   to it rather than catching beforeinstallprompt itself — two listeners racing
+   for one event means whichever fires second calls prompt() on an event already
+   spent, and the corner chip and this link would forget each other's answer. */
+/* pwa.js is deferred, so it has not run yet at this point in the body — a
+   deferred script executes after parsing but before DOMContentLoaded, which
+   is exactly the moment to look for it. */
+addEventListener('DOMContentLoaded',function(){
   var a=document.getElementById('installapp'); if(!a) return;
-  var deferred=null;
-  addEventListener('beforeinstallprompt',function(e){
-    e.preventDefault(); deferred=e; a.hidden=false;
-  });
+  var pwa=window.pwaInstall;
+  if(!pwa||pwa.standalone) return;                 // nothing to offer
+  pwa.onAvailable(function(){ a.hidden=false; });
   a.addEventListener('click',function(e){
     e.preventDefault();
-    if(!deferred) return;
-    deferred.prompt();
-    deferred.userChoice.then(function(){ deferred=null; a.hidden=true; });
+    a.hidden=true;                                  // asked once, either way
+    pwa.prompt();
   });
   addEventListener('appinstalled',function(){ a.hidden=true; });
-  // already running as an installed app? then there is nothing to offer
-  if(matchMedia('(display-mode: standalone)').matches) a.hidden=true;
-})();
+});
 </script>
 <script src="https://dreamsitedesign.com/imago-dreamsite.js" defer
         data-domain="DREAMSITEDESIGN.COM"

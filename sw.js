@@ -4,10 +4,13 @@
      same-origin  -> stale-while-revalidate
      web fonts    -> cache first
      /api/*, /.netlify/*, non-GET, Range -> never touched          */
-const VERSION = '2026-08-06-a7cabba2';
+const VERSION = '2026-08-10-e06d8f43';
 const CACHE   = 'app-' + VERSION;
 const CORE    = ["/", "/offline.html", "/manifest.webmanifest", "/pwa.js", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
-const NEVER   = [/^\/api\//, /^\/\.netlify\//, /^\/admin\.html$/, /^\/admin-comments\.html$/, /weekly\.json$/];
+/* Any /admin… page, not a list of them: a moderation screen served from cache
+   shows a queue that has already been worked, and the list only ever grew after
+   the fact (admin-comments, then admin-poll). One rule cannot fall behind. */
+const NEVER   = [/^\/api\//, /^\/\.netlify\//, /^\/admin/, /weekly\.json$/];
 
 self.addEventListener('install', e => {
   e.waitUntil((async () => {

@@ -9,12 +9,22 @@
   var standalone = window.matchMedia('(display-mode: standalone)').matches ||
                    window.navigator.standalone === true;
 
+  /* The bottom-right corner is not always ours. A page that already keeps
+     something there — an ad badge, a chat launcher — says how much room it
+     needs with <meta name="pwa-install-offset" content="66">, and the chip
+     sits above it instead of on it. */
+  var lift = (function () {
+    var m = document.querySelector('meta[name="pwa-install-offset"]');
+    var n = m && parseInt(m.content, 10);
+    return n > 0 ? n : 16;
+  })();
+
   function chip(text, onClick) {
     var b = document.createElement('button');
     b.type = 'button';
     b.textContent = text;
     b.style.cssText =
-      'position:fixed;z-index:2147483000;inset:auto 16px 16px auto;' +
+      'position:fixed;z-index:2147483000;inset:auto 16px ' + lift + 'px auto;' +
       'font:600 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;' +
       'padding:11px 16px;border:0;border-radius:999px;cursor:pointer;' +
       'background:' + THEME + ';color:' + FG + ';' +
@@ -43,6 +53,16 @@
      more than a chip. */
   var custom = !!document.querySelector('meta[name="pwa-install-ui"][content="custom"]');
 
+  /* The offer belongs on the way in, not on every page of the site. */
+  var landing = /^\/(index\.html)?$/.test(location.pathname);
+  /* Asked once. Whatever the answer — installed, declined, or the browser
+     prompt closed without a word — it does not come back on this device.
+     Private-mode storage throws rather than stores, hence the guards. */
+  function forget() { try { localStorage.setItem(DISMISS, '1'); } catch (e) {} }
+  var asked = (function () {
+    try { return !!localStorage.getItem(DISMISS); } catch (e) { return false; }
+  })();
+
   window.pwaInstall = {
     isIOS: iOS,
     standalone: standalone,
@@ -50,6 +70,7 @@
     /* resolves 'accepted' | 'dismissed' | 'unavailable' */
     prompt: function () {
       var d = deferred; deferred = null;
+      forget(); asked = true; drop(btn); btn = null;
       if (!d) return Promise.resolve('unavailable');
       d.prompt();
       return d.userChoice.then(function (c) { return c.outcome; });
@@ -64,32 +85,29 @@
     e.preventDefault();
     deferred = e;
     try { window.dispatchEvent(new Event('pwa-install-available')); } catch (err) {}
-    if (custom) return;
-    if (standalone || localStorage.getItem(DISMISS)) return;
+    if (custom || !landing) return;
+    if (standalone || asked) return;
     if (btn) return;
     btn = chip('Install ' + LABEL, function () {
+      forget(); asked = true;          // before the prompt, not after its answer
       drop(btn); btn = null;
       var d = deferred; deferred = null;
-      if (!d) return;
-      d.prompt();
-      d.userChoice.then(function (c) {
-        if (c.outcome !== 'accepted') localStorage.setItem(DISMISS, '1');
-      });
+      if (d) d.prompt();
     });
   });
 
   window.addEventListener('appinstalled', function () {
-    localStorage.setItem(DISMISS, '1');
+    forget(); asked = true;
     drop(btn); btn = null;
   });
 
   /* ---- iOS has no beforeinstallprompt: one-time Add-to-Home hint ------ */
-  if (iOS && !custom && !standalone && !localStorage.getItem(DISMISS)) {
+  if (iOS && !custom && landing && !standalone && !asked) {
     window.addEventListener('load', function () {
       setTimeout(function () {
         if (btn) return;
         btn = chip('Add ' + LABEL + ' to Home Screen  ⌄', function () {
-          localStorage.setItem(DISMISS, '1');
+          forget(); asked = true;
           alert('Tap the Share button in Safari, then choose "Add to Home Screen".');
           drop(btn); btn = null;
         });
