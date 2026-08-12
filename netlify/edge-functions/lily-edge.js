@@ -45,9 +45,76 @@ async function dailyVid(day, ip, ua, site) {
   } catch { return ''; }
 }
 
+// An entry ending in '.' or ':' matches as a PREFIX, so a residential lease
+// that moves inside its own block (99.229.90.241 -> 99.229.88.7) stays
+// excluded. Exact-match lists fail silently: the address changes, the list
+// stops matching, and nothing anywhere reports that it stopped working.
+function ipExcluded(ip, list) {
+  if (!ip) return false;
+  for (const entry of list) {
+    if (entry.endsWith('.') || entry.endsWith(':')) {
+      if (ip.startsWith(entry)) return true;
+    } else if (ip === entry) return true;
+  }
+  return false;
+}
+
+// Shown once, when someone toggles their own device in or out. Deliberately
+// self-contained: no stylesheet, no font, no image, so it renders identically
+// on every site this function is installed on.
+function optOutPage(off, host) {
+  const title = off ? 'This device is not counted' : 'This device is counted';
+  const body = off
+    ? 'Page views from this browser will no longer appear in analytics for '
+      + host + '.'
+    : 'Page views from this browser are being counted again.';
+  const note = off
+    ? 'The setting is a cookie on this device only. Clearing cookies undoes '
+      + 'it, and every other browser or phone you use needs its own visit to '
+      + 'this address.'
+    : 'Visit this address with ?lily=off to stop counting this device.';
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>' + title + '</title><style>'
+    + 'body{margin:0;min-height:100vh;display:grid;place-items:center;'
+    + 'background:#12232b;color:#eef2f3;'
+    + 'font:16px/1.6 ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}'
+    + 'main{max-width:34rem;padding:2rem}'
+    + 'h1{font-size:1.35rem;margin:0 0 .75rem;letter-spacing:-.01em}'
+    + 'p{margin:0 0 1rem}small{color:#93a7ae;display:block;margin-top:1.5rem}'
+    + 'code{background:#ffffff14;padding:.1em .4em;border-radius:3px}'
+    + '</style></head><body><main><h1>' + title + '</h1><p>' + body + '</p>'
+    + '<small>' + note + '</small></main></body></html>';
+}
+
 export default async (req, context) => {
   const url = new URL(req.url);
   const path = url.pathname;
+
+  // Device-level opt-out, for the people who build these sites. An IP list is
+  // the wrong instrument: leases rotate, phones sit behind carrier NAT, and a
+  // stale list reports nothing — your own traffic just quietly reappears in
+  // the numbers. A cookie is pinned to the device and cannot drift.
+  //   /?lily=off  -> this browser is never counted here again
+  //   /?lily=on   -> count it again
+  const lilyToggle = url.searchParams.get('lily');
+  if (lilyToggle === 'off' || lilyToggle === 'on') {
+    const off = lilyToggle === 'off';
+    return new Response(optOutPage(off, url.hostname), {
+      status: 200,
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'no-store',
+        'set-cookie': 'lily_off=' + (off ? '1' : '') + '; Path=/; Max-Age='
+          + (off ? 63072000 : 0) + '; SameSite=Lax; Secure',
+      },
+    });
+  }
+  // Returning nothing hands the request straight back to the origin with this
+  // function taking no further part — the opted-out visitor is served exactly
+  // as if the tracker were not installed.
+  if (/(?:^|;\s*)lily_off=1(?:\s*;|$)/.test(req.headers.get('cookie') || '')) return;
+
 
   // Skip API/admin/asset paths (excludedPath below also covers most).
   if (
@@ -72,10 +139,56 @@ export default async (req, context) => {
 
   // Raw IP used here only (self-exclusion + hashing), then discarded.
   const ip = context.ip || '';
-  const ignore = (Netlify.env.get('LILY_IGNORE_IPS') || '').split(/[\s,]+/).filter(Boolean);
-  if (ip && ignore.includes(ip)) return response;
+  // Both variable names are honoured. The install doc has always documented
+  // IGNORE_IPS while this file read LILY_IGNORE_IPS, so a site that set either
+  // one meant it — and that mismatch is why the owner's own visits were being
+  // counted on every site for months without the dashboard ever saying so.
+  const ignore = [Netlify.env.get('LILY_IGNORE_IPS'), Netlify.env.get('IGNORE_IPS')]
+    .join(',').split(/[\s,]+/).filter(Boolean);
+  if (ipExcluded(ip, ignore)) return response;
 
   const site = (Netlify.env.get('LILY_SITE') || '').trim() || url.hostname.split('.')[0] || 'unknown';
+
+  /* Browser-signal gate. OFF unless a site is named in LILY_STRICT_SITES, so
+     no other site's numbers move by so much as one view.
+
+     Why this site needs it: 95% of its views land on /articles spread over
+     12,257 distinct paths, the top ten pages are 3.5% of the total, 98.8% of
+     requests carry no referrer, 91% are desktop, and the country tail runs
+     through Singapore, Vietnam and Bangladesh. Nobody types deep archive URLs.
+     That is a fleet of scrapers reading twenty years of back issues, and
+     because they never say "bot" in the user-agent, BOT_RE above waves every
+     one of them through.
+
+     What is checked is what a browser sends and a scraper usually does not.
+     Absence of Sec-Fetch-* is NOT held against anyone — older Safari omits it
+     — so only a header that actively contradicts a page view counts. Erring
+     toward counting is deliberate: a missed crawler is a number slightly too
+     high, while a wrongly-dropped reader is a person who does not exist in the
+     record at all, and there is no way to notice that has happened. */
+  const strict = new Set((Netlify.env.get('LILY_STRICT_SITES') || '')
+    .split(/[\s,]+/).filter(Boolean));
+  if (strict.has(site)) {
+    const hdr = (n) => req.headers.get(n) || '';
+    let why = '';
+    // Every real browser states a language preference. Very few scrapers do.
+    if (!hdr('accept-language')) why = 'no-accept-language';
+    else {
+      // A page view accepts HTML. Text harvesters usually send */* and nothing else.
+      const acc = hdr('accept');
+      if (acc && !/text\/html|application\/xhtml/i.test(acc)) why = 'accept-not-html';
+      // Present-but-wrong Sec-Fetch-* means this was not a top-level navigation.
+      else if (hdr('sec-fetch-mode') && hdr('sec-fetch-mode') !== 'navigate') why = 'mode=' + hdr('sec-fetch-mode');
+      else if (hdr('sec-fetch-dest') && hdr('sec-fetch-dest') !== 'document') why = 'dest=' + hdr('sec-fetch-dest');
+    }
+    if (why) {
+      // Logged, not silent: the count is visible in the Netlify function log,
+      // so how much this is removing can be checked rather than assumed.
+      console.log('lily-edge filtered [' + why + '] ' + url.pathname.slice(0, 120));
+      return response;
+    }
+  }
+
   const day = new Date().toISOString().slice(0, 10);
 
   // Referrer reduced to hostname; same-origin referrers dropped.
