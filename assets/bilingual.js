@@ -60,6 +60,14 @@
 
     unfreeze(table);
     table.classList.add('bi-table');
+    /* Hebrew on the left, said outright rather than inherited. Most of these
+       articles carry .entry.rtl, and it is that — not anything about the table
+       — that currently decides the column order; the handful without it would
+       put the Hebrew on the right. A table lays its first column out on the
+       right when it is RTL, so the direction here follows which column the
+       Hebrew is actually in. Each cell then states its own direction, so the
+       text inside runs correctly whichever way the table is turned. */
+    table.style.direction = (col.he === 1) ? 'rtl' : 'ltr';
     rows.forEach(function (r) {
       var c = r.cells;
       for (var i = 0; i < c.length; i++) unfreeze(c[i]);
@@ -79,9 +87,12 @@
   function go() {
     var body = document.querySelector('.entry-body');
     if (!body) return;
-    /* Pages that are Hebrew throughout are already right-to-left end to end;
-       there is no second language here to set beside anything. */
-    if (document.querySelector('.entry.rtl') || document.body.classList.contains('he-body')) return;
+    /* Only the Hebrew site is skipped by page. Not .entry.rtl — these articles
+       carry that class themselves, which is the very thing that puts the
+       Hebrew column on the left, so treating it as "Hebrew throughout" skipped
+       every article this is for. Whether a table is bilingual is decided from
+       the table: one column mostly Hebrew, the other mostly Latin. */
+    if (document.body.classList.contains('he-body')) return;
     var tables = body.querySelectorAll('table');
     var done = 0;
     for (var i = 0; i < tables.length; i++) if (fix(tables[i])) done++;
