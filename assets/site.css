@@ -217,6 +217,18 @@ html{scrollbar-gutter:stable;}
 .grp .gc{font-family:var(--mono);font-size:12px;color:var(--gold);margin-left:8px;}
 
 /* ===== Hebrew wing (RTL) ===== */
+/* Parallel text: the sicha on the left, its translation on the right.
+   Built by assets/bilingual.js, which only moves the existing paragraphs. */
+.bi{display:grid;grid-template-columns:1fr 1fr;gap:0 2.2rem;align-items:start;margin:0 0 1.15rem;}
+.bi .bi-he{font-family:var(--hebrew);font-size:1.04em;line-height:1.95;}
+.bi .bi-en{padding-left:2.2rem;margin-left:-2.2rem;border-left:1px solid var(--rule);}
+.bi p{margin:0;}
+/* Side by side needs the room. Below that they stack, Hebrew still first,
+   with a rule under each pair so it stays clear which English belongs to it. */
+@media(max-width:780px){
+  .bi{grid-template-columns:1fr;gap:.45rem;padding-bottom:1rem;border-bottom:1px solid var(--rule);}
+  .bi .bi-en{padding-left:0;margin-left:0;border-left:0;}
+}
 .he-body{font-family:'Frank Ruhl Libre',serif;}
 .he-body .wrap{direction:rtl;}
 .he-title{font-family:'Frank Ruhl Libre',serif;font-weight:900;line-height:1.25;}
@@ -321,7 +333,9 @@ html{scrollbar-gutter:stable;}
 .cm-name:focus,.cm-body:focus{outline:none;border-color:var(--royal);box-shadow:0 0 0 2px rgba(41,55,120,.12)}
 .cm-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 .cm-row{display:flex;align-items:center;gap:14px}
-.cm-post{font-family:var(--display);font-size:15px;font-weight:500;color:#fff;background:var(--royal);border:none;border-radius:5px;padding:10px 20px;cursor:pointer;transition:opacity .15s}
+/* --parchment, not #fff — see .pl-send below. This button read at 2.35:1 in the
+   dark scheme from the day the dark palette landed. */
+.cm-post{font-family:var(--display);font-size:15px;font-weight:500;color:var(--parchment);background:var(--royal);border:none;border-radius:5px;padding:10px 20px;cursor:pointer;transition:opacity .15s}
 .cm-post:hover{opacity:.9}
 .cm-post:disabled{opacity:.5;cursor:default}
 .cm-msg{font-family:var(--display);font-size:13px;color:var(--royal)}
@@ -361,9 +375,13 @@ html{scrollbar-gutter:stable;}
 .pl-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 
 .pl-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:16px 0 0}
+/* Not #fff. --royal lightens to #7FA8FF in the dark scheme, where white text on
+   it measures 2.35:1 — below any floor worth having. --parchment is the GROUND
+   colour, so it is the opposite pole from the ink in whichever scheme is on:
+   cream on deep blue (6.9:1) in light, near-black on pale blue (8.4:1) in dark. */
 .pl-send{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;
-  color:#fff;background:var(--royal);border:none;border-radius:3px;padding:11px 22px;cursor:pointer;
-  transition:opacity .15s}
+  color:var(--parchment);background:var(--royal);border:none;border-radius:3px;padding:11px 22px;
+  cursor:pointer;transition:opacity .15s}
 .pl-send:hover{opacity:.9}
 .pl-send:disabled{opacity:.4;cursor:default}
 .pl-msg,.pl-foot{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;color:var(--ink-soft)}
