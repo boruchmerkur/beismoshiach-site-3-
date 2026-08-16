@@ -434,12 +434,19 @@ def pick(data, wk, n=7):
         return (not tags) or bool(tags & here)
 
     out, seen, why = [], set(), {}
-    for t in wk["tags"]:
-        for s in data["tags"].get(t, []):
-            # a piece can sit under this week's parsha and still be a Sukkos
-            # piece; the date tag wins either way
-            if s not in seen and in_season(s):
-                seen.add(s); out.append(s); why[s] = t
+    # Take one from each of the week's tags in turn rather than emptying the
+    # first. Ki Seitzei has more than seven pieces to itself, so a straight
+    # walk gave the whole page one chip repeated seven times and Elul — which
+    # is the half of the date most readers are actually living in — never
+    # appeared at all. The parsha still leads each cycle, so it stays the
+    # larger share.
+    # A piece can sit under this week's parsha and still be a Sukkos piece;
+    # the date tag wins either way.
+    lists = [[s for s in data["tags"].get(t, []) if in_season(s)] for t in wk["tags"]]
+    for i in range(max((len(L) for L in lists), default=0)):
+        for t, L in zip(wk["tags"], lists):
+            if i < len(L) and L[i] not in seen:
+                seen.add(L[i]); out.append(L[i]); why[L[i]] = t
     if len(out) < n:
         ev = data["evergreen"]
         if ev:
@@ -856,6 +863,11 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   <div id="lead">{{LEAD}}</div>
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards">{{CARDS}}</div>
+  <p class="kick" id="weekpoll-kick">The week&rsquo;s question</p>
+  <!-- Filled by assets/poll.js from /api/poll. Both this and the kicker above
+       remove themselves on any week the editor has not set a question, so the
+       page never announces an absence. Written by admin-poll.html. -->
+  <section id="weekpoll" class="reveal" aria-label="The week&rsquo;s question" hidden></section>
   <p class="kick">From the archive</p>
   <div class="row reveal" id="ever">{{EVER}}</div>
   <p class="kick">Ways in</p>
@@ -998,6 +1010,7 @@ addEventListener('DOMContentLoaded',function(){
   addEventListener('appinstalled',function(){ a.hidden=true; });
 });
 </script>
+<script src="assets/poll.js" defer></script>
 <script src="https://dreamsitedesign.com/imago-dreamsite.js" defer
         data-domain="DREAMSITEDESIGN.COM"
         data-href="https://dreamsitedesign.com"
