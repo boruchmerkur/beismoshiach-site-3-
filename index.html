@@ -94,6 +94,22 @@
         transition:border-color .2s,color .2s,background .2s}
   .ways a:hover{border-color:var(--gold-bright);color:var(--royal);background:var(--parchment-deep)}
   @media(max-width:820px){.lead{grid-template-columns:1fr}.lead-shot{order:-1}}
+  /* The editor's slot. Deliberately quieter than the lead — picture smaller,
+     heading a step down — so it reads as a second invitation rather than
+     competing with the week's own story for the same eye. */
+  .feature{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(1.2rem,3vw,2.4rem);
+        align-items:center;text-decoration:none;color:inherit;
+        padding-bottom:clamp(1.6rem,4vw,2.6rem);border-bottom:1px solid var(--rule)}
+  .feature figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
+  .feature img{display:block;width:100%;height:auto;
+        transition:transform 1.2s var(--ease)}
+  .feature:hover img{transform:scale(1.03)}
+  .feature h2{font-family:var(--display);font-weight:700;
+        font-size:clamp(1.5rem,3vw,2.3rem);line-height:1.05;letter-spacing:-.015em;
+        margin:0 0 .7rem;color:var(--ink)}
+  .feature:hover h2{color:var(--royal)}
+  .feature .dek{margin-bottom:.7rem}
+  @media(max-width:820px){.feature{grid-template-columns:1fr}.feature figure{order:-1}}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
@@ -111,6 +127,13 @@
 <main class="wk" data-week="2026-08-22">
   <p class="kick" id="kick">This week · Parshas Ki Seitzei · Shabbos 9 Elul 5786</p>
   <div id="lead"><a class="lead" href="articles/a-good-compensation-package-or-a-real-partnership.html"><figure class="lead-shot"><img src="storage/images/1fb742ac32dd96f14c37d05674965ce7.jpg" alt="" loading="eager" fetchpriority="high"></figure><div class="lead-txt"><span class="why">Parshas Ki Seitzei</span><h1>A Good Compensation Package or a Real Partnership?</h1><p class="dek">Reward is not for someone who is obligated to work, but for one who binds himself in a kind of consensual, contractual agreement to work for specified compensation, such as a hired worker. We work now and get paid in a timely fashion. The next day, in fact – and even before that!</p><p class="open">All of Elul is devoted to spiritually preparing for Rosh HaShana, Judgement Day. The judgement, however, curiously pertains to material concerns. (Likkutei Sichos 29, pg. 143)</p><p class="meta">Rabbi Boruch Merkur · Editorial · #1182</p></div></a></div>
+
+  <p class="kick">Featured</p>
+  <a class="feature reveal" href="https://rebbesletters.com/hadran%20alach.dc" target="_blank" rel="noopener">
+    <figure><img src="storage/featured/deitsch-kos-shel-bracha.jpg" alt="" loading="lazy"></figure>
+    <div class="feat-txt"><h2>Hadran Alach, Igros Kodesh</h2><p class="dek">One shliach in Toronto has just made a siyum on the whole of the Igros Kodesh — 42 volumes, more than fifteen thousand letters, at ten pages a day, held for some thirty years.</p><p class="meta">Avrohom Reinitz · Beis Moshiach #1515 · on rebbesletters.com</p></div>
+  </a>
+
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards"><a class="card" href="articles/i-for-an-i.html"><figure><img src="storage/art/elul.jpg" alt="" loading="lazy"></figure><span class="why">Elul</span><h3>Elul and Mitzvos</h3><p class="blurb">To be sure, the King is in the field. G-d—and His chosen human redeemer, Moshiach—is here and is waiting for us to seize the opportunity to do our part in making the Redemption a tangible reality. Moshiach is waiting for us to say, “We are ready for Moshiach!” And we express that readiness by accept</p><p class="meta">Rabbi H. Greenberg · Parsha Thought · #848</p></a><a class="card" href="articles/forgetting-is-the-mitzvah.html"><figure><img src="storage/category-pics/med Rabbi Heschel Greenberg.jpg" class="port" alt="" loading="lazy"></figure><span class="why">Parshas Ki Seitzei</span><h3>Forgetting Is the Mitzvah!</h3><p class="blurb">One of the most unusual Biblical commandments is the one which can only be performed when one is unaware that he or she is performing it!</p><p class="meta">Rabbi Greenberg · Parsha Thought · #1132</p></a><a class="card txt" href="articles/dealing-with-amalek-on-shlichus.html"><span class="why">Parshas Ki Seitzei</span><h3>Dealing with Amalek on Shlichus</h3><p class="blurb">I went to get some inspiration for my personal battle with Amalek and spoke with shluchos Mrs. Chani Beckerman of Beer Yaakov, Mrs. Marina Fein, housemother at Machon Chomesh in Moscow, and Mrs. Mushky Shiffman of Maaleh Efraim. · Whoever starts out learning about Judaism knows that we are commanded to constantly remember Amalek and to wipe him out. That refers to Amalek, his descendants, and the Amalek within each of us.</p><p class="meta">Beis Moshiach (staff) · Life on Shlichus · #1132</p></a><a class="card" href="articles/a-conditional-divorce.html"><figure><img src="storage/images-4/1038/1038 R Herzog Chief Rabbi center with R Zislin left.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Ki Seitzei</span><h3>A Conditional Divorce</h3><p class="blurb">In a dramatic pronouncement, the Rebbe Rashab established that all T’mimim are soldiers fighting the wars of Dovid. When soldiers go to fight, they give a conditional writ of divorce to their wives.</p><p class="meta">Berger · Chabad History · #1038</p></a><a class="card" href="articles/you-can-be-like-rebbi-you-can-live-forever.html"><figure><img src="storage/art/geula.jpg" alt="" loading="lazy"></figure><span class="why">Parshas Ki Seitzei</span><h3>You Can Be Like Rebbi, You Can Live Forever</h3><p class="blurb">The Torah alludes to a tzaddik whose mortality can be traced solely to the sin of the Tree of Knowledge, inheriting, as it were, the venom of “the serpent’s bite.” · One has free volition to be entirely righteous, like Chanoch or Eliyahu, or Rabbeinu HaKodesh.</p><p class="meta">Sholom Ber Majeski · Moshiach &amp; Geula · #891</p></a><a class="card txt" href="articles/keys-to-the-treasure-chest.html"><span class="why">Parshas Ki Seitzei</span><h3>Keys to the Treasure Chest</h3><p class="blurb">Now is the time of reward. Hashem provides each Jew with all he or she needs - in abundance. · Your destiny reflects your origin, but where are you now? · We must publicize everywhere that we are now finalizing and completing the longstanding era of “our efforts and service,” [1] and we are now entering the Era of Moshiach, the promised time of “the reward of the righteous,” when the Jewish people are compensated for their avoda, their efforts…</p><p class="meta">Rabbi Boruch Merkur · Moshiach &amp; Geula</p></a></div>
   <p class="kick" id="weekpoll-kick">The week&rsquo;s question</p>
