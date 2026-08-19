@@ -4,6 +4,12 @@
 
 [build.environment]
   LILY_SITE = "beismoshiach"
+  # Kept HERE, not in the Netlify UI env. It has been set there twice and
+  # disappeared twice — and its absence is silent, because the tracker simply
+  # counts everything again with nothing to say it stopped filtering. In this
+  # file it is version-controlled, it deploys with the code that reads it, and
+  # it cannot be cleared by anything that edits site settings.
+  LILY_STRICT_SITES = "beismoshiach"
 
 # v2 functions in netlify/functions are auto-detected and bundled by Netlify's
 # own pipeline. Do NOT set node_bundler here -- "esbuild" is the v1 setting and
@@ -33,6 +39,41 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
     Content-Security-Policy = "default-src 'self'; img-src 'self' https: data:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://dreamsitedesign.com https://cdnjs.cloudflare.com; connect-src 'self' https://dreamsitedesign.com; frame-src https://www.moshiach101.info https://moshiach101.info; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+
+# Netlify Image CDN, for /science/. The wire hands back pictures hosted by the
+# outlet that published them, and this page asks for each at the size its slot
+# needs rather than letting the browser scale whatever the feed gave.
+#
+# THIS LIST IS AN ALLOW-LIST. A host that is not matched here is refused by
+# /.netlify/images and the picture falls back to the source URL, then to no
+# picture at all. Add the host when you add a feed to netlify/functions/wire.js.
+#
+# The patterns are ([a-z0-9-]+\.)*host so they match with OR without a
+# subdomain: most WordPress feeds serve uploads off the bare domain, and a
+# pattern requiring one silently refused nearly every host.
+[images]
+  remote_images = [
+    "https://([a-z0-9-]+\\.)*b-cdn\\.net/.*",
+    "https://([a-z0-9-]+\\.)*phys\\.org/.*",
+    "https://([a-z0-9-]+\\.)*quantamagazine\\.org/.*",
+    "https://([a-z0-9-]+\\.)*sciencedaily\\.com/.*",
+    "https://([a-z0-9-]+\\.)*futurecdn\\.net/.*",
+    "https://([a-z0-9-]+\\.)*livescience\\.com/.*",
+    "https://([a-z0-9-]+\\.)*newscientist\\.com/.*",
+    "https://([a-z0-9-]+\\.)*nasa\\.gov/.*",
+    "https://([a-z0-9-]+\\.)*sciencenews\\.org/.*",
+    "https://([a-z0-9-]+\\.)*arstechnica\\.net/.*",
+    "https://([a-z0-9-]+\\.)*blogspot\\.com/.*",
+    "https://([a-z0-9-]+\\.)*googleusercontent\\.com/.*",
+    "https://([a-z0-9-]+\\.)*ggpht\\.com/.*",
+    "https://([a-z0-9-]+\\.)*anash\\.org/.*",
+    "https://([a-z0-9-]+\\.)*collive\\.com/.*",
+    "https://([a-z0-9-]+\\.)*crownheights\\.info/.*",
+    "https://([a-z0-9-]+\\.)*chabad\\.org/.*",
+    "https://([a-z0-9-]+\\.)*wp\\.com/.*",
+    "https://([a-z0-9-]+\\.)*cloudfront\\.net/.*",
+    "https://([a-z0-9-]+\\.)*wordpress\\.com/.*"
+  ]
 
 # --- pwaify:start — do not hand-edit, re-run pwaify.py ---
 # The worker must revalidate on every load, or a CDN copy can pin users to an
