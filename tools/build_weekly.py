@@ -321,6 +321,22 @@ def main():
             if s not in tagmap[k]:
                 tagmap[k].append(s)
 
+    # ---- Moshiach & Science, from tools/build_science.py
+    # The department has no tag page, so from_tag_pages() never sees it and the
+    # pools list below would look for a key that does not exist. science.json is
+    # the department's index; register it here as a tag like any other, and the
+    # 28 pieces become eligible for the evergreen row and for /science/ alike.
+    sci = os.path.join(ROOT, "assets", "science.json")
+    if os.path.isfile(sci):
+        with open(sci, encoding="utf-8") as f:
+            rows = json.load(f).get("items", [])
+        slugs = [r["s"] for r in rows if r.get("why") == "department"]
+        tagmap["moshiach-science"] = slugs
+        LABELS.setdefault("moshiach-science", "Moshiach & Science")
+        print("moshiach-science: %d slugs registered as a tag" % len(slugs))
+    else:
+        print("moshiach-science: assets/science.json missing — run tools/build_science.py")
+
     # ---- schedule: every Shabbos for the next YEARS years
     today = datetime.date.today()
     start = today - datetime.timedelta(days=today.weekday() + 2 if today.weekday() < 5 else 0)
@@ -367,9 +383,14 @@ def main():
         day += datetime.timedelta(days=7)
 
     # ---- evergreen pool: strong, always-relevant departments
+    # moshiach-science is in this list so the department reaches the landing on
+    # its own, in the same card as everything else. It is a round robin, so a
+    # 28-article department takes one slot per pass and never crowds the row.
+    # The whole department also has its own page at /science/, where each piece
+    # sits beside the live wire.
     pools = [tagmap.get(t, [])[:12] for t in
              ["moshiach-geula", "shleimus-ha-aretz", "chai-vkayam", "miracle-story",
-              "beis-hamikdash", "chinuch", "igrot-kodesh", "rebbe"]]
+              "beis-hamikdash", "chinuch", "igrot-kodesh", "rebbe", "moshiach-science"]]
     ever = []
     for i in range(12):                      # round robin, so no single column
         for pool in pools:                   # can monopolise the top of the pool
@@ -467,6 +488,27 @@ def pick(data, wk, n=7):
 def esc(s):
     return html.escape(str(s or ""), quote=True)
 
+# ------------------------------------------------------------------- featured
+# One hand-picked piece, held under the lead until it is changed here. The rest
+# of the page re-picks itself every week from the archive; this does not, which
+# is the point of it — it is the editor's slot.
+#
+# It sits in its own element, so the script that re-renders the page for the
+# visitor's own week leaves it alone: that script rewrites #lead and #cards and
+# nothing else.
+#
+# Set FEATURE = None to take it down.
+FEATURE = {
+    "href": "https://rebbesletters.com/hadran%20alach.dc",
+    "kicker": "Featured",
+    "title": "Hadran Alach, Igros Kodesh",
+    "dek": "One shliach in Toronto has just made a siyum on the whole of the "
+           "Igros Kodesh — 42 volumes, more than fifteen thousand letters, at "
+           "ten pages a day, held for some thirty years.",
+    "img": "storage/featured/deitsch-kos-shel-bracha.jpg",
+    "meta": "Avrohom Reinitz · Beis Moshiach #1515 · on rebbesletters.com",
+}
+
 FALLBACK_IMG = "storage/landing/topics.jpg"
 # Curated stand-ins for a week whose own pictures will not carry a hero.
 HEROES = ["storage/landing/topics.jpg", "storage/landing/archive.jpg",
@@ -550,6 +592,26 @@ def blurb(a, txt=False):
     if not s:
         return ""
     return '<p class="blurb">%s</p>' % re.sub(r" \*+ ", " · ", esc(s))
+
+def feature_html():
+    """The editor's slot. Empty markup when FEATURE is None, so taking it down
+    leaves no heading standing over nothing."""
+    f = FEATURE
+    if not f:
+        return ""
+    off = "://" in f["href"]
+    return (
+        '\n  <p class="kick">{k}</p>\n'
+        '  <a class="feature reveal" href="{h}"{t}>\n'
+        '    <figure><img src="{i}" alt="" loading="lazy"></figure>\n'
+        '    <div class="feat-txt"><h2>{ti}</h2><p class="dek">{d}</p>'
+        '<p class="meta">{m}</p></div>\n'
+        '  </a>\n'
+    ).format(
+        k=esc(f.get("kicker", "Featured")), h=esc(f["href"]),
+        t=' target="_blank" rel="noopener"' if off else "",
+        i=esc(f["img"]), ti=esc(f["title"]), d=esc(f.get("dek", "")),
+        m=esc(f.get("meta", "")))
 
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
@@ -739,7 +801,8 @@ def render_landing(data):
         return dict(a, _season=wk["tags"], _whytag=wt, _why=labels.get(wt, ""))
 
     used = set()
-    page = LANDING.replace("{{KICKER}}", esc(kicker)) \
+    page = LANDING.replace("{{FEATURE}}", feature_html()) \
+                  .replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
                   .replace("{{CARDS}}", "".join(card_html(dress(a), used=used) for a in rest)) \
                   .replace("{{EVER}}", "".join(card_html(dress(a), used=used) for a in ever)) \
@@ -844,6 +907,22 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
         transition:border-color .2s,color .2s,background .2s}
   .ways a:hover{border-color:var(--gold-bright);color:var(--royal);background:var(--parchment-deep)}
   @media(max-width:820px){.lead{grid-template-columns:1fr}.lead-shot{order:-1}}
+  /* The editor's slot. Deliberately quieter than the lead — picture smaller,
+     heading a step down — so it reads as a second invitation rather than
+     competing with the week's own story for the same eye. */
+  .feature{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(1.2rem,3vw,2.4rem);
+        align-items:center;text-decoration:none;color:inherit;
+        padding-bottom:clamp(1.6rem,4vw,2.6rem);border-bottom:1px solid var(--rule)}
+  .feature figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
+  .feature img{display:block;width:100%;height:auto;
+        transition:transform 1.2s var(--ease)}
+  .feature:hover img{transform:scale(1.03)}
+  .feature h2{font-family:var(--display);font-weight:700;
+        font-size:clamp(1.5rem,3vw,2.3rem);line-height:1.05;letter-spacing:-.015em;
+        margin:0 0 .7rem;color:var(--ink)}
+  .feature:hover h2{color:var(--royal)}
+  .feature .dek{margin-bottom:.7rem}
+  @media(max-width:820px){.feature{grid-template-columns:1fr}.feature figure{order:-1}}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
@@ -861,6 +940,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 <main class="wk" data-week="{{WEEK}}">
   <p class="kick" id="kick">This week · {{KICKER}}</p>
   <div id="lead">{{LEAD}}</div>
+{{FEATURE}}
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards">{{CARDS}}</div>
   <p class="kick" id="weekpoll-kick">The week&rsquo;s question</p>
@@ -874,6 +954,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   <nav class="ways reveal">
     <a href="/collections">Collections</a><a href="/archives">The archive · 3,541 articles</a>
     <a href="/topics">Topics</a><a href="/parsha">By parsha</a><a href="/search">Search</a>
+    <a href="/science/">Moshiach &amp; Science</a>
     <a href="https://www.moshiach101.info/" target="_blank" rel="noopener">Moshiach 101 ↗</a>
     <a id="installapp" href="#" hidden>Install the app</a>
   </nav>
