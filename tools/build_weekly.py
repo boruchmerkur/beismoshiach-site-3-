@@ -934,7 +934,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 </style></head><body>
 <header class="bm-topbar"><div class="bm-inner">
   <a class="bm-wordmark" href="/">beismoshiach<span class="bm-tld">.org</span></a>
-  <nav><a href="/topics">Topics</a><a href="/parsha">Parsha</a><a href="/collections">Collections</a>
+  <nav><a href="/topics">Topics</a><a href="/parsha">Parsha</a><a href="/collections">Collections</a><a href="/science/">Convergence</a>
     <a href="/archives">Archives</a><a href="/search">Search</a><a class="langsw" href="/he/">עברית</a></nav>
 </div></header>
 <main class="wk" data-week="{{WEEK}}">
