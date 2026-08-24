@@ -1,7 +1,8 @@
 // The wire for beismoshiach.org/science/ — v2 Netlify Function.
 //
 // Ported from the standalone Convergence site. Every line below the entry point
-// is carried over unchanged: the thirteen feeds, the relevance gate, the image
+// is carried over unchanged: the feeds (fifteen of them now), the relevance gate,
+// the image
 // upgrade chain, the near-duplicate collapse. Only the handler shape is new.
 //
 // THIS IS A v2 FUNCTION and claims /api/wire through its own inline `config`.
