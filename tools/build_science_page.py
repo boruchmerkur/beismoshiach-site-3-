@@ -203,7 +203,7 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
 <section class="hero"><div class="wrap">
   <p class="eyebrow">Moshiach &amp; Science</p>
   <h1>Convergence</h1>
-  <p class="stand">A live wire, refreshed every fifteen minutes from fifteen feeds. <b>Nature</b>, <b>Quanta</b>, <b>New&nbsp;Scientist</b>, <b>Science&nbsp;News</b>, <b>ScienceDaily</b>, <b>Live&nbsp;Science</b>, <b>Ars&nbsp;Technica</b>, <b>Phys.org</b> and <b>NASA</b> carry the discoveries; <b>Chabad.org</b>, <b>Anash</b>, <b>COLlive</b>, <b>CrownHeights.info</b> and <b>Moshiach101</b> carry the news from our own world. Every story is read against six passages &mdash; knowledge filling the earth, the opening of the graves, G&#8209;d is one, neither famine nor war, in the beginning, swords into plowshares &mdash; and whatever answers to none of them is turned away before it reaches the page. Beneath the wire, thirty&#8209;three pieces from the magazine's own Moshiach&nbsp;&amp;&nbsp;Science department, sorted the same way.</p>
+  <p class="stand">A live wire. <b>Nature</b>, <b>Quanta</b>, <b>New&nbsp;Scientist</b>, <b>Science&nbsp;News</b>, <b>ScienceDaily</b>, <b>Live&nbsp;Science</b>, <b>Ars&nbsp;Technica</b>, <b>Phys.org</b> and <b>NASA</b> carry the discoveries; <b>Chabad.org</b>, <b>Anash</b>, <b>COLlive</b>, <b>CrownHeights.info</b> and <b>Moshiach101</b> carry the news from our own world.</p>
 </div></section>
 
 <section class="band" id="wire"><div class="wrap">
@@ -237,6 +237,30 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
   __PAIRS__
 </div></section>
 
+<section class="band" id="codes"><div class="wrap">
+  <p class="eyebrow">On the shelf</p>
+  <h2 class="sec">Codes in Nature</h2>
+  <p class="sec-sub">The wire is what arrived this morning. This is the part that does not move: twenty&#8209;four shapes found in the world &mdash; the spiral of a shell, the six arms of a snowflake, the hexagon a bee builds without being taught it &mdash; each measured, and each set beside the source that reads it. A book, on the page.</p>
+  <div class="row">
+    <a class="card txt" href="/science/codes/">
+      <span class="why plain">24 pairs &middot; 60 sources</span>
+      <h3>Read it here</h3>
+      <p class="blurb">Four sections &mdash; the spiral, symmetry, fractals, and the shapes that keep things alive &mdash; with the geometry stated plainly, the mathematics kept to one note, and the Torah reading answerable to an endnote every time.</p>
+      <p class="meta">Codes in Nature &mdash; A Torah Companion</p>
+    </a>
+    <a class="card" href="/science/codes/#snowflake">
+      <figure><img loading="lazy" decoding="async" src="/assets/science/codes/image_021.webp" alt=""></figure>
+      <h3>One law, infinite expressions</h3>
+      <p class="blurb">Six arms, every time, and no two crystals alike &mdash; the constraint and the freedom arriving together.</p>
+    </a>
+    <a class="card" href="/science/codes/#honeycomb">
+      <figure><img loading="lazy" decoding="async" src="/assets/science/codes/image_039.webp" alt=""></figure>
+      <h3>Maximum storage, minimum wax</h3>
+      <p class="blurb">The hexagon is the answer to a problem no bee has ever been told it is solving.</p>
+    </a>
+  </div>
+</div></section>
+
 <section class="band" id="lineage"><div class="wrap lineage">
   <p class="eyebrow">Where the name comes from</p>
   <h2 class="sec">Convergence</h2>
@@ -250,7 +274,7 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
 
 <footer class="colophon"><div class="wrap">
   <div class="cf-brand">beismoshiach.org</div>
-  Moshiach &amp; Science &middot; the department, the wire, and six readings.<br>
+  Moshiach &amp; Science &middot; the department, the wire, six readings, and <a href="/science/codes/" style="color:inherit">a book</a>.<br>
   <span style="opacity:.6">Sources named on every card.</span>
 </div></footer>
 
