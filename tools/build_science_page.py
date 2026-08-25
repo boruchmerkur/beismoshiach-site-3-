@@ -141,8 +141,11 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
         align-items:center;text-decoration:none;color:inherit}
   .feat figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep);
         border-top:2px solid var(--gold-bright)}
-  .feat img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
-        object-position:center;transition:transform 1.2s var(--ease)}
+  /* Capped, so one picture does not spend the whole opening screen. At 16:9 the
+     image would run 372px tall on a 1280 screen and push the wire to 905px —
+     which is the same emptiness problem in a nicer coat. */
+  .feat img{display:block;width:100%;height:auto;aspect-ratio:16/9;max-height:300px;
+        object-fit:cover;object-position:center;transition:transform 1.2s var(--ease)}
   .feat:hover img{transform:scale(1.03)}
   .feat h2{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.8vw,2.1rem);
         line-height:1.08;letter-spacing:-.015em;margin:0 0 .6rem;color:var(--ink)}
