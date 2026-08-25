@@ -132,6 +132,25 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
      between two SECTIONS is worth having; the gap between a title and the thing
      it titles is not. */
   .hero + .band{padding-top:clamp(.9rem,2vw,1.5rem);border-top:0}
+
+  /* The featured slot. The picture leads, so it takes the larger half and is
+     allowed to be big; the text sits beside it rather than under it, which
+     keeps the filters and the first row of cards on the opening screen. */
+  .feat-band{padding-top:clamp(.9rem,2vw,1.5rem);padding-bottom:clamp(1.4rem,3vw,2.2rem)}
+  .feat{display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(1.2rem,3vw,2.4rem);
+        align-items:center;text-decoration:none;color:inherit}
+  .feat figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep);
+        border-top:2px solid var(--gold-bright)}
+  .feat img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+        object-position:center;transition:transform 1.2s var(--ease)}
+  .feat:hover img{transform:scale(1.03)}
+  .feat h2{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.8vw,2.1rem);
+        line-height:1.08;letter-spacing:-.015em;margin:0 0 .6rem;color:var(--ink)}
+  .feat:hover h2{color:var(--royal)}
+  .feat .feat-blurb{font-size:.96rem;line-height:1.6;color:var(--ink-soft);margin:0 0 .6rem;
+        display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden}
+  .feat .eyebrow{margin-bottom:.5rem}
+  @media(max-width:760px){.feat{grid-template-columns:1fr}.feat figure{order:-1}}
   .paper{background:var(--parchment-deep)}
 
   .filters{display:flex;flex-wrap:wrap;gap:.55rem;padding-bottom:1.6rem}
@@ -210,6 +229,16 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
   <p class="eyebrow">Moshiach &amp; Science</p>
   <h1>Convergence</h1>
   <p class="stand">A live wire. <b>Nature</b>, <b>Quanta</b>, <b>New&nbsp;Scientist</b>, <b>Science&nbsp;News</b>, <b>ScienceDaily</b>, <b>Live&nbsp;Science</b>, <b>Ars&nbsp;Technica</b>, <b>Phys.org</b> and <b>NASA</b> carry the discoveries; <b>Chabad.org</b>, <b>Anash</b>, <b>COLlive</b>, <b>CrownHeights.info</b> and <b>Moshiach101</b> carry the news from our own world.</p>
+</div></section>
+
+<!-- Filled by the script at the foot of this page from FEATPOOL, which the
+     build writes below. Hidden until it has something, so an empty pool never
+     leaves a heading standing over nothing. -->
+<section class="band feat-band" id="featband" hidden><div class="wrap">
+  <a class="feat" id="feat" href="#"><figure><img id="feat-img" src="" alt="" fetchpriority="high"></figure>
+  <div class="feat-txt"><p class="eyebrow" id="feat-kick">Featured</p>
+    <h2 id="feat-title"></h2><p class="feat-blurb" id="feat-blurb"></p>
+    <p class="meta" id="feat-meta"></p></div></a>
 </div></section>
 
 <section class="band" id="wire"><div class="wrap">
@@ -429,12 +458,103 @@ PAGE = r"""<!DOCTYPE html><html lang="en"><head>
   });
 })();
 </script>
+
+<script>
+/* The featured slot. Twice a week, from a pool the build has already measured.
+
+   The pick is a function of the date alone, so every visitor sees the same
+   piece on the same day and it needs no rebuild to turn over: 3.5 days to a
+   slot is two changes a week, landing midweek and at the weekend. Whole days
+   in UTC, so it does not flip at a different moment for each reader.
+
+   Adding pieces to the pool lengthens the cycle rather than reshuffling it —
+   the pool is ordered by slug at build time, not by date scraped. */
+(function(){
+  var POOL = __FEATPOOL__;
+  if (!POOL.length) return;
+  var band = document.getElementById('featband');
+  var slot = Math.floor(Date.now() / 864e5 / 3.5);   /* 3.5 days = twice a week */
+  var it = POOL[((slot % POOL.length) + POOL.length) % POOL.length];
+  var a = document.getElementById('feat');
+  a.href = '/articles/' + it.s + '.html';
+  var img = document.getElementById('feat-img');
+  img.src = '/' + it.img;
+  img.alt = '';
+  document.getElementById('feat-title').textContent = it.t;
+  document.getElementById('feat-blurb').textContent = it.blurb || '';
+  document.getElementById('feat-meta').textContent =
+    [it.a, it.date, it.iss ? '#' + it.iss : ''].filter(Boolean).join('  ·  ');
+  band.hidden = false;
+})();
+</script>
 </body></html>
 """
 
+def img_size(rel):
+    """Width/height without a decoder dependency (PNG IHDR + JPEG SOF scan)."""
+    import struct
+    p = os.path.join(ROOT, rel.replace("/", os.sep))
+    if not os.path.isfile(p):
+        return None
+    try:
+        b = open(p, "rb").read(64000)
+        if b[:8] == bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]):
+            return struct.unpack(">II", b[16:24])
+        if b[:2] == bytes([0xFF, 0xD8]):
+            i = 2
+            while i < len(b) - 9:
+                if b[i] != 0xFF:
+                    i += 1
+                    continue
+                m = b[i + 1]
+                if 0xC0 <= m <= 0xCF and m not in (0xC4, 0xC8, 0xCC):
+                    h, w = struct.unpack(">HH", b[i + 5:i + 9])
+                    return w, h
+                i += 2 + struct.unpack(">H", b[i + 2:i + 4])[0]
+    except Exception:
+        pass
+    return None
+
+
+def featured_pool():
+    """The rotation for the slot under the title, decided here rather than in
+    the browser: the picture is the whole point of that slot, so every
+    candidate is opened and measured once at build time. A file that is
+    missing, portrait, or too small to lead with never reaches the page.
+
+    Ordered oldest first so the rotation is stable — adding a new piece
+    extends the cycle instead of reshuffling what everyone is seeing."""
+    import json
+    src = os.path.join(ROOT, "assets", "science.json")
+    if not os.path.isfile(src):
+        print("featured: assets/science.json missing — slot will stay hidden")
+        return []
+    items = json.load(io.open(src, encoding="utf-8"))["items"]
+    out = []
+    for it in items:
+        rel = it.get("img")
+        if not rel:
+            continue
+        wh = img_size(rel)
+        if not wh or wh[0] < 600 or wh[0] / max(wh[1], 1) < 1.1:
+            continue
+        out.append({
+            "s": it["s"], "t": it["t"], "img": rel,
+            "blurb": (it.get("blurb") or "")[:240],
+            "a": it.get("a") or "", "date": it.get("date") or "",
+            "iss": it.get("iss") or "",
+        })
+    out.sort(key=lambda x: x["s"])
+    print("featured: %d of %d pieces carry a picture worth leading with"
+          % (len(out), len(items)))
+    return out
+
+
+import json as _json
 page = (PAGE.replace("__TIMELINE__", TIMELINE)
             .replace("__NOTE__", NOTE)
-            .replace("__PAIRS__", PAIRS))
+            .replace("__PAIRS__", PAIRS)
+            .replace("__FEATPOOL__", _json.dumps(featured_pool(), ensure_ascii=False)))
 
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 io.open(OUT, "w", encoding="utf-8").write(page)

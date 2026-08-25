@@ -77,6 +77,25 @@
      between two SECTIONS is worth having; the gap between a title and the thing
      it titles is not. */
   .hero + .band{padding-top:clamp(.9rem,2vw,1.5rem);border-top:0}
+
+  /* The featured slot. The picture leads, so it takes the larger half and is
+     allowed to be big; the text sits beside it rather than under it, which
+     keeps the filters and the first row of cards on the opening screen. */
+  .feat-band{padding-top:clamp(.9rem,2vw,1.5rem);padding-bottom:clamp(1.4rem,3vw,2.2rem)}
+  .feat{display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(1.2rem,3vw,2.4rem);
+        align-items:center;text-decoration:none;color:inherit}
+  .feat figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep);
+        border-top:2px solid var(--gold-bright)}
+  .feat img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+        object-position:center;transition:transform 1.2s var(--ease)}
+  .feat:hover img{transform:scale(1.03)}
+  .feat h2{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.8vw,2.1rem);
+        line-height:1.08;letter-spacing:-.015em;margin:0 0 .6rem;color:var(--ink)}
+  .feat:hover h2{color:var(--royal)}
+  .feat .feat-blurb{font-size:.96rem;line-height:1.6;color:var(--ink-soft);margin:0 0 .6rem;
+        display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden}
+  .feat .eyebrow{margin-bottom:.5rem}
+  @media(max-width:760px){.feat{grid-template-columns:1fr}.feat figure{order:-1}}
   .paper{background:var(--parchment-deep)}
 
   .filters{display:flex;flex-wrap:wrap;gap:.55rem;padding-bottom:1.6rem}
@@ -155,6 +174,16 @@
   <p class="eyebrow">Moshiach &amp; Science</p>
   <h1>Convergence</h1>
   <p class="stand">A live wire. <b>Nature</b>, <b>Quanta</b>, <b>New&nbsp;Scientist</b>, <b>Science&nbsp;News</b>, <b>ScienceDaily</b>, <b>Live&nbsp;Science</b>, <b>Ars&nbsp;Technica</b>, <b>Phys.org</b> and <b>NASA</b> carry the discoveries; <b>Chabad.org</b>, <b>Anash</b>, <b>COLlive</b>, <b>CrownHeights.info</b> and <b>Moshiach101</b> carry the news from our own world.</p>
+</div></section>
+
+<!-- Filled by the script at the foot of this page from FEATPOOL, which the
+     build writes below. Hidden until it has something, so an empty pool never
+     leaves a heading standing over nothing. -->
+<section class="band feat-band" id="featband" hidden><div class="wrap">
+  <a class="feat" id="feat" href="#"><figure><img id="feat-img" src="" alt="" fetchpriority="high"></figure>
+  <div class="feat-txt"><p class="eyebrow" id="feat-kick">Featured</p>
+    <h2 id="feat-title"></h2><p class="feat-blurb" id="feat-blurb"></p>
+    <p class="meta" id="feat-meta"></p></div></a>
 </div></section>
 
 <section class="band" id="wire"><div class="wrap">
@@ -659,6 +688,35 @@
     render();
     if(!wireOk) state.hidden = false;
   });
+})();
+</script>
+
+<script>
+/* The featured slot. Twice a week, from a pool the build has already measured.
+
+   The pick is a function of the date alone, so every visitor sees the same
+   piece on the same day and it needs no rebuild to turn over: 3.5 days to a
+   slot is two changes a week, landing midweek and at the weekend. Whole days
+   in UTC, so it does not flip at a different moment for each reader.
+
+   Adding pieces to the pool lengthens the cycle rather than reshuffling it —
+   the pool is ordered by slug at build time, not by date scraped. */
+(function(){
+  var POOL = [{"s": "from-sputnik-to-spot-1", "t": "From Sputnik to SPOT", "img": "storage/images-4/1047/1047 From Sputnik to SPOT.jpg", "blurb": "As we promised last year, Parshas Mishpatim, 5776, that since we are entering the 25th year of SIP (“Swords into Plowshares”) we will be running a series of articles on the latest developments in this area.", "a": "Beis Moshiach (staff)", "date": "December 7, 2016", "iss": "1047"}, {"s": "from-sputnik-to-spot-part-2", "t": "From Sputnik to SPOT * Part 2", "img": "storage/images-4/1048/Zika Risk Map.jpg", "blurb": "Swords Into Plowshares – the 25 th year By Prof. Shimon Silman, RYAL Institute and...", "a": "Beis Moshiach (staff)", "date": "December 13, 2016", "iss": "1048"}, {"s": "he-does-wonders-until-there-is-no-number", "t": "“He Does Wonders Until There Is No Number”", "img": "storage/images-4/1040/1040 UNTIL THERE IS NO NUMBER.jpg", "blurb": "The Tzemach Tzedek’s Maamer on √2 Translation and comments by Prof. Shimon S...", "a": "Beis Moshiach (staff)", "date": "September 27, 2016", "iss": "1040"}, {"s": "how-deadly-cruise-missiles-became-the-lifesaving-cyberknife", "t": "How Deadly Cruise Missiles Became the Lifesaving “CyberKnife”", "img": "storage/images7/CyberKnife.png", "blurb": "Radiation and radioactive materials have been used in medical procedures for decades. Especially in the case of a brain tumor, radiation has the obvious advantage of eliminating the need to open the patient’s skull to operate on his brain —", "a": "Prof. Shimon Silman", "date": "September 5, 2019", "iss": "1181"}, {"s": "moshiachand-scienceon-har-hatzofim", "t": "Moshiach—and Science—on Har Hatzofim", "img": "storage/images-5/1071/Yakov Guggenheim.JPG", "blurb": "They came together on Har HaTzofim (Mount Scopus) with the Har HaBayis in full view to contribute what is hoped to be the final “stone” in the construction of the Third Beis HaMikdash. Who were they and what was their stone? They were Jewis", "a": "Beis Moshiach (staff)", "date": "June 7, 2017", "iss": "1071"}, {"s": "putin-and-plowshares-part-1", "t": "Putin and Plowshares - Part 1", "img": "storage/images7/1152/Berel-Lazar-vladimir-putin-chanukka.jpg", "blurb": "By Prof. Shimon Silman, RYAL Institute and Touro College I t is now 27 years since the Rebbe...", "a": "Beis Moshiach (staff)", "date": "January 31, 2019", "iss": "1152"}, {"s": "putin-and-plowshares-part-2", "t": "Putin and Plowshares Part 2", "img": "storage/images7/1155/Putin.jpg", "blurb": "By Prof. Shimon Silman, RYAL Institute and Touro College", "a": "Beis Moshiach (staff)", "date": "February 21, 2019", "iss": "1155"}, {"s": "swords-into-plowshares-1", "t": "Swords into Plowshares", "img": "storage/images-4/1033/1033 UNswords.jpg", "blurb": "The 25 th year * Dual Use in the USA By Prof. Shimon Silman, RYAL Institute and Touro College ...", "a": "Beis Moshiach (staff)", "date": "August 10, 2016", "iss": "1033"}, {"s": "swords-into-plowshares-2", "t": "Swords into Plowshares", "img": "storage/images7/1138/Port Aktau nuclear.jpg", "blurb": "Kazakhstan: transformation of the largest known WMD stockpile in history", "a": "Beis Moshiach (staff)", "date": "October 24, 2018", "iss": "1138"}, {"s": "swords-into-plowshares-part-2", "t": "Swords into Plowshares • Part 2", "img": "storage/images7/1139/Central Reference Laboratory.jpg", "blurb": "Kazakhstan: Bioweapons to Biomedicines", "a": "Beis Moshiach (staff)", "date": "October 31, 2018", "iss": "1139"}, {"s": "swords-into-plowshares-the-swords-of-south-africa", "t": "Swords into Plowshares - The Swords of South Africa", "img": "storage/images-4/1038/1038 South Africa.jpg", "blurb": "By Prof. Shimon Silman, RYAL Institute and Touro College When we talk of Swords into Plowshares...", "a": "Beis Moshiach (staff)", "date": "September 13, 2016", "iss": "1038"}, {"s": "the-eyes-were-given-permission-to-see", "t": "\"The Eyes Were Given Permission to See…”", "img": "storage/images7/1175 Permission to See.png", "blurb": "3 million Americans suffer chronic visual impairments. But now, a technology used in the Persian Gulf War has been transformed into a visual aid to help them see. .", "a": "Beis Moshiach (staff)", "date": "July 25, 2019", "iss": "1175"}, {"s": "what-will-your-next-move-be", "t": "What Will Your Next Move Be?", "img": "storage/images7/Your Next Move.png", "blurb": "Ideas, resources, and inspiration for reaching out to scientists, bochurim, kids, laypeople, Bnei Torah, and more…", "a": "Beis Moshiach (staff)", "date": "August 29, 2019", "iss": "1180"}];
+  if (!POOL.length) return;
+  var band = document.getElementById('featband');
+  var slot = Math.floor(Date.now() / 864e5 / 3.5);   /* 3.5 days = twice a week */
+  var it = POOL[((slot % POOL.length) + POOL.length) % POOL.length];
+  var a = document.getElementById('feat');
+  a.href = '/articles/' + it.s + '.html';
+  var img = document.getElementById('feat-img');
+  img.src = '/' + it.img;
+  img.alt = '';
+  document.getElementById('feat-title').textContent = it.t;
+  document.getElementById('feat-blurb').textContent = it.blurb || '';
+  document.getElementById('feat-meta').textContent =
+    [it.a, it.date, it.iss ? '#' + it.iss : ''].filter(Boolean).join('  ·  ');
+  band.hidden = false;
 })();
 </script>
 </body></html>
