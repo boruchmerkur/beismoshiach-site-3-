@@ -455,6 +455,7 @@ def pick(data, wk, n=7):
         return (not tags) or bool(tags & here)
 
     out, seen, why = [], set(), {}
+    weekpicks = []
     # Take one from each of the week's tags in turn rather than emptying the
     # first. Ki Seitzei has more than seven pieces to itself, so a straight
     # walk gave the whole page one chip repeated seven times and Elul — which
@@ -467,7 +468,32 @@ def pick(data, wk, n=7):
     for i in range(max((len(L) for L in lists), default=0)):
         for t, L in zip(wk["tags"], lists):
             if i < len(L) and L[i] not in seen:
-                seen.add(L[i]); out.append(L[i]); why[L[i]] = t
+                seen.add(L[i]); weekpicks.append(L[i]); why[L[i]] = t
+
+    # A standing place for the strands that do not expire. The parsha turns
+    # over every week; the magazine's argument about the Land, and its own
+    # editorial voice, are current in any week — and a page that is only parsha
+    # reads like a bulletin rather than a magazine. Rotated by week, so it is a
+    # different piece each time instead of the same one forever.
+    wknum = datetime.date.fromisoformat(wk["w"]).toordinal() // 7
+    standing = []
+    for t in STANDING:
+        # Reject the broken headings here rather than downstream. Four of the
+        # fourteen shleimus ha'aretz pieces open with a line of body text as
+        # their <h1>, and if one of those wins the rotation the filter further
+        # down drops it and the strand simply vanishes for that week — the slot
+        # would be silently empty in exactly the weeks it was wanted.
+        pool = [s for s in data["tags"].get(t, [])
+                if s not in seen and in_season(s)
+                and reads_as_headline(data["articles"].get(s, {}))]
+        if pool:
+            s = pool[wknum % len(pool)]
+            seen.add(s); standing.append(s); why[s] = t
+
+    # Interleaved rather than appended: the parsha alone can fill all seven
+    # slots, and anything added after that never survives the cut.
+    out = (weekpicks[:2] + standing[:1] + weekpicks[2:4]
+           + standing[1:] + weekpicks[4:])
     if len(out) < n:
         ev = data["evergreen"]
         if ev:
@@ -507,6 +533,14 @@ FEATURE = {
            "ten pages a day, held for some thirty years.",
     "img": "storage/featured/deitsch-kos-shel-bracha.jpg",
     "meta": "Avrohom Reinitz · Beis Moshiach #1515 · on rebbesletters.com",
+}
+
+# Strands that never go out of date, given a standing place on the page beside
+# whatever the parsha happens to be. The chip says which strand it is, so a
+# reader can see why a piece about the Land is sitting under Ki Savo.
+STANDING = {
+    "shleimus-ha-aretz": "Shleimus HaAretz",
+    "editorial": "Editorial",
 }
 
 FALLBACK_IMG = "storage/landing/topics.jpg"
@@ -798,7 +832,9 @@ def render_landing(data):
     whyof = getattr(pick, "why", {}) or {}
     def dress(a):
         wt = whyof.get(a["s"], "")
-        return dict(a, _season=wk["tags"], _whytag=wt, _why=labels.get(wt, ""))
+        # a standing strand has no label in the week entry — it belongs to no week
+        return dict(a, _season=wk["tags"], _whytag=wt,
+                    _why=labels.get(wt, "") or STANDING.get(wt, ""))
 
     used = set()
     page = LANDING.replace("{{FEATURE}}", feature_html()) \
