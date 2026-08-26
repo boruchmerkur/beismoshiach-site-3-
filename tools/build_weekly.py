@@ -172,23 +172,51 @@ def read_article(slug):
     dek, open_ = lede(t)
     src = clean_img(img.group(1)) if img else None
     wh = dims(os.path.join(ROOT, src.replace("/", os.sep))) if src else None
+    # Is the heading a line of the article's own prose? Decided here, where the
+    # body is open, rather than guessed at later from the title's shape. A long
+    # heading that appears verbatim inside the text was lifted from it — that is
+    # what happened to "The voting public must now remind the prime minister
+    # that he received", whose real title survives in its slug. Short headings
+    # are exempt: a title legitimately recurs in its own opening line.
+    # Only text found DEEP in the piece counts. Plenty of articles repeat their
+    # own title as the first line of the body, and reading that as evidence of
+    # theft threw 144 sound articles out of the index. A title is not lifted
+    # because it appears at the top; it is lifted when it turns up in the
+    # middle of a paragraph six hundred characters down.
+    # Narrowed to the actual signature of the fault: a long heading that stops
+    # without punctuation AND is found in the middle of the piece. Testing only
+    # "appears in the body" cost 143 sound articles, because a title recurring
+    # in its own prose is ordinary writing, not evidence of anything.
+    lifted = 0
+    if (len(title) > 55
+            and not title.rstrip().endswith(("?", "!", ".", "”", "’", '"', "'"))
+            and not agrees_with_slug(slug, title)):
+        body = re.search(r'<div class="entry-body">(.*)', t, re.S)
+        if body and _norm(strip(body.group(1))).find(_norm(title)[:60]) > 200:
+            lifted = 1
     return {
         "s": slug,
         "t": title,
         "a": strip(au.group(1)) if au else "",
         "c": strip(dept.group(1)) if dept else "",
         "i": int(iss.group(1)) if iss else None,
-        "d": dek, "x": open_,
+        "d": dek, "x": open_, "lift": lifted,
         "img": src, "w": (wh or (0, 0))[0], "h": (wh or (0, 0))[1],
     }
 
 def looks_broken(a):
     """Some export titles are body text or the 'Recent Articles' shell; a few
     entries are an embedded video with no prose, which has nothing to show on
-    a card."""
+    a card.
+
+    The 'len > 72' that used to be here was the same mistake as the old
+    headline test, made twice: it dropped real headlines from the index before
+    anything downstream could even consider them. The one test now lives in
+    reads_as_headline, which checks whether the heading is the article's own
+    opening rather than guessing from its length.
+    """
     t = a["t"]
-    return (t.startswith("Beis Moshiach Magazine") or len(t) > 72 or
-            t.lower().startswith(("translated ", "by ")) or not t or
+    return (not t or not reads_as_headline(a) or
             not (a.get("d") or a.get("x")))
 
 # ------------------------------------------------------------------ tag sources
@@ -697,22 +725,71 @@ def card_html(a, big=False, used=None):
             '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
         s=esc(a["s"]), why=tag, t=esc(a["t"]), m=esc(meta), b=blurb(a, txt=True))
 
+APPARATUS = re.compile(r"(?i)^(beis moshiach magazine|translated\b|presented by|"
+                       r"adapted from\b|reprinted\b|photos? by|bs\W{0,2}d\b|dear reader|"
+                       r"prepared for publication)")
+
+def _norm(s):
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+_STOPW = set("a an the of to in on for and or is it as at by be with that this from".split())
+
+def agrees_with_slug(slug, title):
+    """The slug was made from the real title, so it is an independent record of
+    it. When the two share vocabulary the heading is the title, whatever else
+    it does — recur in its own prose, run long, end on a preposition. When they
+    share nothing, the heading came from somewhere else."""
+    sw = [w for w in _norm(slug).split() if len(w) > 2 and w not in _STOPW]
+    tw = set(_norm(title).split())
+    if len(sw) < 3:
+        return True                       # too short to judge; assume honest
+    hit = sum(1 for w in sw if w in tw or any(x.startswith(w[:5]) for x in tw))
+    return hit / len(sw) >= 0.45
+
 def reads_as_headline(a):
-    """The export left some articles with a line of body text as their <h1>.
-    A headline is short, or asks a question; a lifted sentence runs long and
-    just stops."""
+    """Is this <h1> a title, or a line of the article's own body?
+
+    The old test guessed from shape — short, or a question — and threw out 415
+    articles for the crime of having an ordinary magazine headline: "22 Years
+    Have Come and Gone and the Silence Is Deafening", "A Beacon of Light in the
+    Darkness of Soviet Russia". Over 45 characters and over 8 words is most
+    real headlines, so the landing was drawing from a fraction of the archive
+    and half the shleimus ha'aretz writing was unreachable.
+
+    This checks evidence instead. If the heading is how the piece OPENS, it is
+    not a title, it is the first sentence — and that is a fact about the file,
+    not a hunch about the prose. Length, word count and what the last word
+    happens to be are none of our business: "Reaching out to Israelis in the
+    Land Down Under" is a headline, and so is "Firebrand"."""
     ti = (a.get("t") or "").strip()
-    if not ti or len(ti.split()) < 2:
+    if not ti:
         return False
     if ti[0].islower():                      # "goes out" — cut mid-sentence
         return False
-    # "It was a surreal sight" — a line of narration, not a headline
-    if re.match(r"(?i)^(it|he|she|they|there|we|this|that)\s+"
-                r"(was|were|is|are|had|have|has|will|would|could|began|went)", ti):
+    if APPARATUS.match(ti):                  # export shell, credit line, preamble
         return False
-    if ti.endswith(("?", "!")):
-        return True
-    return len(ti) <= 45 or len(ti.split()) <= 8
+    if len(ti) > 95:                         # a paragraph, not a headline
+        return False
+    if a.get("lift"):                        # found verbatim inside the article
+        return False
+    # Sentence case where a headline belongs. "It was a surreal sight" carries
+    # the slug it-was-a-surreal-sight, so the slug is no help — it was minted
+    # from the same mistake, and both witnesses repeat it. What still separates
+    # them is capitals: the magazine sets headlines in title case, and a line
+    # lifted out of a paragraph keeps its sentence case. Only applied to
+    # headings long enough to judge and without the punctuation a real headline
+    # would carry, so "Repent – for what?" and "Firebrand" are untouched.
+    w = ti.split()
+    if len(w) >= 4 and not ti.rstrip().endswith(("?", "!", ".", "”", "’", '"')):
+        capped = sum(1 for x in w if x[:1].isupper())
+        if capped / len(w) < 0.35:
+            return False
+    head = _norm(ti)
+    if len(head) >= 12:
+        for field in ("d", "x"):             # the dek, and the opening paragraph
+            if _norm(a.get(field)).startswith(head[:60]):
+                return False
+    return True
 
 def author_key(name):
     """The archive spells the same writer several ways — "Rabbi Greenberg",
