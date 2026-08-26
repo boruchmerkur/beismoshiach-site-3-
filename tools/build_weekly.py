@@ -552,16 +552,32 @@ def esc(s):
 # nothing else.
 #
 # Set FEATURE = None to take it down.
-FEATURE = {
-    "href": "https://rebbesletters.com/hadran%20alach.dc",
-    "kicker": "Featured",
-    "title": "Hadran Alach, Igros Kodesh",
-    "dek": "One shliach in Toronto has just made a siyum on the whole of the "
-           "Igros Kodesh — 42 volumes, more than fifteen thousand letters, at "
-           "ten pages a day, held for some thirty years.",
-    "img": "storage/featured/deitsch-kos-shel-bracha.jpg",
-    "meta": "Avrohom Reinitz · Beis Moshiach #1515 · on rebbesletters.com",
-}
+FEATURE = [
+    {
+        # The piece is the Rebbe's own sicha on Elul, and its heading is one of
+        # the export's broken ones — the article file says "goes out", a
+        # fragment of a sentence. The title given here is what its slug records
+        # and what the piece plainly is; the article's own bytes are untouched.
+        # The dek is the magazine's own, verbatim from its entry-pull.
+        "href": "articles/elul-the-king-is-in-the-field.html",
+        "kicker": "This month",
+        "title": "Elul: The King Is in the Field",
+        "dek": "“The illumination of the Thirteen Attributes of Mercy is in the "
+               "field, not in the desert.”",
+        "img": "storage/featured/rebbe-elul-in-the-field.jpg",
+        "meta": "The Rebbe · D’var Malchus · #847 · photo: RebbeDrive",
+    },
+    {
+        "href": "https://rebbesletters.com/hadran%20alach.dc",
+        "kicker": "Featured",
+        "title": "Hadran Alach, Igros Kodesh",
+        "dek": "One shliach in Toronto has just made a siyum on the whole of the "
+               "Igros Kodesh — 42 volumes, more than fifteen thousand letters, at "
+               "ten pages a day, held for some thirty years.",
+        "img": "storage/featured/deitsch-kos-shel-bracha.jpg",
+        "meta": "Avrohom Reinitz · Beis Moshiach #1515 · on rebbesletters.com",
+    },
+]
 
 # Strands that never go out of date, given a standing place on the page beside
 # whatever the parsha happens to be. The chip says which strand it is, so a
@@ -658,9 +674,10 @@ def blurb(a, txt=False):
 def feature_html():
     """The editor's slot. Empty markup when FEATURE is None, so taking it down
     leaves no heading standing over nothing."""
-    f = FEATURE
-    if not f:
-        return ""
+    items = FEATURE if isinstance(FEATURE, list) else ([FEATURE] if FEATURE else [])
+    return "".join(_one_feature(f) for f in items)
+
+def _one_feature(f):
     off = "://" in f["href"]
     return (
         '\n  <p class="kick">{k}</p>\n'
