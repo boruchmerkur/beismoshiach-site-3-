@@ -552,6 +552,98 @@ def esc(s):
 # nothing else.
 #
 # Set FEATURE = None to take it down.
+# ------------------------------------------------------------------- memorial
+# Sits above the week, before anything else on the page. Set MEMORIAL = None to
+# take it down. Every fact below is sourced: the biography from this archive's
+# own reporting in #848, the dates and family from COLlive and Anash, which
+# agree; the three quotations are from pieces already published here.
+MEMORIAL = {
+    "img": "storage/images-5/1098/Avrohom Levi Lipskier.jpg",
+    "caption": "With alumni of his baal t’shuva programs at a farbrengen in "
+               "Yerushalayim, Kislev 5778.",
+    "name": "Rabbi Avrohom Levi Lipskier",
+    "dates": "15 Adar I 5700 — 28 Elul 5786",
+    "lede": "Rabbi Avrohom Levi Lipskier, mashpia and rosh yeshiva, of Crown "
+            "Heights, passed away on Thursday, 28 Elul, at the age of 86. He "
+            "taught baalei t’shuva for more than sixty years, beginning before "
+            "there was a yeshiva to teach them in.",
+    "body": [
+        "He was born in Kutaisi, Georgia, to R’ Yankel and Teibel Lipskier. The "
+        "family left the Soviet Union and reached America in 5708. He learned in "
+        "770, and in 5722 was sent to Brunoy, France.",
+
+        "In 1962, while he was still a bochur learning for smicha, young men "
+        "began wandering into 770. This magazine reported in issue #848 that the "
+        "locals were afraid of them, and that he was not: he learned with them "
+        "one to one, then in small groups, then in a class in 770. Rabbi Yisroel "
+        "Jacobson, the mashpia to the rabbinical students, told him to keep "
+        "going. The following year Rabbi Jacobson opened Hadar HaTorah with the "
+        "Rebbe’s blessing and hired him as its main teacher. It was the first "
+        "baal t’shuva yeshiva.",
+
+        "He married Cirel, daughter of the shliach Reb Berel Baumgarten. He "
+        "taught at Hadar HaTorah until 1967, then went on shlichus to Milan. In "
+        "1972 he wrote to the Rebbe about an offer to work on college campuses, "
+        "and the Rebbe told him to accept it.",
+
+        "That year he advertised a summer program in Morristown called “Live and "
+        "Learn.” Rabbi Gurary of Buffalo telephoned to say he was bringing five "
+        "students to Crown Heights for Shavuos: “If they don’t go straight from "
+        "Crown Heights to learn in Morristown, they’ll go in all different "
+        "directions and we’ll lose them.” The five came ten days early. One of "
+        "them, Avrohom Schwarzberg, wanted to stay on, and wrote to the Rebbe. "
+        "The Rebbe answered, “Since you were successful where you were until "
+        "now, you should stay.” That was the beginning of Yeshivas Tiferes "
+        "Bachurim, which he led for decades. In 5760 he founded Yeshivas Tiferes "
+        "Menachem in Sea Gate.",
+
+        "Asked in 2012 what his message to his students was, he said it was the "
+        "study and practice of Chassidus and a deep attachment to the Rebbe, and "
+        "that this was what built, in his words, “not followers, but Jewish "
+        "leaders.”",
+
+        "The levaya passed 770 at three o’clock on the day of his passing, and "
+        "he was buried at Old Montefiore, near the Ohel. He is survived by his "
+        "wife Cirel; by Mrs. Chani Kaminetzky of Dnipro, Rabbi Mendel Lipskier "
+        "of Sherman Oaks, Mrs. Dinie Mangel of Cherry Hill, Mrs. Shternie "
+        "Backman of Glendale, Mrs. Chaya Mushka Silberberg of Crown Heights and "
+        "R’ Berel Lipskier of Crown Heights; by grandchildren and "
+        "great-grandchildren; and by seven siblings.",
+    ],
+    # his talmid, in this magazine, in his own words
+    "pull": "Rabbi Avrohom Lipskier saved a generation.",
+    "pullsrc": ("Rabbi Boruch Merkur, “The Final Push,” June 2026",
+                "articles/the-final-push.html"),
+    "quotes": [
+        ("Within a day or two of Gimmel Tammuz, Rabbi Avrohom Lipskier, the "
+         "celebrated chassid and founder of Tiferes Bachurim, came into the "
+         "classroom and gave his devastated students a likut, a compilation of "
+         "the Rebbe’s teachings. … Reb Lipskier gave us a seder ha’avoda, a "
+         "structured order of spiritual work to uplift us.",
+         "“The Final Push,” June 2026", "articles/the-final-push.html"),
+        ("I remember seeing mashpia Rabbi Avrohom Lipskier in 770 on Gimmel "
+         "Tammuz. I looked at him perplexed. He shrugged. It was a time of "
+         "shock. … I think it was Dalet Tammuz, the very next day, when Rabbi "
+         "Lipskier gathered us into a classroom. His shrug was gone. His command "
+         "had returned. He had a Yechi HaMelech pamphlet in hand and we learned, "
+         "our faith restored and refocused. Here is a leader who helped us defy "
+         "despair.",
+         "“Who Are You?!” issue #1173, 5779", "articles/who-are-you.html"),
+        ("The legendary chassid and mashpia, Rabbi Avrohom Lipskier, famed for "
+         "leading so many Jews to the path of t’shuva with his inviting smile "
+         "and charisma, used to farbreng almost daily with his students. It was "
+         "a rigorous regime of ongoing, uplifting inspiration that lasted for "
+         "years.",
+         "“Be a Man – Of G-d,” issue #1165, 5779", "articles/be-a-man-of-g-d.html"),
+    ],
+    "more": [
+        ("Renowned Mentor to the Baal Teshuva Movement Marks 50 Years — issue #848",
+         "articles/renowned-mentor-to-the-baal-teshuva-movement-marks-50-years.html"),
+        ("Tiferes Alumni Farbrengen in Yerushalayim — issue #1098",
+         "articles/tiferes-alumni-farbrengen-in-yerushalayim-with-rabbi-lipskie.html"),
+    ],
+}
+
 FEATURE = [
     {
         # The piece is the Rebbe's own sicha on Elul, and its heading is one of
@@ -676,6 +768,42 @@ def feature_html():
     leaves no heading standing over nothing."""
     items = FEATURE if isinstance(FEATURE, list) else ([FEATURE] if FEATURE else [])
     return "".join(_one_feature(f) for f in items)
+
+def memorial_html():
+    """The memorial band, above the week. Nothing here is composed from memory:
+    the life is this archive's own reporting, the dates and the family are from
+    the two notices, and the three quotations are lifted from pieces already
+    published on this site, each linked to its own page."""
+    m = MEMORIAL
+    if not m:
+        return ""
+    quotes = "".join(
+        '<blockquote class="mq"><p>{t}</p><cite><a href="/{h}">{s}</a></cite></blockquote>'
+        .format(t=esc(t), s=esc(s), h=esc(h)) for t, s, h in m.get("quotes", []))
+    more = "".join('<li><a href="/{h}">{t}</a></li>'.format(h=esc(h), t=esc(t))
+                   for t, h in m.get("more", []))
+    return (
+        '\n<section class="memorial reveal" aria-label="In memory">\n'
+        '  <figure class="mem-shot"><img src="/{img}" alt="">'
+        '<figcaption>{cap}</figcaption></figure>\n'
+        '  <div class="mem-txt">\n'
+        '    <p class="kick">In memory</p>\n'
+        '    <h2>{name}</h2>\n'
+        '    <p class="mem-dates">{dates}</p>\n'
+        '    <p class="mem-lede">{lede}</p>\n'
+        '    <blockquote class="mem-pull"><p>{pull}</p>'
+        '<cite><a href="/{psh}">{ps}</a></cite></blockquote>\n'
+        '    {body}\n'
+        '    {quotes}\n'
+        '    <p class="mem-more">In this archive:</p><ul class="mem-list">{more}</ul>\n'
+        '  </div>\n'
+        '</section>\n'
+    ).format(
+        img=esc(m["img"]), cap=esc(m.get("caption", "")), name=esc(m["name"]),
+        dates=esc(m["dates"]), lede=esc(m["lede"]),
+        pull=esc(m["pull"]), ps=esc(m["pullsrc"][0]), psh=esc(m["pullsrc"][1]),
+        body="".join("<p>%s</p>" % esc(p) for p in m.get("body", [])),
+        quotes=quotes, more=more)
 
 def _one_feature(f):
     off = "://" in f["href"]
@@ -931,7 +1059,8 @@ def render_landing(data):
                     _why=labels.get(wt, "") or STANDING.get(wt, ""))
 
     used = set()
-    page = LANDING.replace("{{FEATURE}}", feature_html()) \
+    page = LANDING.replace("{{MEMORIAL}}", memorial_html()) \
+                  .replace("{{FEATURE}}", feature_html()) \
                   .replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
                   .replace("{{CARDS}}", "".join(card_html(dress(a), used=used) for a in rest)) \
@@ -1053,6 +1182,41 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .feature:hover h2{color:var(--royal)}
   .feature .dek{margin-bottom:.7rem}
   @media(max-width:820px){.feature{grid-template-columns:1fr}.feature figure{order:-1}}
+  /* The memorial. Sits above the week, quieter than the lead in colour and
+     louder in measure: one column of text at reading width, the photograph
+     across the top, and the quotations set in from the left so the eye can
+     find them without a rule or a box. */
+  .memorial{padding:clamp(1.6rem,4vw,2.8rem) 0 clamp(2rem,5vw,3.2rem);
+        border-bottom:1px solid var(--rule);margin-bottom:clamp(1.4rem,3vw,2.2rem)}
+  .mem-shot{margin:0 0 1.6rem}
+  .mem-shot img{display:block;width:100%;height:auto;border-radius:3px;
+        background:var(--parchment-deep)}
+  .mem-shot figcaption{font-family:var(--mono);font-size:.68rem;letter-spacing:.03em;
+        color:var(--ink-soft);margin-top:.5rem}
+  .mem-txt{max-width:64ch}
+  .memorial h2{font-family:var(--display);font-weight:900;
+        font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.02;letter-spacing:-.02em;
+        margin:.2rem 0 .3rem;color:var(--ink)}
+  .mem-dates{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;
+        color:var(--gold);margin:0 0 1.1rem}
+  .mem-lede{font-size:1.12rem;line-height:1.6;color:var(--ink);margin:0 0 1.3rem}
+  .memorial p{font-size:1rem;line-height:1.72;color:var(--ink-soft);margin:0 0 1rem}
+  .mem-pull{margin:1.4rem 0;padding:0 0 0 1.2rem;border-left:2px solid var(--gold-bright)}
+  .mem-pull p{font-family:var(--display);font-size:clamp(1.2rem,2.4vw,1.6rem);
+        line-height:1.25;color:var(--ink);margin:0 0 .4rem}
+  .memorial blockquote{margin:1.3rem 0}
+  .mq{padding:0 0 0 1.2rem;border-left:1px solid var(--rule)}
+  .mq p{font-size:.99rem;line-height:1.7;color:var(--ink);margin:0 0 .35rem}
+  .memorial cite{font-style:normal;font-family:var(--mono);font-size:.68rem;
+        letter-spacing:.04em;color:var(--ink-soft)}
+  .memorial cite a{color:var(--royal);text-decoration:none}
+  .memorial cite a:hover{border-bottom:1px solid var(--royal)}
+  .mem-more{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+        text-transform:uppercase;color:var(--ink-soft);margin:1.6rem 0 .5rem}
+  .mem-list{list-style:none;margin:0;padding:0}
+  .mem-list li{padding:.4rem 0;border-top:1px solid var(--rule)}
+  .mem-list a{color:var(--ink);text-decoration:none;font-size:.95rem}
+  .mem-list a:hover{color:var(--royal)}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
@@ -1068,6 +1232,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     <a href="/archives">Archives</a><a href="/search">Search</a><a class="langsw" href="/he/">עברית</a></nav>
 </div></header>
 <main class="wk" data-week="{{WEEK}}">
+{{MEMORIAL}}
   <p class="kick" id="kick">This week · {{KICKER}}</p>
   <div id="lead">{{LEAD}}</div>
 {{FEATURE}}
