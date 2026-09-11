@@ -598,9 +598,22 @@ MEMORIAL = {
         "Yeshivas Tiferes Bachurim, which he led for decades. In 5760 he founded "
         "Yeshivas Tiferes Menachem in Sea Gate.",
 
+        "The men who came were of every kind and every age: college students, "
+        "Russian immigrants, professionals, university researchers, servicemen "
+        "out of the forces. Some arrived unable to read Hebrew. Some stayed "
+        "years, some a fortnight, some came back each winter break. He put the "
+        "original texts straight into their hands and taught them the language "
+        "and the reasoning to read them, on the principle that learning which "
+        "does not move a man to do a mitzva and help another Jew has not "
+        "finished its work. He carried an inviting smile and he gave each of "
+        "them his whole attention, and whatever else they left with, they left "
+        "warmer than they came.",
+
         "Asked in 2012 what he was trying to give his students, he named the "
         "study and practice of Chassidus and a deep attachment to the Rebbe, and "
-        "said that what this produced was not followers but leaders.",
+        "said that what this produced was not followers but leaders. He did not "
+        "speak of them as his students at all in later years, but as colleagues "
+        "holding the same commission.",
 
         "He farbrenged with his talmidim almost daily for years, until the pace "
         "slackened to weekly and they took to knocking on his door to ask for "
@@ -623,9 +636,18 @@ MEMORIAL = {
         "Backman of Glendale, Mrs. Chaya Mushka Silberberg of Crown Heights and "
         "R’ Berel Lipskier of Crown Heights; by grandchildren and "
         "great-grandchildren; and by seven siblings.",
+
+        "What he built is still running. His talmidim teach, run yeshivos, sit "
+        "as rabbonim and serve as shluchim the world over, and many took "
+        "ordinary work and built Jewish homes with it. When he came to Eretz "
+        "Yisroel in Kislev 5778, about fifty of them filled a shul in Ramot "
+        "Dalet to farbreng with him, and before the evening was out they had "
+        "agreed to keep gathering. The order of work he put in front of his "
+        "students in that classroom in Tammuz 5754 is the one they are still "
+        "following, and it runs until Moshiach is revealed.",
     ],
-    "pull": "He started the first baal t’shuva yeshiva, and taught in one for "
-            "sixty years.",
+    "pull": "Men came to his door unable to read Hebrew and went out as "
+            "teachers, shluchim and rabbonim. He kept it open for sixty years.",
     "quotes": [],
     "more": [
         ("Renowned Mentor to the Baal Teshuva Movement Marks 50 Years — issue #848",
