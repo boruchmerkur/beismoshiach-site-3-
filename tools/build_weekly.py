@@ -555,16 +555,20 @@ def esc(s):
 # ------------------------------------------------------------------- memorial
 # Sits above the week, before anything else on the page. Set MEMORIAL = None to
 # take it down. Every fact below is sourced: the biography from this archive's
-# own reporting in #848, the dates and family from COLlive and Anash, which
-# agree; the three quotations are from pieces already published here.
+# own reporting in #848, the dates and family from COLlive, CrownHeights.info
+# and Anash, which agree; the tributes are quoted as printed from COLlive and
+# CrownHeights.info and link back to them.
 MEMORIAL = {
     # The portrait is the left panel of the composite that ran in #1165, lifted
     # out at full size: the archive's only other copy of it is 150px wide.
     "img": "storage/featured/lipskier-portrait.jpg",
     "caption": "",
-    "name": "Rabbi Avrohom Levi Lipskier",
+    # a”h, not z”l and not OBM. This magazine has written a”h after a name 112
+    # times and z”l fourteen; Anash writes AH, which is the same ע"ה. COLlive
+    # and CrownHeights.info write OBM, which is the English of it.
+    "name": "Rabbi Avrohom Levi Lipskier a”h",
     "dates": "15 Adar I 5700 — 28 Elul 5786",
-    "lede": "Rabbi Avrohom Levi Lipskier, mashpia and rosh yeshiva, of Crown "
+    "lede": "Rabbi Avrohom Levi Lipskier a”h, mashpia and rosh yeshiva, of Crown "
             "Heights, passed away on Thursday, 28 Elul, at the age of 86. He "
             "taught baalei t’shuva for more than sixty years, beginning before "
             "there was a yeshiva to teach them in.",
@@ -583,6 +587,13 @@ MEMORIAL = {
         "students, told him to keep at it, and the next year opened Hadar "
         "HaTorah with the Rebbe’s blessing and put him in front of it as its "
         "main teacher. It was the first baal t’shuva yeshiva.",
+
+        "The Rebbe held it close. Of these bochurim the Rebbe said "
+        "<em>meine kinder</em> — my children; and when Hadar HaTorah came up "
+        "in conversation the Rebbe said, <em>Ich hob gemacht di yeshiva</em>, "
+        "I made the yeshiva. Rabbi Lipskier stood in that place for the next "
+        "six decades, and he behaved as though every young man who walked in "
+        "was being handed to him by name.",
 
         "He married Cirel, daughter of the shliach Reb Berel Baumgarten. He "
         "taught at Hadar HaTorah until 1967, then went on shlichus to Milan. In "
@@ -655,6 +666,57 @@ MEMORIAL = {
     "pull": "Men came to his door unable to read Hebrew and went out as "
             "teachers, shluchim and rabbonim. He kept it open for sixty years.",
     "quotes": [],
+    # Said about him elsewhere in the days after, quoted as printed. The first
+    # is from CrownHeights.info's notice; the rest were written by his talmidim
+    # under COLlive's, where more than twenty of them wrote in overnight.
+    "tributes": [
+        ("His heart was pure love and appreciation for all his students and "
+         "teachers. I had the privilege of being a teacher under his tutelage. "
+         "He was my mentor and my friend.",
+         "Rabbi Aryeh", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("What a light was Rabbi Lipskier for so many of us! Brought by the "
+         "Rebbe but cared for by him and his staff. Rabbi Lipskier was an "
+         "inspiration in many ways and aspects of Chassidic life but what "
+         "stands out above all for me was he was a Chassid of the Rebbe.",
+         "A talmid", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("He was my teacher in 5743, he brought me closer to Torah and "
+         "Chassidus, and the Rebbe. I will always remember when I shaved with "
+         "a blade, he asked Rabbi Greenberg and bought me a 100 dollar "
+         "electric razor; when I grew my beard I returned the electric razor "
+         "to him.",
+         "Kalman Leib", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("No one loved bochurim more than him. No one cared more than him. "
+         "Who doesn’t remember the notes he would write to Flamms, to optic "
+         "store, to Primo? The fact that a mashpia was doing all this was a "
+         "great lesson to all of us. A lesson of true love and true "
+         "spirituality — that start with caring about physical needs.",
+         "Eli Nochum", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("Who can forget his lively (to say the least) farbrengens that ended "
+         "at 3 or 4 in the morning with singing “Throw ’im in the mikvoh”?",
+         "A talmid", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("He was directly responsible for much of what Chabad is today, more "
+         "probably than many people realize. Some huge percentage of anash "
+         "learned with him over the years.",
+         "A talmid", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("Generations of students and their families remained connected to "
+         "him, and he became a beloved and revered figure in thousands of "
+         "Chabad homes around the world.",
+         "", "CrownHeights.info",
+         "https://crownheights.info/chabad-news/959753/"
+         "bde-rabbi-avrohom-lipskier-86-obm/"),
+    ],
     "more": [
         ("Renowned Mentor to the Baal Teshuva Movement Marks 50 Years — issue #848",
          "articles/renowned-mentor-to-the-baal-teshuva-movement-marks-50-years.html"),
@@ -860,8 +922,8 @@ def memorial_band():
 def memorial_html():
     """The memorial in full, for its own page. Nothing here is composed from
     memory: the life is this archive's own reporting, the dates and the family
-    are from the two notices, and the three quotations are lifted from pieces
-    already published on this site, each linked to its own page."""
+    are from the notices, which agree, and the tributes at the foot are quoted
+    as printed from COLlive and CrownHeights.info, each linked to its source."""
     m = MEMORIAL
     if not m:
         return ""
@@ -870,6 +932,19 @@ def memorial_html():
         .format(t=esc(t), s=esc(s), h=esc(h)) for t, s, h in m.get("quotes", []))
     more = "".join('<li><a href="/{h}">{t}</a></li>'.format(h=esc(h), t=esc(t))
                    for t, h in m.get("more", []))
+    trib = m.get("tributes", [])
+    tributes = ""
+    if trib:
+        tributes = (
+            '<section class="mem-trib" aria-label="Said about him">'
+            '<h3>What they wrote</h3>' +
+            "".join(
+                '<blockquote><p>{t}</p><cite>{w}<a href="{u}" target="_blank"'
+                ' rel="noopener">{s}</a></cite></blockquote>'.format(
+                    t=esc(t), w=(esc(w) + " &middot; " if w else ""),
+                    s=esc(s), u=esc(u))
+                for t, w, s, u in trib) +
+            '</section>')
     return (
         '\n<section class="memorial reveal" aria-label="In memory">\n'
         '  <figure class="mem-shot"><img src="/{img}" alt="">'
@@ -882,6 +957,7 @@ def memorial_html():
         '    <blockquote class="mem-pull"><p>{pull}</p></blockquote>\n'
         '    {body}\n'
         '    {quotes}\n'
+        '    {tributes}\n'
         '    <p class="mem-more">In this archive:</p><ul class="mem-list">{more}</ul>\n'
         '  </div>\n'
         '</section>\n'
@@ -890,7 +966,7 @@ def memorial_html():
         dates=esc(m["dates"]), lede=esc(m["lede"]),
         pull=esc(m["pull"]),
         body=_memorial_body(m.get("body", [])),
-        quotes=quotes, more=more)
+        quotes=quotes, tributes=tributes, more=more)
 
 def _memorial_body(items):
     """A body item is either a paragraph or a photograph, so pictures can sit
@@ -903,8 +979,14 @@ def _memorial_body(items):
                 '<figcaption>{c}</figcaption></figure>'
                 .format(i=esc(it["img"]), c=esc(it.get("caption", ""))))
         else:
-            out.append("<p>%s</p>" % esc(it))
+            out.append("<p>%s</p>" % _em(it))
     return "".join(out)
+
+def _em(s):
+    """Body text is escaped, so <em> would come out as literal angle brackets.
+    Yiddish and Hebrew phrases inside an English sentence want italics and
+    nothing else does, so exactly that one tag is let back through."""
+    return esc(s).replace("&lt;em&gt;", "<em>").replace("&lt;/em&gt;", "</em>")
 
 def _one_feature(f):
     off = "://" in f["href"]

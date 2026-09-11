@@ -457,6 +457,21 @@ html{scrollbar-gutter:stable;}
         letter-spacing:.04em;color:var(--ink-soft)}
   .memorial cite a{color:var(--royal);text-decoration:none}
   .memorial cite a:hover{border-bottom:1px solid var(--royal)}
+  /* What his talmidim wrote elsewhere in the days after. Two columns so a
+     screenful reads as a gathering of voices rather than a queue. */
+  .mem-trib{margin:2.2rem 0 0;padding-top:1.4rem;border-top:1px solid var(--rule)}
+  .mem-trib h3{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+        text-transform:uppercase;color:var(--ink-soft);font-weight:500;margin:0 0 1.1rem}
+  .mem-trib blockquote{margin:0;break-inside:avoid;padding:0 0 0 1rem;
+        border-left:1px solid var(--gold-bright)}
+  .mem-trib p{font-size:.96rem;line-height:1.65;color:var(--ink);margin:0 0 .4rem}
+  .mem-trib blockquote+blockquote{margin-top:1.4rem}
+  @media(min-width:900px){
+    .mem-trib{columns:2;column-gap:2.2rem}
+    .mem-trib h3{column-span:all}
+    .mem-trib blockquote{margin-bottom:1.4rem}
+    .mem-trib blockquote+blockquote{margin-top:0}
+  }
   .mem-more{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
         text-transform:uppercase;color:var(--ink-soft);margin:1.6rem 0 .5rem}
   .mem-list{list-style:none;margin:0;padding:0}
