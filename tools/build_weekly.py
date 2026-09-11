@@ -558,9 +558,10 @@ def esc(s):
 # own reporting in #848, the dates and family from COLlive and Anash, which
 # agree; the three quotations are from pieces already published here.
 MEMORIAL = {
-    "img": "storage/images-5/1098/Avrohom Levi Lipskier.jpg",
-    "caption": "With alumni of his baal t’shuva programs at a farbrengen in "
-               "Yerushalayim, Kislev 5778.",
+    # The portrait is the left panel of the composite that ran in #1165, lifted
+    # out at full size: the archive's only other copy of it is 150px wide.
+    "img": "storage/featured/lipskier-portrait.jpg",
+    "caption": "",
     "name": "Rabbi Avrohom Levi Lipskier",
     "dates": "15 Adar I 5700 — 28 Elul 5786",
     "lede": "Rabbi Avrohom Levi Lipskier, mashpia and rosh yeshiva, of Crown "
@@ -636,6 +637,11 @@ MEMORIAL = {
         "Backman of Glendale, Mrs. Chaya Mushka Silberberg of Crown Heights and "
         "R’ Berel Lipskier of Crown Heights; by grandchildren and "
         "great-grandchildren; and by seven siblings.",
+
+        {"img": "storage/images-5/1098/Avrohom Levi Lipskier.jpg",
+         "caption": "Kislev 5778, Ramot Dalet, Yerushalayim: about fifty of his "
+                    "alumni at a farbrengen with him on his visit to Eretz "
+                    "Yisroel. They agreed that evening to keep gathering."},
 
         "What he built is still running. His talmidim teach, run yeshivos, sit "
         "as rabbonim and serve as shluchim the world over, and many took "
@@ -883,8 +889,22 @@ def memorial_html():
         img=esc(m["img"]), cap=esc(m.get("caption", "")), name=esc(m["name"]),
         dates=esc(m["dates"]), lede=esc(m["lede"]),
         pull=esc(m["pull"]),
-        body="".join("<p>%s</p>" % esc(p) for p in m.get("body", [])),
+        body=_memorial_body(m.get("body", [])),
         quotes=quotes, more=more)
+
+def _memorial_body(items):
+    """A body item is either a paragraph or a photograph, so pictures can sit
+    where they belong in the account rather than all at the top."""
+    out = []
+    for it in items:
+        if isinstance(it, dict):
+            out.append(
+                '<figure class="mem-fig"><img src="/{i}" alt="" loading="lazy">'
+                '<figcaption>{c}</figcaption></figure>'
+                .format(i=esc(it["img"]), c=esc(it.get("caption", ""))))
+        else:
+            out.append("<p>%s</p>" % esc(it))
+    return "".join(out)
 
 def _one_feature(f):
     off = "://" in f["href"]
@@ -1278,9 +1298,22 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
      find them without a rule or a box. */
   .memorial{padding:clamp(1.6rem,4vw,2.8rem) 0 clamp(2rem,5vw,3.2rem);
         border-bottom:1px solid var(--rule);margin-bottom:clamp(1.4rem,3vw,2.2rem)}
-  .mem-shot{margin:0 0 1.6rem}
+  /* Portrait beside the name on a wide screen, above it on a narrow one. It is
+     625x672, so it sits square-ish next to the heading rather than as a band. */
+  .memorial{display:grid;grid-template-columns:minmax(0,26rem) minmax(0,1fr);
+        gap:0 clamp(1.6rem,4vw,3.4rem);align-items:start}
+  .mem-shot{margin:0;position:sticky;top:76px}
   .mem-shot img{display:block;width:100%;height:auto;border-radius:3px;
         background:var(--parchment-deep)}
+  .mem-fig{margin:1.8rem 0;grid-column:1/-1}
+  .mem-fig img{display:block;width:100%;height:auto;border-radius:3px;
+        background:var(--parchment-deep)}
+  .mem-fig figcaption{font-family:var(--mono);font-size:.68rem;line-height:1.5;
+        letter-spacing:.02em;color:var(--ink-soft);margin-top:.5rem;max-width:60ch}
+  @media(max-width:880px){
+    .memorial{grid-template-columns:1fr}
+    .mem-shot{position:static;margin-bottom:1.4rem;max-width:22rem}
+  }
   .mem-shot figcaption{font-family:var(--mono);font-size:.68rem;letter-spacing:.03em;
         color:var(--ink-soft);margin-top:.5rem}
   .mem-txt{max-width:64ch}
