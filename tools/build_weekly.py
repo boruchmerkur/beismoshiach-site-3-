@@ -618,7 +618,7 @@ MEMORIAL = {
         ("Within a day or two of Gimmel Tammuz, Rabbi Avrohom Lipskier, the "
          "celebrated chassid and founder of Tiferes Bachurim, came into the "
          "classroom and gave his devastated students a likut, a compilation of "
-         "the Rebbe’s teachings. … Reb Lipskier gave us a seder ha’avoda, a "
+         "the Rebbe’s teachings. … Rabbi Lipskier gave us a seder ha’avoda, a "
          "structured order of spiritual work to uplift us.",
          "“The Final Push,” June 2026", "articles/the-final-push.html"),
         ("I remember seeing mashpia Rabbi Avrohom Lipskier in 770 on Gimmel "
@@ -646,28 +646,20 @@ MEMORIAL = {
 
 FEATURE = [
     {
-        # The piece is the Rebbe's own sicha on Elul, and its heading is one of
-        # the export's broken ones — the article file says "goes out", a
-        # fragment of a sentence. The title given here is what its slug records
-        # and what the piece plainly is; the article's own bytes are untouched.
-        # The dek is the magazine's own, verbatim from its entry-pull.
-        "href": "articles/elul-the-king-is-in-the-field.html",
-        "kicker": "This month",
-        "title": "Elul: The King Is in the Field",
-        "dek": "“The illumination of the Thirteen Attributes of Mercy is in the "
-               "field, not in the desert.”",
-        "img": "storage/featured/rebbe-elul-in-the-field.jpg",
-        "meta": "The Rebbe · D’var Malchus · #847 · photo: RebbeDrive",
-    },
-    {
-        "href": "https://rebbesletters.com/hadran%20alach.dc",
-        "kicker": "Featured",
-        "title": "Hadran Alach, Igros Kodesh",
-        "dek": "One shliach in Toronto has just made a siyum on the whole of the "
-               "Igros Kodesh — 42 volumes, more than fifteen thousand letters, at "
-               "ten pages a day, held for some thirty years.",
-        "img": "storage/featured/deitsch-kos-shel-bracha.jpg",
-        "meta": "Avrohom Reinitz · Beis Moshiach #1515 · on rebbesletters.com",
+        # 11 September falls on erev Rosh HaShana this year, twenty-five years
+        # on. The archive holds a first-person account by two sisters who were
+        # in the air that morning on their way to the Rebbe for Rosh HaShana —
+        # 23 Elul 5761 — and were put down in Newfoundland. The figure and the
+        # ceremony are today's, from the wires.
+        "href": "articles/marooned-on-a-faraway-island.html",
+        "kicker": "Twenty-five years",
+        "title": "Marooned on a Faraway Island",
+        "dek": "At Ground Zero this morning the names of 2,983 people were read "
+               "aloud. Two sisters had left Eretz Yisroel on 23 Elul 5761 to be "
+               "with the Rebbe for Rosh HaShana. Their plane was put down in "
+               "Newfoundland.",
+        "img": "storage/images2/992/992 MAROONED ON A FARAWAY ISLAND.jpg",
+        "meta": "Beis Moshiach #992 · from the archive",
     },
 ]
 
@@ -769,11 +761,82 @@ def feature_html():
     items = FEATURE if isinstance(FEATURE, list) else ([FEATURE] if FEATURE else [])
     return "".join(_one_feature(f) for f in items)
 
+MEMORIAL_PAGE = "memory/rabbi-avrohom-lipskier.html"
+
+MEMORIAL_SHELL = """<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{name} &mdash; beismoshiach.org</title>
+<meta name="description" content="{lede}">
+<link rel="canonical" href="https://beismoshiach.org/{page}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{name}">
+<meta property="og:description" content="{lede}">
+<meta property="og:image" content="https://beismoshiach.org/{img}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900&family=Geist:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+  .wrap{{max-width:1180px;margin:0 auto;padding:0 clamp(1rem,4vw,2.6rem)}}
+  .memorial{{padding:clamp(1.8rem,4vw,3rem) 0 clamp(2rem,5vw,3.4rem);border-bottom:0}}
+</style>
+</head><body>
+<header class="bm-topbar"><div class="bm-inner">
+  <a class="bm-wordmark" href="/">beismoshiach<span class="bm-tld">.org</span></a>
+  <nav><a href="/topics">Topics</a><a href="/parsha">Parsha</a><a href="/collections">Collections</a><a href="/science/">Convergence</a>
+    <a href="/archives">Archives</a><a href="/search">Search</a><a class="langsw" href="/he/">&#1506;&#1489;&#1512;&#1497;&#1514;</a></nav>
+</div></header>
+<main><div class="wrap">{body}</div></main>
+<footer class="colophon"><div class="wrap">
+  <div class="cf-brand">beismoshiach.org</div>
+  A unified archive &middot; 3,541 articles preserved.
+</div></footer>
+</body></html>
+"""
+
+def write_memorial_page():
+    """The memorial gets its own page so the landing can carry a short notice
+    and a link rather than the whole of it."""
+    m = MEMORIAL
+    if not m:
+        return
+    doc = MEMORIAL_SHELL.format(name=esc(m["name"]), lede=esc(m["lede"]),
+                                page=esc(MEMORIAL_PAGE), img=esc(m["img"]),
+                                body=memorial_html())
+    p = os.path.join(ROOT, MEMORIAL_PAGE.replace("/", os.sep))
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    io_open = open(p, "w", encoding="utf-8", newline="\n")
+    io_open.write(doc)
+    io_open.close()
+    print("%s: %d bytes" % (MEMORIAL_PAGE, len(doc)))
+
+def memorial_band():
+    """What the landing carries: the photograph, who he was, the line his
+    talmid wrote about him, and a way through to the rest. The full account
+    lives on its own page — a memorial should not be the whole front page for
+    a week, and it reads better somewhere a person can send someone else."""
+    m = MEMORIAL
+    if not m:
+        return ""
+    return (
+        '\n<a class="memorial-brief reveal" href="/{page}">\n'
+        '  <figure><img src="/{img}" alt=""></figure>\n'
+        '  <div class="mb-txt">\n'
+        '    <p class="kick">In memory</p>\n'
+        '    <h2>{name}</h2>\n'
+        '    <p class="mem-dates">{dates}</p>\n'
+        '    <p class="mb-pull">{pull}</p>\n'
+        '    <p class="mb-more">Read the full memorial</p>\n'
+        '  </div>\n'
+        '</a>\n'
+    ).format(page=esc(MEMORIAL_PAGE), img=esc(m["img"]), name=esc(m["name"]),
+             dates=esc(m["dates"]), pull=esc(m["pull"]))
+
 def memorial_html():
-    """The memorial band, above the week. Nothing here is composed from memory:
-    the life is this archive's own reporting, the dates and the family are from
-    the two notices, and the three quotations are lifted from pieces already
-    published on this site, each linked to its own page."""
+    """The memorial in full, for its own page. Nothing here is composed from
+    memory: the life is this archive's own reporting, the dates and the family
+    are from the two notices, and the three quotations are lifted from pieces
+    already published on this site, each linked to its own page."""
     m = MEMORIAL
     if not m:
         return ""
@@ -988,8 +1051,16 @@ def render_landing(data):
         than on a guess about the filename."""
         return (bool(a.get("img")) and a.get("w", 0) >= 430
                 and a["w"] / max(a.get("h", 1), 1) >= 1.15)
-    order = ([a for a in arts if is_photo(a)] +
-             [a for a in arts if not is_photo(a)])
+    # The date leads, then the picture. Choosing on the picture alone put
+    # "Hunker Down", an editorial held by the standing strand, at the top of
+    # the page on erev Rosh Hashana while three Rosh Hashana pieces sat under
+    # it. A reader arriving that morning should meet the day he is in.
+    whytag = getattr(pick, "why", {}) or {}
+    here = set(wk["tags"])
+    seasonal = lambda a: whytag.get(a["s"], "") in here
+    order = sorted(arts, key=lambda a: (not (seasonal(a) and is_photo(a)),
+                                        not seasonal(a),
+                                        not is_photo(a)))
     lead = order[0]
     rest = [a for a in arts if a["s"] != lead["s"]][:6]
     if not is_photo(lead):
@@ -1059,7 +1130,8 @@ def render_landing(data):
                     _why=labels.get(wt, "") or STANDING.get(wt, ""))
 
     used = set()
-    page = LANDING.replace("{{MEMORIAL}}", memorial_html()) \
+    write_memorial_page()
+    page = LANDING.replace("{{MEMORIAL}}", memorial_band()) \
                   .replace("{{FEATURE}}", feature_html()) \
                   .replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
@@ -1217,6 +1289,25 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .mem-list li{padding:.4rem 0;border-top:1px solid var(--rule)}
   .mem-list a{color:var(--ink);text-decoration:none;font-size:.95rem}
   .mem-list a:hover{color:var(--royal)}
+  /* The landing's notice: enough to know who died and to want the rest. */
+  .memorial-brief{display:grid;grid-template-columns:.85fr 1.15fr;
+        gap:clamp(1rem,2.6vw,2rem);align-items:center;text-decoration:none;color:inherit;
+        padding:clamp(1.1rem,2.6vw,1.7rem) 0;border-top:1px solid var(--rule);
+        border-bottom:1px solid var(--rule);margin-bottom:clamp(1.2rem,3vw,2rem)}
+  .memorial-brief figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
+  .memorial-brief img{display:block;width:100%;height:auto;max-height:190px;object-fit:cover;
+        object-position:center 35%;filter:grayscale(1);transition:filter .6s var(--ease)}
+  .memorial-brief:hover img{filter:grayscale(.35)}
+  .memorial-brief h2{font-family:var(--display);font-weight:700;
+        font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.08;margin:.15rem 0 .25rem;color:var(--ink)}
+  .memorial-brief:hover h2{color:var(--royal)}
+  .mb-pull{font-family:var(--display);font-size:clamp(1rem,1.9vw,1.2rem);line-height:1.35;
+        color:var(--ink-soft);margin:.6rem 0 .5rem}
+  .mb-more{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--royal);margin:0}
+  .mb-more::after{content:" \\2192"}
+  @media(max-width:700px){.memorial-brief{grid-template-columns:1fr}
+        .memorial-brief figure{order:-1}}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
