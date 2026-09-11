@@ -573,34 +573,48 @@ MEMORIAL = {
         "770, and in 5722 was sent to Brunoy, France.",
 
         "In 1962, while he was still a bochur learning for smicha, young men "
-        "began wandering into 770. This magazine reported in issue #848 that the "
-        "locals were afraid of them, and that he was not: he learned with them "
-        "one to one, then in small groups, then in a class in 770. Rabbi Yisroel "
-        "Jacobson, the mashpia to the rabbinical students, told him to keep "
-        "going. The following year Rabbi Jacobson opened Hadar HaTorah with the "
-        "Rebbe’s blessing and hired him as its main teacher. It was the first "
-        "baal t’shuva yeshiva.",
+        "began wandering into 770 — long hair, no Jewish schooling behind them, "
+        "tired of what they had and unable to say what they were looking for. "
+        "The neighbourhood was wary of them. He was not. He learned with them "
+        "one at a time, then in small groups, then in a class he ran in 770 "
+        "itself, which at the time struck people as the strangest thing in the "
+        "building. Rabbi Yisroel Jacobson, the mashpia to the rabbinical "
+        "students, told him to keep at it, and the next year opened Hadar "
+        "HaTorah with the Rebbe’s blessing and put him in front of it as its "
+        "main teacher. It was the first baal t’shuva yeshiva.",
 
         "He married Cirel, daughter of the shliach Reb Berel Baumgarten. He "
         "taught at Hadar HaTorah until 1967, then went on shlichus to Milan. In "
         "1972 he wrote to the Rebbe about an offer to work on college campuses, "
         "and the Rebbe told him to accept it.",
 
-        "That year he advertised a summer program in Morristown called “Live and "
-        "Learn.” Rabbi Gurary of Buffalo telephoned to say he was bringing five "
-        "students to Crown Heights for Shavuos: “If they don’t go straight from "
-        "Crown Heights to learn in Morristown, they’ll go in all different "
-        "directions and we’ll lose them.” The five came ten days early. One of "
-        "them, Avrohom Schwarzberg, wanted to stay on, and wrote to the Rebbe. "
-        "The Rebbe answered, “Since you were successful where you were until "
-        "now, you should stay.” That was the beginning of Yeshivas Tiferes "
-        "Bachurim, which he led for decades. In 5760 he founded Yeshivas Tiferes "
-        "Menachem in Sea Gate.",
+        "That year he advertised a summer programme in Morristown, Live and "
+        "Learn. Rabbi Gurary of Buffalo telephoned to say he was bringing five "
+        "students down to Crown Heights for Shavuos, and that unless they went "
+        "straight on to learn in Morristown they would scatter and be lost. The "
+        "five came ten days early. One of them, Avrohom Schwarzberg, wanted to "
+        "stay on and wrote to the Rebbe, who answered that since he had been "
+        "successful where he was, he should stay. That was the beginning of "
+        "Yeshivas Tiferes Bachurim, which he led for decades. In 5760 he founded "
+        "Yeshivas Tiferes Menachem in Sea Gate.",
 
-        "Asked in 2012 what his message to his students was, he said it was the "
+        "Asked in 2012 what he was trying to give his students, he named the "
         "study and practice of Chassidus and a deep attachment to the Rebbe, and "
-        "that this was what built, in his words, “not followers, but Jewish "
-        "leaders.”",
+        "said that what this produced was not followers but leaders.",
+
+        "He farbrenged with his talmidim almost daily for years, until the pace "
+        "slackened to weekly and they took to knocking on his door to ask for "
+        "more. He was in 770 on Gimmel Tammuz 5754. Within a day or two he "
+        "gathered his students at Tiferes Bachurim into a classroom and put in "
+        "front of them a compilation of the Rebbe’s teachings, set out so that "
+        "the Rebbe’s own response to the passing of the Rebbe Rayatz after Yud "
+        "Shvat 5710 stood beside the day they were in: the talks published, the "
+        "spreading of Chassidus demanded faster, Yaakov Avinu lo meis, that "
+        "Jacob our father did not die, the bond deeper rather than ended. He "
+        "gave them an order of work to "
+        "follow. A therapist had been handing out business cards at the Ohel "
+        "that week, on the assumption that Lubavitch was on its way to "
+        "mourning. His students went back to learning.",
 
         "The levaya passed 770 at three o’clock on the day of his passing, and "
         "he was buried at Old Montefiore, near the Ohel. He is survived by his "
@@ -610,37 +624,20 @@ MEMORIAL = {
         "R’ Berel Lipskier of Crown Heights; by grandchildren and "
         "great-grandchildren; and by seven siblings.",
     ],
-    # his talmid, in this magazine, in his own words
-    "pull": "Rabbi Avrohom Lipskier saved a generation.",
-    "pullsrc": ("Rabbi Boruch Merkur, “The Final Push,” June 2026",
-                "articles/the-final-push.html"),
-    "quotes": [
-        ("Within a day or two of Gimmel Tammuz, Rabbi Avrohom Lipskier, the "
-         "celebrated chassid and founder of Tiferes Bachurim, came into the "
-         "classroom and gave his devastated students a likut, a compilation of "
-         "the Rebbe’s teachings. … Rabbi Lipskier gave us a seder ha’avoda, a "
-         "structured order of spiritual work to uplift us.",
-         "“The Final Push,” June 2026", "articles/the-final-push.html"),
-        ("I remember seeing mashpia Rabbi Avrohom Lipskier in 770 on Gimmel "
-         "Tammuz. I looked at him perplexed. He shrugged. It was a time of "
-         "shock. … I think it was Dalet Tammuz, the very next day, when Rabbi "
-         "Lipskier gathered us into a classroom. His shrug was gone. His command "
-         "had returned. He had a Yechi HaMelech pamphlet in hand and we learned, "
-         "our faith restored and refocused. Here is a leader who helped us defy "
-         "despair.",
-         "“Who Are You?!” issue #1173, 5779", "articles/who-are-you.html"),
-        ("The legendary chassid and mashpia, Rabbi Avrohom Lipskier, famed for "
-         "leading so many Jews to the path of t’shuva with his inviting smile "
-         "and charisma, used to farbreng almost daily with his students. It was "
-         "a rigorous regime of ongoing, uplifting inspiration that lasted for "
-         "years.",
-         "“Be a Man – Of G-d,” issue #1165, 5779", "articles/be-a-man-of-g-d.html"),
-    ],
+    "pull": "He started the first baal t’shuva yeshiva, and taught in one for "
+            "sixty years.",
+    "quotes": [],
     "more": [
         ("Renowned Mentor to the Baal Teshuva Movement Marks 50 Years — issue #848",
          "articles/renowned-mentor-to-the-baal-teshuva-movement-marks-50-years.html"),
         ("Tiferes Alumni Farbrengen in Yerushalayim — issue #1098",
          "articles/tiferes-alumni-farbrengen-in-yerushalayim-with-rabbi-lipskie.html"),
+        ("Who Are You?! — issue #1173",
+         "articles/who-are-you.html"),
+        ("Be a Man – Of G-d — issue #1165",
+         "articles/be-a-man-of-g-d.html"),
+        ("The Final Push — Gimmel Tammuz 5786",
+         "articles/the-final-push.html"),
     ],
 }
 
@@ -854,8 +851,7 @@ def memorial_html():
         '    <h2>{name}</h2>\n'
         '    <p class="mem-dates">{dates}</p>\n'
         '    <p class="mem-lede">{lede}</p>\n'
-        '    <blockquote class="mem-pull"><p>{pull}</p>'
-        '<cite><a href="/{psh}">{ps}</a></cite></blockquote>\n'
+        '    <blockquote class="mem-pull"><p>{pull}</p></blockquote>\n'
         '    {body}\n'
         '    {quotes}\n'
         '    <p class="mem-more">In this archive:</p><ul class="mem-list">{more}</ul>\n'
@@ -864,7 +860,7 @@ def memorial_html():
     ).format(
         img=esc(m["img"]), cap=esc(m.get("caption", "")), name=esc(m["name"]),
         dates=esc(m["dates"]), lede=esc(m["lede"]),
-        pull=esc(m["pull"]), ps=esc(m["pullsrc"][0]), psh=esc(m["pullsrc"][1]),
+        pull=esc(m["pull"]),
         body="".join("<p>%s</p>" % esc(p) for p in m.get("body", [])),
         quotes=quotes, more=more)
 
