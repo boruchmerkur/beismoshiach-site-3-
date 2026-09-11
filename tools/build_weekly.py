@@ -629,7 +629,19 @@ MEMORIAL = {
 
         "He farbrenged with his talmidim almost daily for years, until the pace "
         "slackened to weekly and they took to knocking on his door to ask for "
-        "more. He was in 770 on Gimmel Tammuz 5754. Within a day or two he "
+        "more. Those farbrengens are the first thing his talmidim bring up. "
+        "They ran to three and four in the morning and ended with a man being "
+        "carried off to the mikva, and being the one carried is remembered as "
+        "a privilege. So are the notes. He would write a chit to Flamm’s for a "
+        "hat, to the optician for glasses, to the men’s shop for a suit, so "
+        "that a bochur who had arrived with nothing could be dressed like "
+        "everybody else. One who came shaving with a blade found an electric "
+        "razor had been bought for him; when the beard came in, he gave the "
+        "razor back. That a mashpia, whose brief was supposedly the soul, "
+        "spent his afternoons on hats and glasses was itself the lesson, and "
+        "the men watching took it as one.",
+
+        "He was in 770 on Gimmel Tammuz 5754. Within a day or two he "
         "gathered his students at Tiferes Bachurim into a classroom and put in "
         "front of them a compilation of the Rebbe’s teachings, set out so that "
         "the Rebbe’s own response to the passing of the Rebbe Rayatz after Yud "
@@ -666,23 +678,11 @@ MEMORIAL = {
     "pull": "Men came to his door unable to read Hebrew and went out as "
             "teachers, shluchim and rabbonim. He kept it open for sixty years.",
     "quotes": [],
-    # Said about him elsewhere in the days after, quoted as printed. The first
-    # is from CrownHeights.info's notice; the rest were written by his talmidim
-    # under COLlive's, where more than twenty of them wrote in overnight.
+    # The stories his talmidim tell, quoted as printed and ordered so the ones
+    # with something in them come first. All but the last were written under
+    # COLlive's notice, where more than twenty of them wrote in overnight;
+    # CrownHeights.info's own notice supplies the last.
     "tributes": [
-        ("His heart was pure love and appreciation for all his students and "
-         "teachers. I had the privilege of being a teacher under his tutelage. "
-         "He was my mentor and my friend.",
-         "Rabbi Aryeh", "COLlive",
-         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
-
-        ("What a light was Rabbi Lipskier for so many of us! Brought by the "
-         "Rebbe but cared for by him and his staff. Rabbi Lipskier was an "
-         "inspiration in many ways and aspects of Chassidic life but what "
-         "stands out above all for me was he was a Chassid of the Rebbe.",
-         "A talmid", "COLlive",
-         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
-
         ("He was my teacher in 5743, he brought me closer to Torah and "
          "Chassidus, and the Rebbe. I will always remember when I shaved with "
          "a blade, he asked Rabbi Greenberg and bought me a 100 dollar "
@@ -701,6 +701,40 @@ MEMORIAL = {
 
         ("Who can forget his lively (to say the least) farbrengens that ended "
          "at 3 or 4 in the morning with singing “Throw ’im in the mikvoh”?",
+         "A talmid", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("I was thrown by him. What a zchus!",
+         "A talmid", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("I am at loss of words to say. Rabbi Lipskier literally took me into "
+         "Tiferes Bachurim with mesirus nefesh, and I owe him so much. He "
+         "played a most important role, and mainly shliach, in what and who I "
+         "am today. Only the best memories of those days.",
+         "Nosson Blumes", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("His heart was pure love and appreciation for all his students and "
+         "teachers. I had the privilege of being a teacher under his tutelage. "
+         "He was my mentor and my friend.",
+         "Rabbi Aryeh", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("What a light was Rabbi Lipskier for so many of us! Brought by the "
+         "Rebbe but cared for by him and his staff. Rabbi Lipskier was an "
+         "inspiration in many ways and aspects of Chassidic life but what "
+         "stands out above all for me was he was a Chassid of the Rebbe.",
+         "A talmid", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("Changed lives over and over for decades and decades. What a legend, "
+         "chosid, and a great great man.",
+         "A talmid, 2010", "COLlive",
+         "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
+
+        ("I was a student at Sea Gate between 1999–2000. I learned so much "
+         "just by watching him.",
          "A talmid", "COLlive",
          "https://collive.com/rabbi-avrohom-lipskier-86-obm/"),
 
@@ -866,6 +900,9 @@ MEMORIAL_SHELL = """<!DOCTYPE html><html lang="en"><head>
 <style>
   .wrap{{max-width:1180px;margin:0 auto;padding:0 clamp(1rem,4vw,2.6rem)}}
   .memorial{{padding:clamp(1.8rem,4vw,3rem) 0 clamp(2rem,5vw,3.4rem);border-bottom:0}}
+  /* Wide enough for the body to run in two columns beside the portrait, so
+     the page is let out to suit rather than held at the reading width. */
+  @media(min-width:1480px){{.wrap{{max-width:1460px}}}}
 </style>
 </head><body>
 <header class="bm-topbar"><div class="bm-inner">
@@ -936,8 +973,8 @@ def memorial_html():
     tributes = ""
     if trib:
         tributes = (
-            '<section class="mem-trib" aria-label="Said about him">'
-            '<h3>What they wrote</h3>' +
+            '<section class="mem-trib" aria-label="Stories his talmidim tell">'
+            '<h3>Stories they tell</h3>' +
             "".join(
                 '<blockquote><p>{t}</p><cite>{w}<a href="{u}" target="_blank"'
                 ' rel="noopener">{s}</a></cite></blockquote>'.format(
@@ -955,7 +992,7 @@ def memorial_html():
         '    <p class="mem-dates">{dates}</p>\n'
         '    <p class="mem-lede">{lede}</p>\n'
         '    <blockquote class="mem-pull"><p>{pull}</p></blockquote>\n'
-        '    {body}\n'
+        '    <div class="mem-body">{body}</div>\n'
         '    {quotes}\n'
         '    {tributes}\n'
         '    <p class="mem-more">In this archive:</p><ul class="mem-list">{more}</ul>\n'

@@ -421,25 +421,39 @@ html{scrollbar-gutter:stable;}
      find them without a rule or a box. */
   .memorial{padding:clamp(1.6rem,4vw,2.8rem) 0 clamp(2rem,5vw,3.2rem);
         border-bottom:1px solid var(--rule);margin-bottom:clamp(1.4rem,3vw,2.2rem)}
-  /* Portrait beside the name on a wide screen, above it on a narrow one. It is
-     625x672, so it sits square-ish next to the heading rather than as a band. */
-  .memorial{display:grid;grid-template-columns:minmax(0,26rem) minmax(0,1fr);
+  /* Portrait to the right of the text on a wide screen, above it on a narrow
+     one. It is 625x672, so it sits square-ish beside the heading rather than
+     as a band. It scrolls away with everything else: holding it in place cost
+     a column the text can use instead. */
+  .memorial{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,24rem);
         gap:0 clamp(1.6rem,4vw,3.4rem);align-items:start}
-  .mem-shot{margin:0;position:sticky;top:76px}
+  .mem-shot{margin:0;grid-column:2;grid-row:1}
+  .mem-txt{grid-column:1;grid-row:1}
   .mem-shot img{display:block;width:100%;height:auto;border-radius:3px;
         background:var(--parchment-deep)}
-  .mem-fig{margin:1.8rem 0;grid-column:1/-1}
+  .mem-fig{margin:1.8rem 0;break-inside:avoid}
   .mem-fig img{display:block;width:100%;height:auto;border-radius:3px;
         background:var(--parchment-deep)}
   .mem-fig figcaption{font-family:var(--mono);font-size:.68rem;line-height:1.5;
         letter-spacing:.02em;color:var(--ink-soft);margin-top:.5rem;max-width:60ch}
   @media(max-width:880px){
     .memorial{grid-template-columns:1fr}
-    .mem-shot{position:static;margin-bottom:1.4rem;max-width:22rem}
+    .mem-shot{grid-column:1;grid-row:1;margin-bottom:1.4rem;max-width:22rem}
+    .mem-txt{grid-row:2}
   }
   .mem-shot figcaption{font-family:var(--mono);font-size:.68rem;letter-spacing:.03em;
         color:var(--ink-soft);margin-top:.5rem}
   .mem-txt{max-width:64ch}
+  /* Very wide: the account itself breaks into two columns. The heading, the
+     lede and the pull quote stay across the top of them, so the piece still
+     opens as one thing before it divides. */
+  @media(min-width:1480px){
+    .mem-txt{max-width:none}
+    .mem-body{columns:2;column-gap:clamp(1.8rem,3vw,3rem);
+          column-rule:1px solid var(--rule)}
+    .mem-body>p{margin-top:0;break-inside:avoid-column}
+    .mem-lede,.mem-pull{max-width:72ch}
+  }
   .memorial h2{font-family:var(--display);font-weight:900;
         font-size:clamp(1.9rem,4.4vw,3rem);line-height:1.02;letter-spacing:-.02em;
         margin:.2rem 0 .3rem;color:var(--ink)}
