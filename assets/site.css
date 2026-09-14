@@ -493,13 +493,18 @@ html{scrollbar-gutter:stable;}
   .mem-list a{color:var(--ink);text-decoration:none;font-size:.95rem}
   .mem-list a:hover{color:var(--royal)}
   /* The landing's notice: enough to know who died and to want the rest. */
-  .memorial-brief{display:grid;grid-template-columns:.85fr 1.15fr;
+  .memorial-brief{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr);
         gap:clamp(1rem,2.6vw,2rem);align-items:center;text-decoration:none;color:inherit;
         padding:clamp(1.1rem,2.6vw,1.7rem) 0;border-top:1px solid var(--rule);
         border-bottom:1px solid var(--rule);margin-bottom:clamp(1.2rem,3vw,2rem)}
   .memorial-brief figure{margin:0;overflow:hidden;border-radius:3px;background:var(--parchment-deep)}
-  .memorial-brief img{display:block;width:100%;height:auto;max-height:190px;object-fit:cover;
-        object-position:center 35%;filter:grayscale(1);transition:filter .6s var(--ease)}
+  /* A portrait, cropped as one: the photograph is 625x672, so a 4:5 frame
+     trims a little off the sides and nothing off his face. The earlier rule
+     squashed it into a 190px letterbox, which cut the t'fillin off the top of
+     his head and the beard off the bottom. */
+  .memorial-brief img{display:block;width:100%;height:auto;aspect-ratio:4/5;
+        object-fit:cover;object-position:42% 30%;
+        filter:grayscale(1);transition:filter .6s var(--ease)}
   .memorial-brief:hover img{filter:grayscale(.35)}
   .memorial-brief h2{font-family:var(--display);font-weight:700;
         font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.08;margin:.15rem 0 .25rem;color:var(--ink)}
@@ -510,4 +515,6 @@ html{scrollbar-gutter:stable;}
         color:var(--royal);margin:0}
   .mb-more::after{content:" \2192"}
   @media(max-width:700px){.memorial-brief{grid-template-columns:1fr}
-        .memorial-brief figure{order:-1}}
+        /* Stacked, a full-width portrait would run half the phone screen, so
+           it is held to a size the notice can sit beside its own text. */
+        .memorial-brief figure{order:-1;max-width:12rem}}
