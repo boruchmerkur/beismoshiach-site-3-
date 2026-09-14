@@ -767,20 +767,20 @@ MEMORIAL = {
 
 FEATURE = [
     {
-        # 11 September falls on erev Rosh HaShana this year, twenty-five years
-        # on. The archive holds a first-person account by two sisters who were
-        # in the air that morning on their way to the Rebbe for Rosh HaShana —
-        # 23 Elul 5761 — and were put down in Newfoundland. The figure and the
-        # ceremony are today's, from the wires.
-        "href": "articles/marooned-on-a-faraway-island.html",
-        "kicker": "Twenty-five years",
-        "title": "Marooned on a Faraway Island",
-        "dek": "At Ground Zero this morning the names of 2,983 people were read "
-               "aloud. Two sisters had left Eretz Yisroel on 23 Elul 5761 to be "
-               "with the Rebbe for Rosh HaShana. Their plane was put down in "
-               "Newfoundland.",
-        "img": "storage/images2/992/992 MAROONED ON A FARAWAY ISLAND.jpg",
-        "meta": "Beis Moshiach #992 · from the archive",
+        # Yom Kippur 5787 falls on Monday, 10 Tishrei — after the coming
+        # Shabbos, so the week entry does not carry it and the slot does. A
+        # profile from #1134 of R' Avrohom Tauber a"h, whose Yom Kippur was
+        # spent walking out to make a minyan on yishuv Orot. Every detail
+        # below is from the article itself.
+        "href": "articles/going-on-high-on-yom-kippur.html",
+        "kicker": "Yom Kippur",
+        "title": "Going on High on Yom Kippur",
+        "dek": "For decades he walked a long distance every Yom Kippur to make "
+               "a minyan on yishuv Orot, pulling the residents out of their "
+               "homes to come and daven. He blessed Jews with the priestly "
+               "blessing on the Rebbe’s explicit instruction.",
+        "img": "storage/images7/1134/YOM KIPPUR.png",
+        "meta": "Beis Moshiach #1134 · Nosson Avrohom",
     },
 ]
 
