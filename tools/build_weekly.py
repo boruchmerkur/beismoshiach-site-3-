@@ -678,6 +678,31 @@ MEMORIAL = {
     "pull": "Men came to his door unable to read Hebrew and went out as "
             "teachers, shluchim and rabbonim. He kept it open for sixty years.",
     "quotes": [],
+    # His own shiurim, which the yeshiva has put online at tiferes.org. The
+    # recordings are his; the transcripts beside them are machine-made and
+    # rough on Hebrew and Yiddish, so nothing from them is quoted here — the
+    # block says what is there and sends the reader to hear it.
+    "shiurim": {
+        "href": "https://www.tiferes.org/video/",
+        "kicker": "In his own voice",
+        "title": "Twenty of his shiurim, online",
+        "note": "Yeshivas Tiferes Menachem has recovered the recordings from "
+                "its archive and put them up. The yeshiva’s doors are closed; "
+                "this is what is still open.",
+        "groups": [
+            ("A maamar of 5709 on the avodah of Elul and t’shuva",
+             "Taught over seven sessions: the neshama that comes down into a "
+             "body as a debtor who can pay only half, and a creditor who "
+             "forgives and by forgiving puts him back on his feet."),
+            ("Likkutei Sichos, volume 24",
+             "Elul, the Ten Days of T’shuva and Chai Elul — among them the "
+             "Baal Shem Tov’s child who is lost, has no language to ask in, "
+             "and cries out one sound; which is the shofar."),
+            ("Shoftim 5751, and further sichos",
+             "Two parts from the year of the sichos, and later shiurim from "
+             "Sea Gate."),
+        ],
+    },
     # The stories his talmidim tell, quoted as printed and ordered so the ones
     # with something in them come first. All but the last were written under
     # COLlive's notice, where more than twenty of them wrote in overnight;
@@ -969,6 +994,18 @@ def memorial_html():
         .format(t=esc(t), s=esc(s), h=esc(h)) for t, s, h in m.get("quotes", []))
     more = "".join('<li><a href="/{h}">{t}</a></li>'.format(h=esc(h), t=esc(t))
                    for t, h in m.get("more", []))
+    sh = m.get("shiurim")
+    shiurim = ""
+    if sh:
+        shiurim = (
+            '<a class="mem-shiur" href="{h}" target="_blank" rel="noopener">'
+            '<p class="kick">{k}</p><h3>{t}</h3><p class="ms-note">{n}</p>'
+            '<ul>{g}</ul><p class="ms-more">Listen at tiferes.org</p></a>'
+        ).format(
+            h=esc(sh["href"]), k=esc(sh["kicker"]), t=esc(sh["title"]),
+            n=esc(sh["note"]),
+            g="".join("<li><b>{a}</b> {b}</li>".format(a=esc(a), b=esc(b))
+                      for a, b in sh["groups"]))
     trib = m.get("tributes", [])
     tributes = ""
     if trib:
@@ -994,6 +1031,7 @@ def memorial_html():
         '    <blockquote class="mem-pull"><p>{pull}</p></blockquote>\n'
         '    <div class="mem-body">{body}</div>\n'
         '    {quotes}\n'
+        '    {shiurim}\n'
         '    {tributes}\n'
         '    <p class="mem-more">In this archive:</p><ul class="mem-list">{more}</ul>\n'
         '  </div>\n'
@@ -1003,7 +1041,7 @@ def memorial_html():
         dates=esc(m["dates"]), lede=esc(m["lede"]),
         pull=esc(m["pull"]),
         body=_memorial_body(m.get("body", [])),
-        quotes=quotes, tributes=tributes, more=more)
+        quotes=quotes, shiurim=shiurim, tributes=tributes, more=more)
 
 def _memorial_body(items):
     """A body item is either a paragraph or a photograph, so pictures can sit

@@ -471,6 +471,30 @@ html{scrollbar-gutter:stable;}
         letter-spacing:.04em;color:var(--ink-soft)}
   .memorial cite a{color:var(--royal);text-decoration:none}
   .memorial cite a:hover{border-bottom:1px solid var(--royal)}
+  /* His own shiurim, at the yeshiva that recorded them. Set apart from the
+     account as a card, because it is the one thing on the page a reader can
+     act on. */
+  .mem-shiur{display:block;margin:2.2rem 0 0;padding:clamp(1.1rem,2.4vw,1.5rem);
+        border:1px solid var(--rule);border-left:3px solid var(--gold-bright);
+        border-radius:3px;background:var(--parchment-deep);
+        text-decoration:none;color:inherit;break-inside:avoid;
+        transition:border-color .4s var(--ease)}
+  .mem-shiur:hover{border-color:var(--royal)}
+  .mem-shiur h3{font-family:var(--display);font-weight:700;
+        font-size:clamp(1.15rem,2.2vw,1.45rem);line-height:1.12;
+        margin:.15rem 0 .5rem;color:var(--ink)}
+  .mem-shiur:hover h3{color:var(--royal)}
+  /* `.memorial p` is a class+element selector, so it outranks a bare class —
+     these two have to be qualified or the card's own type never lands. */
+  .mem-shiur .ms-note{font-size:.95rem;line-height:1.6;color:var(--ink-soft);
+        margin:0 0 .9rem}
+  .mem-shiur ul{list-style:none;margin:0;padding:0}
+  .mem-shiur li{padding:.55rem 0;border-top:1px solid var(--rule);
+        font-size:.92rem;line-height:1.6;color:var(--ink-soft)}
+  .mem-shiur li b{font-weight:500;color:var(--ink)}
+  .mem-shiur .ms-more{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;
+        text-transform:uppercase;color:var(--royal);margin:.9rem 0 0}
+  .mem-shiur .ms-more::after{content:" \2192"}
   /* What his talmidim wrote elsewhere in the days after. Two columns so a
      screenful reads as a gathering of voices rather than a queue. */
   .mem-trib{margin:2.2rem 0 0;padding-top:1.4rem;border-top:1px solid var(--rule)}
