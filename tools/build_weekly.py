@@ -450,8 +450,12 @@ def main():
         "season": {t: "storage/art/" + f for t, f in SEASON_ART.items() if have(f)},
         "dept": {d: "storage/art/" + f for d, f in DEPT_ART.items() if have(f)},
     }
+    head_of, parts_of = find_series(arts)
     data = {"built": today.isoformat(), "articles": arts, "tags": keep,
-            "evergreen": ever, "season": season, "art": artmap, "schedule": sched}
+            "evergreen": ever, "season": season, "art": artmap, "schedule": sched,
+            # worked out once here so the page and the script that re-renders it
+            # for the visitor's own week cannot disagree about it
+            "series": head_of, "parts": parts_of}
     outp = os.path.join(ROOT, "assets", "weekly.json")
     with open(outp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
@@ -468,6 +472,62 @@ def week_for(data, today=None):
             return w
     return data["schedule"][-1]
 
+PART_RX = re.compile(r"-part-(\d+|i{1,3}|iv|v)$")
+ROMAN = {"i": 1, "ii": 2, "iii": 3, "iv": 4, "v": 5}
+
+def _part_no(tok):
+    tok = tok.lower()
+    return int(tok) if tok.isdigit() else ROMAN.get(tok, 0)
+
+def find_series(articles):
+    """Bind an article to its own later parts.
+
+    Two shapes occur in the archive. Sometimes both parts carry the marker
+    (putin-and-plowshares-part-1 and -part-2). More often only the later one
+    does and the opening part is the bare slug: learn-to-yearn-for-the-beis-
+    hamikdash in #1126, then ...-part-2 in #1127.
+
+    The bare slug is accepted as the opening only when it ran in an earlier
+    issue. the-dream-of-exile-part-2 is #841 while the-dream-of-exile is #980,
+    which makes those two pieces that happen to share a name rather than a
+    series, and pairing them would send a reader backwards.
+
+    Returns (head_of, parts_of): every member slug mapped to the opening part,
+    and every opening part mapped to its ordered [[n, slug], ...].
+    """
+    groups = {}
+    for s in articles:
+        m = PART_RX.search(s)
+        if m:
+            groups.setdefault(s[:m.start()], {})[_part_no(m.group(1))] = s
+    head_of, parts_of = {}, {}
+    for base, parts in groups.items():
+        if 1 not in parts and base in articles:
+            later = articles[parts[min(parts)]].get("i") or 0
+            if (articles[base].get("i") or 0) <= later:
+                parts[1] = base
+        if len(parts) < 2:
+            continue
+        ordered = [[n, parts[n]] for n in sorted(parts)]
+        head = ordered[0][1]
+        for _, s in ordered:
+            head_of[s] = head
+        parts_of[head] = ordered
+    return head_of, parts_of
+
+def collapse_series(slugs, head_of):
+    """One card for a series, and it is the opening part.
+
+    The week's tags hand back both halves of a two-part interview, and the
+    tag order decided which came first — which is how part 2 ended up above
+    part 1 on the page, with the same dek under each."""
+    out, seen = [], set()
+    for s in slugs:
+        s = head_of.get(s, s)
+        if s not in seen:
+            seen.add(s); out.append(s)
+    return out
+
 def pick(data, wk, n=7):
     """The week's own material first, topped up from the evergreen pool so a
     thin parsha week still fills the page.
@@ -482,6 +542,7 @@ def pick(data, wk, n=7):
         tags = set(season.get(s, []))
         return (not tags) or bool(tags & here)
 
+    head_of = data.get("series", {})
     out, seen, why = [], set(), {}
     weekpicks = []
     # Take one from each of the week's tags in turn rather than emptying the
@@ -492,7 +553,10 @@ def pick(data, wk, n=7):
     # larger share.
     # A piece can sit under this week's parsha and still be a Sukkos piece;
     # the date tag wins either way.
-    lists = [[s for s in data["tags"].get(t, []) if in_season(s)] for t in wk["tags"]]
+    # A later part is folded onto its opening here, before anything is chosen,
+    # so a series takes one slot rather than two and takes it in order.
+    lists = [[head_of.get(s, s) for s in data["tags"].get(t, []) if in_season(s)]
+             for t in wk["tags"]]
     for i in range(max((len(L) for L in lists), default=0)):
         for t, L in zip(wk["tags"], lists):
             if i < len(L) and L[i] not in seen:
@@ -511,9 +575,9 @@ def pick(data, wk, n=7):
         # their <h1>, and if one of those wins the rotation the filter further
         # down drops it and the strand simply vanishes for that week — the slot
         # would be silently empty in exactly the weeks it was wanted.
-        pool = [s for s in data["tags"].get(t, [])
-                if s not in seen and in_season(s)
-                and reads_as_headline(data["articles"].get(s, {}))]
+        pool = [h for h in (head_of.get(s, s) for s in data["tags"].get(t, [])
+                            if in_season(s))
+                if h not in seen and reads_as_headline(data["articles"].get(h, {}))]
         if pool:
             s = pool[wknum % len(pool)]
             seen.add(s); standing.append(s); why[s] = t
@@ -528,7 +592,7 @@ def pick(data, wk, n=7):
             # rotate the pool by week so it isn't the same picks forever
             off = (datetime.date.fromisoformat(wk["w"]).toordinal() // 7) % len(ev)
             for i in range(len(ev)):
-                s = ev[(off + i) % len(ev)]
+                s = head_of.get(ev[(off + i) % len(ev)], ev[(off + i) % len(ev)])
                 if s in seen:
                     continue
                 if not in_season(s):
@@ -1078,6 +1142,15 @@ def _one_feature(f):
         i=esc(f["img"]), ti=esc(f["title"]), d=esc(f.get("dek", "")),
         m=esc(f.get("meta", "")))
 
+def parts_html(a):
+    """A card that opens a series says so, and says how long it is.
+
+    It is a label rather than a link: the card is already one link, and a
+    second inside it is not something a browser will render. The parts link to
+    each other on the articles themselves."""
+    n = len(a.get("_parts") or ())
+    return '<span class="ofparts">In %s parts</span>' % ("two" if n == 2 else n) if n > 1 else ""
+
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
     meta = " · ".join(x for x in [a.get("a"), a.get("c"), ("#%s" % a["i"]) if a.get("i") else ""] if x)
@@ -1087,6 +1160,7 @@ def card_html(a, big=False, used=None):
     why = a.get("_why") or ""
     chip = why or a.get("c") or "From the archive"
     tag = '<span class="why%s">%s</span>' % ("" if why else " plain", esc(chip))
+    tag += parts_html(a)
     if big:
         img = a.get("img") or FALLBACK_IMG
         used.add(img)
@@ -1271,8 +1345,16 @@ def render_landing(data):
     # something already on the page.
     shown = {lead["s"]} | {a["s"] for a in rest}
     season, here = data.get("season", {}), set(wk["tags"])
+    head_of = data.get("series", {})
+    fam = lambda s: head_of.get(s, s)
     def eligible(s):
+        # A series is one item on the page, wherever it turns up. Both halves
+        # of the Ben-Ari interview sit in the archive pool, so without this
+        # they came out as two cards with the same dek, part two above part one.
+        s = fam(s)
         if s in shown or s not in data["articles"]:
+            return False
+        if any(fam(e["s"]) == s for e in ever):
             return False
         tags = set(season.get(s, []))
         return not (tags and not (tags & here))
@@ -1280,19 +1362,24 @@ def render_landing(data):
     # Shleimus HaAretz always has a place on the page — it is a standing
     # concern of the magazine, not an occasional topic.
     ever, cand, used_authors = [], [], {author_key(a.get("a")) for a in arts if a.get("a")}
-    shleimus = [data["articles"][s] for s in data["tags"].get("shleimus-ha-aretz", [])
+    shleimus = [data["articles"][fam(s)] for s in data["tags"].get("shleimus-ha-aretz", [])
                 if eligible(s)]
     for a in sorted(shleimus, key=lambda x: not reads_as_headline(x)):
         ever.append(a); break
+    # eligible() weighs a slug against what is already on the page; the
+    # candidate list is built before any of it lands there, so two slugs of one
+    # series both pass and both resolve to the same opening article. Hold them
+    # off here as well, or the archive row prints that piece twice.
+    incand = set()
     for s in data["evergreen"]:
         if len(ever) >= 6:
             break
-        if not eligible(s) or any(e["s"] == s for e in ever):
+        if not eligible(s) or fam(s) in incand:
             continue
-        a = data["articles"][s]
+        a = data["articles"][fam(s)]
         if author_key(a.get("a")) in used_authors:
             continue                              # a writer already on the page
-        cand.append(a)
+        incand.add(fam(s)); cand.append(a)
     # A lifted sentence only gets a slot if nothing else can fill it.
     heads = [a for a in cand if reads_as_headline(a)]
     cand = heads + [a for a in cand if a not in heads] if len(heads) < 6 else heads
@@ -1305,12 +1392,15 @@ def render_landing(data):
         for s in data["evergreen"]:
             if len(ever) >= 6:
                 break
-            a = data["articles"].get(s)
-            if not a or not eligible(s) or any(e["s"] == s for e in ever):
+            if not eligible(s):
+                continue
+            a = data["articles"].get(fam(s))
+            if not a:
                 continue
             if want_headline and not reads_as_headline(a):
                 continue
             ever.append(a)
+            incand.add(fam(s))
     kicker = " · ".join(x for x in [("Parshas " + wk["p"]) if wk["p"] else "",
                                     ("Shabbos " + wk["hd"]) if wk["hd"] else ""] if x)
 
@@ -1322,6 +1412,7 @@ def render_landing(data):
         wt = whyof.get(a["s"], "")
         # a standing strand has no label in the week entry — it belongs to no week
         return dict(a, _season=wk["tags"], _whytag=wt,
+                    _parts=data.get("parts", {}).get(a["s"], []),
                     _why=labels.get(wt, "") or STANDING.get(wt, ""))
 
     used = set()
@@ -1506,13 +1597,17 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     (wk.tags||[]).forEach(function(t){here[t]=1;});
     var inSeason=function(s){var st=(d.season||{})[s]||[];
       return !st.length||st.some(function(x){return here[x];});};
-    var why={};
-    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s){
-      if(!seen[s]&&inSeason(s)){seen[s]=1;list.push(s);why[s]=t;}});});
+    var why={},SER=d.series||{},PRT=d.parts||{};
+    /* a later part folds onto its opening, so a series takes one slot and
+       takes it in order — the same rule the builder applies */
+    var headOf=function(s){return SER[s]||s;};
+    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s0){
+      var s=headOf(s0);
+      if(!seen[s]&&inSeason(s0)){seen[s]=1;list.push(s);why[s]=t;}});});
     if(list.length<13&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
       for(var j=0;j<d.evergreen.length&&list.length<13;j++){
-        var s=d.evergreen[(off+j)%d.evergreen.length];
+        var s=headOf(d.evergreen[(off+j)%d.evergreen.length]);
         if(seen[s]) continue;
         if(!inSeason(s)) continue;               /* out of season? wait its turn */
         seen[s]=1;list.push(s);
@@ -1547,8 +1642,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var AM=d.art||{season:{},dept:{}};
     var LB=wk.labels||{};
     var whyOf=function(a){return LB[a._why||'']||'';};
+    var parts=function(a){var n=(PRT[a.s]||[]).length;
+      return n>1?'<span class="ofparts">In '+(n===2?'two':n)+' parts</span>':'';};
     var chip=function(a){var w=whyOf(a);
-      return '<span class="why'+(w?'':' plain')+'">'+esc(w||a.c||'From the archive')+'</span>';};
+      return '<span class="why'+(w?'':' plain')+'">'+esc(w||a.c||'From the archive')+'</span>'+parts(a);};
     /* Beis Moshiach separates dek clauses with an asterisk; set it as a
        middot, which is what that break looks like on screen */
     var sep=function(s){return s.replace(/ \*+ /g,' · ');};

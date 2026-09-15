@@ -74,6 +74,20 @@ hr.rule-gold{height:2px;border:0;background:linear-gradient(90deg,transparent,va
   background:var(--royal);color:var(--parchment);border:0;border-radius:2px;padding:7px 14px;cursor:pointer;}
 .citebox button:hover{background:var(--ink);}
 
+/* The parts of a piece that ran over more than one issue. Sits between the
+   article and the rest of its issue, because that is the next thing the
+   reader of part one actually wants. */
+.series{max-width:720px;margin:24px auto 0;padding:16px 0 0;border-top:1px solid var(--rule);}
+.series .sr-kick{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);margin:0 0 10px;}
+.series ol{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;}
+.series li{margin:0;}
+.series li a,.series li span{display:block;font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--rule);
+  border-radius:2px;text-decoration:none;}
+.series li a{color:var(--royal);}
+.series li a:hover{border-color:var(--royal);background:var(--parchment-deep);}
+.series li.here span{color:var(--ink-soft);background:var(--parchment-deep);cursor:default;}
 .more-issue{max-width:720px;margin:20px auto 0;padding:20px 0 0;border-top:1px solid var(--rule);}
 .more-issue h3{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:0 0 12px;}
 .more-issue ul{list-style:none;margin:0;padding:0;}
@@ -471,6 +485,12 @@ html{scrollbar-gutter:stable;}
         letter-spacing:.04em;color:var(--ink-soft)}
   .memorial cite a{color:var(--royal);text-decoration:none}
   .memorial cite a:hover{border-bottom:1px solid var(--royal)}
+  /* A card that opens a series wears a quiet second chip beside the first. */
+  .ofparts{display:inline-block;margin-left:.45rem;font-family:var(--mono);
+        font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;
+        color:var(--ink-soft);border:1px solid var(--rule);
+        border-radius:2px;padding:.12rem .38rem;vertical-align:.08em}
+
   /* His own shiurim, at the yeshiva that recorded them. Set apart from the
      account as a card, because it is the one thing on the page a reader can
      act on. */
