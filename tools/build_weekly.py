@@ -302,7 +302,22 @@ SEASON_TAGS.update({"sukkos", "pesach", "chanukah", "purim", "shavuos",
                     "tisha-b-av", "yud-tes-kislev", "chof-beis-shvat",
                     "yud-shvat", "gimmel-tammuz", "yud-beis-tammuz",
                     "beis-nissan", "yud-alef-nissan", "basi-l-gani",
-                    "chai-elul", "elul", "menachem-av", "tishrei", "selichos"})
+                    "chai-elul", "elul", "menachem-av", "tishrei", "selichos",
+                    "shabbos-shuva"})
+
+# Shabbos Shuva has no tag page — the archive files this material under
+# "teshuva", which is mostly baal-t'shuva stories and would read wrong under
+# that chip. These are the pieces in the archive that are about the t'shuva of
+# these particular days; each one was opened and read before it went on the
+# list. Registered as a pool below, the way the science department is.
+SHABBOS_SHUVA = [
+    "origin-confusing-repentance-with-teshuva",  # #1184, Preparing for Tishrei
+    "teshuva-70",                                # #1181, Majeski on cheshbon ha'nefesh
+    "ayin-beis-on-tshuva",                       # #1038, the Rebbe Rashab's hemshech
+    "tshuva-before-geula",                       # #1135, Ha'yom Yom & Moshiach
+    "repent-for-what",                           # #1179, editorial
+    "undoing-the-disguise-of-galus",             # #849, D'var Malchus, 6 Tishrei
+]
 
 SMALL = {"of", "the", "and", "b", "l"}
 
@@ -365,6 +380,13 @@ def main():
     else:
         print("moshiach-science: assets/science.json missing — run tools/build_science.py")
 
+    # ---- Shabbos Shuva, hand-picked above because the archive has no tag for it
+    have_ss = [s for s in SHABBOS_SHUVA
+               if os.path.isfile(os.path.join(ART, s + ".html"))]
+    tagmap["shabbos-shuva"] = have_ss
+    LABELS.setdefault("shabbos-shuva", "Shabbos Shuva")
+    print("shabbos-shuva: %d of %d slugs found" % (len(have_ss), len(SHABBOS_SHUVA)))
+
     # ---- schedule: every Shabbos for the next YEARS years
     today = datetime.date.today()
     start = today - datetime.timedelta(days=today.weekday() + 2 if today.weekday() < 5 else 0)
@@ -380,12 +402,14 @@ def main():
         hd = dates.GregorianDate(sat.year, sat.month, sat.day)
         pname = parshios.getparsha_string(hd, israel=False)
         tags = []
+        psl = ""
         if pname:
             cands = PARSHA_ALIASES.get(pname) or []
             cands = cands + [norm(pname), re.sub(r"[^a-z]+", "-", pname.lower()).strip("-")]
             sl = pick_slug(cands, tagmap)
             if sl:
                 tags.append(sl)
+                psl = sl
         # occasions + month falling anywhere in this week
         for off in range(-6, 1):
             d2 = sat + datetime.timedelta(days=off)
@@ -401,10 +425,25 @@ def main():
                 sl = pick_slug(cands, tagmap)
                 if sl and sl not in tags:
                     tags.append(sl)
+        # Shabbos Shuva: the Shabbos that falls inside the Ten Days, 3–9
+        # Tishrei. Two things follow from it, and neither comes out of the
+        # scan above. The day itself has no fixed date, so it has no entry in
+        # OCCASIONS; and Yom Kippur, 10 Tishrei, always falls in the days
+        # AFTER this Shabbos, so the backward six-day scan first reports it
+        # on the Shabbos that follows the fast — days late for a reader
+        # standing in the Ten Days. Both go to the front, Shuva first.
+        if hsat.month == 7 and 3 <= hsat.day <= 9:
+            front = []
+            for cands in (["shabbos-shuva"], ["yom-kippur"]):
+                sl = pick_slug(cands, tagmap)
+                if sl:
+                    if sl in tags:
+                        tags.remove(sl)
+                    front.append(sl)
+            tags = front + tags
         sched.append({"w": sat.isoformat(), "p": pname or "", "tags": tags,
-                      "ptag": tags[0] if (pname and tags) else "",
-                      "labels": {t: label_for(t, LABELS, pname, tags[0] if (pname and tags) else "")
-                                 for t in tags},
+                      "ptag": psl,
+                      "labels": {t: label_for(t, LABELS, pname, psl) for t in tags},
                       "hd": "%d %s %d" % (hsat.day, hsat.month_name(), hsat.year)})
         for t in tags:
             need.update(tagmap.get(t, [])[:14])
@@ -904,7 +943,8 @@ DEPT_ART = {
 SEASON_ART = {
     "elul": "elul.jpg", "menachem-av": "av.jpg", "tishrei": "tishrei.jpg",
     "rosh-hashanah": "tishrei.jpg", "rosh-hashana": "tishrei.jpg",
-    "yom-kippur": "tishrei.jpg", "sukkos": "sukkos.jpg",
+    "yom-kippur": "tishrei.jpg", "shabbos-shuva": "tishrei.jpg",
+    "sukkos": "sukkos.jpg",
     "simchas-torah": "sukkos.jpg", "chanukah": "chanukah.jpg",
     "purim": "purim.jpg", "pesach": "pesach.jpg", "shavuos": "shavuos.jpg",
     "lag-baomer": "lagbaomer.jpg", "lag-bomer": "lagbaomer.jpg",
