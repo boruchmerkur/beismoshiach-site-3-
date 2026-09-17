@@ -27,3 +27,7 @@ package-lock.json
 # Python bytecode from the build scripts in tools/
 __pycache__/
 *.pyc
+
+# scratch from the Scribd recovery — working files, not part of the site
+*.tmp
+.covers/

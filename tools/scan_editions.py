@@ -30,7 +30,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = r"C:\Users\BoruchMerkur\Downloads\beismoshiach-pdfs"
 COVERS = os.path.join(ROOT, "storage", "editions")
 OUT = os.path.join(ROOT, "assets", "editions.json")
-LANGS = {"hebrew": "he", "english": "en"}
+# english-scribd is where issues pulled back off Scribd land. It was not in
+# this map, so #923 and #938 sat on disk for weeks without ever reaching the
+# index — the folder existed and nothing read it.
+LANGS = {"hebrew": "he", "english": "en", "english-scribd": "en"}
 COVER_W = 320
 
 FORCE = "--force" in sys.argv
