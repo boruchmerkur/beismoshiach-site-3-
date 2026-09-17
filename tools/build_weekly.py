@@ -567,13 +567,26 @@ def collapse_series(slugs, head_of):
             seen.add(s); out.append(s)
     return out
 
-def pick(data, wk, n=7):
+def half_of_week(wk, today=None):
+    """Which half of the run-up to Shabbos we are in: 0, then 1 from Wednesday.
+
+    The week's picks are settled by the week entry, so a reader who came on
+    Sunday and came back on Thursday met the same page — which is what a page
+    looks like when it has stopped moving. The second half takes the next
+    pieces out of the same week's pool instead."""
+    today = today or datetime.date.today()
+    return 0 if (datetime.date.fromisoformat(wk["w"]) - today).days > 3 else 1
+
+def pick(data, wk, n=7, half=0):
     """The week's own material first, topped up from the evergreen pool so a
     thin parsha week still fills the page.
 
     The top-ups are filtered by season: a piece tagged Sukkos has no business
     on the page in Av. Anything carrying a date tag other than this week's own
-    is held back until its time comes round."""
+    is held back until its time comes round.
+
+    `half` turns the week's own pool over midweek, so the page moves twice a
+    week off one build rather than once."""
     season = data.get("season", {})
     here = set(wk["tags"])
 
@@ -620,6 +633,12 @@ def pick(data, wk, n=7):
         if pool:
             s = pool[wknum % len(pool)]
             seen.add(s); standing.append(s); why[s] = t
+
+    # Midweek, start further into the week's own pool. Ki Seitzei and Tishrei
+    # carry far more than seven pieces each, so this brings up material that
+    # would otherwise wait a year for its week to come round again.
+    if half and len(weekpicks) > 7:
+        weekpicks = weekpicks[3:] + weekpicks[:3]
 
     # Interleaved rather than appended: the parsha alone can fill all seven
     # slots, and anything added after that never survives the cut.
@@ -1013,6 +1032,12 @@ def feature_html():
 
 MEMORIAL_PAGE = "memory/rabbi-avrohom-lipskier.html"
 
+# The memorial keeps its own page for good; the notice on the landing is the
+# part that has a season. It came down a week after the petira, and goes back
+# up for the shloshim — 28 Tishrei 5787, around 9 October 2026. Set this True
+# to put the band back.
+MEMORIAL_ON_LANDING = False
+
 MEMORIAL_SHELL = """<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1069,7 +1094,7 @@ def memorial_band():
     lives on its own page — a memorial should not be the whole front page for
     a week, and it reads better somewhere a person can send someone else."""
     m = MEMORIAL
-    if not m:
+    if not m or not MEMORIAL_ON_LANDING:
         return ""
     return (
         '\n<a class="memorial-brief reveal" href="/{page}">\n'
@@ -1333,7 +1358,8 @@ def render_landing(data):
     # ask for a deeper pool than the page needs, so capping a prolific
     # columnist still leaves real choices underneath rather than forcing a
     # third piece by the same writer
-    slugs = pick(data, wk, 24)
+    half = half_of_week(wk)
+    slugs = pick(data, wk, 24, half=half)
     arts = [data["articles"][s] for s in slugs if s in data["articles"]]
     arts = spread(arts, cap=2)
     lead_first = arts[:1]
@@ -1463,7 +1489,7 @@ def render_landing(data):
                   .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
                   .replace("{{CARDS}}", "".join(card_html(dress(a), used=used) for a in rest)) \
                   .replace("{{EVER}}", "".join(card_html(dress(a), used=used) for a in ever)) \
-                  .replace("{{WEEK}}", esc(wk["w"]))
+                  .replace("{{WEEK}}", esc("%s-%d" % (wk["w"], half)))
     open(os.path.join(ROOT, "index.html"), "w", encoding="utf-8").write(page)
     print("index.html: lead '%s' + %d cards + %d evergreen (week %s)"
           % (lead["t"][:44], len(rest), len(ever), wk["w"]))
@@ -1632,7 +1658,12 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var today=new Date().toISOString().slice(0,10);
     var wk=null;
     for(var i=0;i<d.schedule.length;i++){ if(d.schedule[i].w>=today){ wk=d.schedule[i]; break; } }
-    if(!wk||wk.w===main.dataset.week) return;               // already current
+    /* which half of the run-up to Shabbos: 0, then 1 from Wednesday. The page
+       is built for one slot; when the reader's own slot has moved past it, the
+       week's pool is turned over here rather than waiting for a rebuild. */
+    var half=((Date.parse(wk.w)-Date.parse(today))/864e5)>3?0:1;
+    var slot=wk.w+'-'+half;
+    if(slot===main.dataset.week) return;                    // already current
     var seen={},list=[],here={};
     (wk.tags||[]).forEach(function(t){here[t]=1;});
     var inSeason=function(s){var st=(d.season||{})[s]||[];
@@ -1653,6 +1684,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
         seen[s]=1;list.push(s);
       }
     }
+    if(half&&list.length>7) list=list.slice(3).concat(list.slice(0,3));
     var arts=list.map(function(s){var a=d.articles[s];
       return a?Object.assign({},a,{_why:why[s]||''}):null;}).filter(Boolean);
     /* the same rules the builder applies, so a week that turns over without a
@@ -1727,7 +1759,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
       (L.x?'<p class="open">'+esc(L.x)+'</p>':'')+
       '<p class="meta">'+esc(meta(L))+'</p></div></a>';
     document.getElementById('cards').innerHTML=arts.slice(1,7).map(card).join('');
-    main.dataset.week=wk.w;
+    main.dataset.week=slot;
   }).catch(function(){/* the rendered week stands */});
 })();
 </script>
