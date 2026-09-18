@@ -5533,6 +5533,17 @@
 "cover": "storage/editions/en-866.jpg"
 },
 {
+"k": "en-867",
+"n": 867,
+"lang": "en",
+"file": "867.pdf",
+"bytes": 2872821,
+"pages": 37,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-867.jpg"
+},
+{
 "k": "en-879",
 "n": 879,
 "lang": "en",
@@ -5544,6 +5555,105 @@
 "cover": "storage/editions/en-879.jpg"
 },
 {
+"k": "en-880",
+"n": 880,
+"lang": "en",
+"file": "880.pdf",
+"bytes": 3316041,
+"pages": 41,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-880.jpg"
+},
+{
+"k": "en-887",
+"n": 887,
+"lang": "en",
+"file": "887.pdf",
+"bytes": 3023414,
+"pages": 40,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-887.jpg"
+},
+{
+"k": "en-891",
+"n": 891,
+"lang": "en",
+"file": "891.pdf",
+"bytes": 3202583,
+"pages": 40,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-891.jpg"
+},
+{
+"k": "en-892",
+"n": 892,
+"lang": "en",
+"file": "892.pdf",
+"bytes": 2715571,
+"pages": 40,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-892.jpg"
+},
+{
+"k": "en-896",
+"n": 896,
+"lang": "en",
+"file": "896.pdf",
+"bytes": 3729236,
+"pages": 40,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-896.jpg"
+},
+{
+"k": "en-899",
+"n": 899,
+"lang": "en",
+"file": "899.pdf",
+"bytes": 3430426,
+"pages": 36,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-899.jpg"
+},
+{
+"k": "en-901",
+"n": 901,
+"lang": "en",
+"file": "901.pdf",
+"bytes": 2645509,
+"pages": 40,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-901.jpg"
+},
+{
+"k": "en-902",
+"n": 902,
+"lang": "en",
+"file": "902.pdf",
+"bytes": 2294516,
+"pages": 39,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-902.jpg"
+},
+{
+"k": "en-904",
+"n": 904,
+"lang": "en",
+"file": "904.pdf",
+"bytes": 3538091,
+"pages": 39,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-904.jpg"
+},
+{
 "k": "en-907",
 "n": 907,
 "lang": "en",
@@ -5553,6 +5663,28 @@
 "repaired": false,
 "ok": true,
 "cover": "storage/editions/en-907.jpg"
+},
+{
+"k": "en-908",
+"n": 908,
+"lang": "en",
+"file": "908.pdf",
+"bytes": 6260503,
+"pages": 39,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-908.jpg"
+},
+{
+"k": "en-912",
+"n": 912,
+"lang": "en",
+"file": "912.pdf",
+"bytes": 3191397,
+"pages": 39,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-912.jpg"
 },
 {
 "k": "en-922",
@@ -5577,6 +5709,17 @@
 "cover": "storage/editions/en-923.jpg"
 },
 {
+"k": "en-924",
+"n": 924,
+"lang": "en",
+"file": "924.pdf",
+"bytes": 3013895,
+"pages": 39,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-924.jpg"
+},
+{
 "k": "en-928",
 "n": 928,
 "lang": "en",
@@ -5586,6 +5729,28 @@
 "repaired": false,
 "ok": true,
 "cover": "storage/editions/en-928.jpg"
+},
+{
+"k": "en-931",
+"n": 931,
+"lang": "en",
+"file": "931.pdf",
+"bytes": 2896228,
+"pages": 48,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-931.jpg"
+},
+{
+"k": "en-932",
+"n": 932,
+"lang": "en",
+"file": "932.pdf",
+"bytes": 2312241,
+"pages": 40,
+"repaired": false,
+"ok": true,
+"cover": "storage/editions/en-932.jpg"
 },
 {
 "k": "en-934",
