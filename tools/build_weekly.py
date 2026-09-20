@@ -411,14 +411,24 @@ def main():
                 tags.append(sl)
                 psl = sl
         # occasions + month falling anywhere in this week
+        # `on` records the day each occasion actually falls on. A week runs
+        # Sunday to Shabbos and can hold two of them — 5787 puts Yom Kippur on
+        # the Monday and the first day of Sukkos on the Shabbos — and the
+        # earlier one is over long before the page comes down. The date travels
+        # with the week so both renderers can put a day that has passed behind
+        # one still ahead; nothing here is reordered, because a week entry does
+        # not know which day it is being read on.
+        on = {}
         for off in range(-6, 1):
             d2 = sat + datetime.timedelta(days=off)
             h2 = dates.GregorianDate(d2.year, d2.month, d2.day).to_heb()
             for cands in [OCCASIONS.get((h2.month, h2.day))]:
                 if cands:
                     sl = pick_slug(cands, tagmap)
-                    if sl and sl not in tags:
-                        tags.append(sl)
+                    if sl:
+                        on.setdefault(sl, d2.isoformat())
+                        if sl not in tags:
+                            tags.append(sl)
         hsat = hd.to_heb()
         for cands in [MONTH_TAGS.get(hsat.month)]:
             if cands:
@@ -442,7 +452,7 @@ def main():
                     front.append(sl)
             tags = front + tags
         sched.append({"w": sat.isoformat(), "p": pname or "", "tags": tags,
-                      "ptag": psl,
+                      "ptag": psl, "on": on,
                       "labels": {t: label_for(t, LABELS, pname, psl) for t in tags},
                       "hd": "%d %s %d" % (hsat.day, hsat.month_name(), hsat.year)})
         for t in tags:
@@ -577,6 +587,21 @@ def half_of_week(wk, today=None):
     today = today or datetime.date.today()
     return 0 if (datetime.date.fromisoformat(wk["w"]) - today).days > 3 else 1
 
+def week_tags(wk, today=None):
+    """The week's tags, with any occasion already behind the reader moved to
+    the back.
+
+    The order matters: the page leads on the first tag that has a picture, so
+    whichever occasion stands first runs the week. On the week of 15 Tishrei
+    that is Yom Kippur, which falls on the Monday, and by Wednesday the page
+    would still be opening on the fast while Sukkos comes in on Friday night.
+    The day itself is never demoted — a fast is the fast until it is out."""
+    today = today or datetime.date.today()
+    on = wk.get("on") or {}
+    tags = wk.get("tags") or []
+    past = [t for t in tags if on.get(t, "9999") < today.isoformat()]
+    return ([t for t in tags if t not in past] + past) if past else tags
+
 def pick(data, wk, n=7, half=0):
     """The week's own material first, topped up from the evergreen pool so a
     thin parsha week still fills the page.
@@ -588,7 +613,8 @@ def pick(data, wk, n=7, half=0):
     `half` turns the week's own pool over midweek, so the page moves twice a
     week off one build rather than once."""
     season = data.get("season", {})
-    here = set(wk["tags"])
+    tags = week_tags(wk)
+    here = set(tags)
 
     def in_season(s):
         tags = set(season.get(s, []))
@@ -608,9 +634,9 @@ def pick(data, wk, n=7, half=0):
     # A later part is folded onto its opening here, before anything is chosen,
     # so a series takes one slot rather than two and takes it in order.
     lists = [[head_of.get(s, s) for s in data["tags"].get(t, []) if in_season(s)]
-             for t in wk["tags"]]
+             for t in tags]
     for i in range(max((len(L) for L in lists), default=0)):
-        for t, L in zip(wk["tags"], lists):
+        for t, L in zip(tags, lists):
             if i < len(L) and L[i] not in seen:
                 seen.add(L[i]); weekpicks.append(L[i]); why[L[i]] = t
 
@@ -919,6 +945,11 @@ FEATURE = [
         # profile from #1134 of R' Avrohom Tauber a"h, whose Yom Kippur was
         # spent walking out to make a minyan on yishuv Orot. Every detail
         # below is from the article itself.
+        #
+        # Comes down at the Wednesday run, 23 September 2026. The fast is out
+        # Monday night and this week's Shabbos is the first day of Sukkos; the
+        # week entry demotes its own Yom Kippur tag from the Tuesday, but this
+        # slot does not demote itself and has to be changed here.
         "href": "articles/going-on-high-on-yom-kippur.html",
         "kicker": "Yom Kippur",
         "title": "Going on High on Yom Kippur",
@@ -1400,7 +1431,7 @@ def render_landing(data):
     rest = [a for a in arts if a["s"] != lead["s"]][:6]
     if not is_photo(lead):
         lead = dict(lead, _whytag=(getattr(pick, "why", {}) or {}).get(lead["s"], ""))
-        commissioned = art_for(lead, wk["tags"])
+        commissioned = art_for(lead, week_tags(wk))
         if commissioned:
             lead = dict(lead, img=commissioned[0])
         else:
@@ -1665,14 +1696,20 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var slot=wk.w+'-'+half;
     if(slot===main.dataset.week) return;                    // already current
     var seen={},list=[],here={};
-    (wk.tags||[]).forEach(function(t){here[t]=1;});
+    /* An occasion the reader is already past goes behind one still ahead: a
+       week can hold two, and the page leads on whichever stands first. The day
+       itself is never demoted — the same rule the builder applies. */
+    var ON=wk.on||{},TAGS=(wk.tags||[]),past=TAGS.filter(function(t){
+      return ON[t]&&ON[t]<today;});
+    if(past.length) TAGS=TAGS.filter(function(t){return past.indexOf(t)<0;}).concat(past);
+    TAGS.forEach(function(t){here[t]=1;});
     var inSeason=function(s){var st=(d.season||{})[s]||[];
       return !st.length||st.some(function(x){return here[x];});};
     var why={},SER=d.series||{},PRT=d.parts||{};
     /* a later part folds onto its opening, so a series takes one slot and
        takes it in order — the same rule the builder applies */
     var headOf=function(s){return SER[s]||s;};
-    (wk.tags||[]).forEach(function(t){(d.tags[t]||[]).forEach(function(s0){
+    TAGS.forEach(function(t){(d.tags[t]||[]).forEach(function(s0){
       var s=headOf(s0);
       if(!seen[s]&&inSeason(s0)){seen[s]=1;list.push(s);why[s]=t;}});});
     if(list.length<13&&d.evergreen.length){
@@ -1747,7 +1784,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     if(L) used[L.img]=1;
     if(!L){L=Object.assign({},arts[0]);
       var AM0=d.art||{season:{},dept:{}},hero=null;
-      (wk.tags||[]).forEach(function(t){if(!hero&&AM0.season[t])hero=AM0.season[t];});
+      TAGS.forEach(function(t){if(!hero&&AM0.season[t])hero=AM0.season[t];});
       if(!hero)hero=AM0.dept[(L.c||'').trim()];
       L.img=hero||HEROES[Math.floor(Date.parse(wk.w)/6048e5)%HEROES.length];}
     arts=[L].concat(arts.filter(function(a){return a.s!==L.s;}));
