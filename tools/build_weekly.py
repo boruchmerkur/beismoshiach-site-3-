@@ -588,19 +588,20 @@ def half_of_week(wk, today=None):
     return 0 if (datetime.date.fromisoformat(wk["w"]) - today).days > 3 else 1
 
 def week_tags(wk, today=None):
-    """The week's tags, with any occasion already behind the reader moved to
-    the back.
+    """The week's tags, less any occasion already behind the reader.
 
     The order matters: the page leads on the first tag that has a picture, so
     whichever occasion stands first runs the week. On the week of 15 Tishrei
     that is Yom Kippur, which falls on the Monday, and by Wednesday the page
     would still be opening on the fast while Sukkos comes in on Friday night.
-    The day itself is never demoted — a fast is the fast until it is out."""
+    Moving it to the back was not enough — a Yom Kippur card still sat on the
+    Sukkos page — so once it has passed it leaves the week altogether. The day
+    itself is never dropped: a fast is the fast until it is out."""
     today = today or datetime.date.today()
     on = wk.get("on") or {}
     tags = wk.get("tags") or []
     past = [t for t in tags if on.get(t, "9999") < today.isoformat()]
-    return ([t for t in tags if t not in past] + past) if past else tags
+    return [t for t in tags if t not in past]
 
 def pick(data, wk, n=7, half=0):
     """The week's own material first, topped up from the evergreen pool so a
@@ -940,25 +941,24 @@ MEMORIAL = {
 
 FEATURE = [
     {
-        # Yom Kippur 5787 falls on Monday, 10 Tishrei — after the coming
-        # Shabbos, so the week entry does not carry it and the slot does. A
-        # profile from #1134 of R' Avrohom Tauber a"h, whose Yom Kippur was
-        # spent walking out to make a minyan on yishuv Orot. Every detail
-        # below is from the article itself.
+        # Sukkos 5787 begins Friday night, 15 Tishrei, 25 September 2026; the
+        # week's Shabbos is the first day. Put up at the Wednesday run, 23
+        # September, in place of the Yom Kippur piece, while the four minim
+        # are still being bought. From #1135 (Chabad History, by Berger); the
+        # dek is the magazine's own, verbatim.
         #
-        # Comes down at the Wednesday run, 23 September 2026. The fast is out
-        # Monday night and this week's Shabbos is the first day of Sukkos; the
-        # week entry demotes its own Yom Kippur tag from the Tuesday, but this
-        # slot does not demote itself and has to be changed here.
-        "href": "articles/going-on-high-on-yom-kippur.html",
-        "kicker": "Yom Kippur",
-        "title": "Going on High on Yom Kippur",
-        "dek": "For decades he walked a long distance every Yom Kippur to make "
-               "a minyan on yishuv Orot, pulling the residents out of their "
-               "homes to come and daven. He blessed Jews with the priestly "
-               "blessing on the Rebbe’s explicit instruction.",
-        "img": "storage/images7/1134/YOM KIPPUR.png",
-        "meta": "Beis Moshiach #1134 · Nosson Avrohom",
+        # Comes down, or turns to Simchas Torah, at the run after Sukkos: the
+        # week of 22 Tishrei (Shabbos 3 October) carries simchas-torah only.
+        "href": "articles/the-esrogim-that-no-borders-could-hold-back.html",
+        "kicker": "Sukkos",
+        "title": "The Esrogim That No Borders Could Hold Back",
+        "dek": "Chabad custom is to use an esrog from Calabria (Genoa). "
+               "Chassidim faced many a challenge over the years in obtaining "
+               "these esrogim, that went beyond high prices. Even when Europe "
+               "was on fire, these esrogim continued to break down iron walls "
+               "and to reach Chassidim who pined for them with love.",
+        "img": "storage/images7/1135/ESROG.png",
+        "meta": "Beis Moshiach #1135 · Berger",
     },
 ]
 
@@ -1421,8 +1421,11 @@ def render_landing(data):
     # "Hunker Down", an editorial held by the standing strand, at the top of
     # the page on erev Rosh Hashana while three Rosh Hashana pieces sat under
     # it. A reader arriving that morning should meet the day he is in.
+    # An occasion already behind the reader does not count as the day: on the
+    # Wednesday of the week of 15 Tishrei a Yom Kippur photo was still beating
+    # the Sukkos pieces to the top.
     whytag = getattr(pick, "why", {}) or {}
-    here = set(wk["tags"])
+    here = set(week_tags(wk))
     seasonal = lambda a: whytag.get(a["s"], "") in here
     order = sorted(arts, key=lambda a: (not (seasonal(a) and is_photo(a)),
                                         not seasonal(a),
@@ -1441,7 +1444,7 @@ def render_landing(data):
     # it is where the Sukkos piece was turning up in Av — and never repeats
     # something already on the page.
     shown = {lead["s"]} | {a["s"] for a in rest}
-    season, here = data.get("season", {}), set(wk["tags"])
+    season, here = data.get("season", {}), set(week_tags(wk))
     head_of = data.get("series", {})
     fam = lambda s: head_of.get(s, s)
     def eligible(s):
@@ -1508,7 +1511,7 @@ def render_landing(data):
     def dress(a):
         wt = whyof.get(a["s"], "")
         # a standing strand has no label in the week entry — it belongs to no week
-        return dict(a, _season=wk["tags"], _whytag=wt,
+        return dict(a, _season=week_tags(wk), _whytag=wt,
                     _parts=data.get("parts", {}).get(a["s"], []),
                     _why=labels.get(wt, "") or STANDING.get(wt, ""))
 
@@ -1696,12 +1699,12 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var slot=wk.w+'-'+half;
     if(slot===main.dataset.week) return;                    // already current
     var seen={},list=[],here={};
-    /* An occasion the reader is already past goes behind one still ahead: a
-       week can hold two, and the page leads on whichever stands first. The day
-       itself is never demoted — the same rule the builder applies. */
+    /* An occasion the reader is already past leaves the week: a week can hold
+       two, and the page leads on whichever stands first. The day itself is
+       never dropped — the same rule the builder applies. */
     var ON=wk.on||{},TAGS=(wk.tags||[]),past=TAGS.filter(function(t){
       return ON[t]&&ON[t]<today;});
-    if(past.length) TAGS=TAGS.filter(function(t){return past.indexOf(t)<0;}).concat(past);
+    if(past.length) TAGS=TAGS.filter(function(t){return past.indexOf(t)<0;});
     TAGS.forEach(function(t){here[t]=1;});
     var inSeason=function(s){var st=(d.season||{})[s]||[];
       return !st.length||st.some(function(x){return here[x];});};
