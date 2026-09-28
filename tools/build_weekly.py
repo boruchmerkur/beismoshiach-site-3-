@@ -941,24 +941,23 @@ MEMORIAL = {
 
 FEATURE = [
     {
-        # Sukkos 5787 begins Friday night, 15 Tishrei, 25 September 2026; the
-        # week's Shabbos is the first day. Put up at the Wednesday run, 23
-        # September, in place of the Yom Kippur piece, while the four minim
-        # are still being bought. From #1135 (Chabad History, by Berger); the
-        # dek is the magazine's own, verbatim.
+        # Shemini Atzeres 5787 is Shabbos 22 Tishrei, 3 October 2026, and
+        # Simchas Torah follows on Sunday. Put up at the run of 27 September
+        # (16 Tishrei) in place of the Sukkos esrog piece. From #990 (Stories,
+        # by Ziegelboim), which the article itself presents for Simchas Torah;
+        # the dek is the magazine's own, verbatim.
         #
-        # Comes down, or turns to Simchas Torah, at the run after Sukkos: the
-        # week of 22 Tishrei (Shabbos 3 October) carries simchas-torah only.
-        "href": "articles/the-esrogim-that-no-borders-could-hold-back.html",
-        "kicker": "Sukkos",
-        "title": "The Esrogim That No Borders Could Hold Back",
-        "dek": "Chabad custom is to use an esrog from Calabria (Genoa). "
-               "Chassidim faced many a challenge over the years in obtaining "
-               "these esrogim, that went beyond high prices. Even when Europe "
-               "was on fire, these esrogim continued to break down iron walls "
-               "and to reach Chassidim who pined for them with love.",
-        "img": "storage/images7/1135/ESROG.png",
-        "meta": "Beis Moshiach #1135 · Berger",
+        # Comes down at the run after Simchas Torah: the week of 29 Tishrei
+        # (Shabbos 10 October, Bereishis) carries tishrei only.
+        "href": "articles/the-sifrei-torah-that-were-saved-at-the-last-minute.html",
+        "kicker": "Simchas Torah",
+        "title": "The Sifrei Torah That Were Saved at the Last Minute",
+        "dek": "There was a very special man by the name of R’ Refael "
+               "Chudaitov. He was a Bucharian Jew who had a great love for "
+               "Sifrei Torah. He would rescue Sifrei Torah from destruction, "
+               "and he often endangered his life for this.",
+        "img": "storage/images2/990/990 THE SIFREI TORAH THAT WERE SAVED AT THE LAST MINUTE.jpg",
+        "meta": "Beis Moshiach #990 · Ziegelboim",
     },
 ]
 
