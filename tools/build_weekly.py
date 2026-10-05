@@ -941,23 +941,24 @@ MEMORIAL = {
 
 FEATURE = [
     {
-        # Shemini Atzeres 5787 is Shabbos 22 Tishrei, 3 October 2026, and
-        # Simchas Torah follows on Sunday. Put up at the run of 27 September
-        # (16 Tishrei) in place of the Sukkos esrog piece. From #990 (Stories,
-        # by Ziegelboim), which the article itself presents for Simchas Torah;
-        # the dek is the magazine's own, verbatim.
+        # Parshas Bereishis 5787 is Shabbos 29 Tishrei, 10 October 2026
+        # (Mevarchim Cheshvan). Put up at the run of 5 October (24 Tishrei) in
+        # place of the Simchas Torah Sifrei Torah piece. From #1186 (Parsha of
+        # the Future, October 2019, the week of Bereishis 5780); the byline in
+        # the article body is Rabbi Nissim Lagziel. The dek is the article's
+        # own sentence, verbatim. The article carries no picture, so the slot
+        # takes the department art the build already gives parsha pieces.
         #
-        # Comes down at the run after Simchas Torah: the week of 29 Tishrei
-        # (Shabbos 10 October, Bereishis) carries tishrei only.
-        "href": "articles/the-sifrei-torah-that-were-saved-at-the-last-minute.html",
-        "kicker": "Simchas Torah",
-        "title": "The Sifrei Torah That Were Saved at the Last Minute",
-        "dek": "There was a very special man by the name of R’ Refael "
-               "Chudaitov. He was a Bucharian Jew who had a great love for "
-               "Sifrei Torah. He would rescue Sifrei Torah from destruction, "
-               "and he often endangered his life for this.",
-        "img": "storage/images2/990/990 THE SIFREI TORAH THAT WERE SAVED AT THE LAST MINUTE.jpg",
-        "meta": "Beis Moshiach #990 · Ziegelboim",
+        # Comes down at the run after Bereishis (week of Noach, 6 Cheshvan).
+        "href": "articles/looking-for-light.html",
+        "kicker": "Parshas Bereishis",
+        "title": "Looking for Light",
+        "dek": "This week, we start Chumash again from the very beginning. We "
+               "will learn about what happened in the world during the first "
+               "millennium of its existence, and it all appears in one single "
+               "Torah portion – Parshas Bereishis.",
+        "img": "storage/art/parsha.jpg",
+        "meta": "Beis Moshiach #1186 · Lagziel",
     },
 ]
 
