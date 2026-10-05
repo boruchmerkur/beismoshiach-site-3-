@@ -267,6 +267,9 @@ PARSHA_ALIASES = {
     "Shelach": ["shlach", "shelach"], "Nasso": ["naso", "nasso"],
     "Beha'aloscha": ["b-haalos-cha", "behaaloscha", "b-haaloscha"],
     "Haazinu": ["ha-azinu", "haazinu"],
+    # The archive has no parsha tag for Bereishis; what it files under the
+    # week is on the "Shabbos Bereishis" tag page.
+    "Bereishis": ["bereishis", "shabbos-bereishis"],
     "Acharei Mos": ["acharei", "acharei-mos"],
     "Mattos, Masei": ["masei", "matos-masei", "mattos-masei"],
     "Nitzavim, Vayeilech": ["nitzavim-vayeilech", "nitzavim", "vayeilech"],
@@ -290,11 +293,16 @@ OCCASIONS = {
     (5, 9): ["tisha-b-av"], (6, 18): ["chai-elul"],
 }
 MONTH_TAGS = {5: ["menachem-av"], 6: ["elul"], 7: ["tishrei"]}
+# Months the archive has too little on to carry every week of: their tag goes
+# on Shabbos Mevarchim only. Cheshvan has one piece, which would otherwise sit
+# on the page for five weeks running.
+MEVARCHIM_TAGS = {8: ["mar-cheshvan"]}
 
 # Every tag that is bound to a point in the year. An article carrying one of
 # these is only ever shown in its own week.
 SEASON_TAGS = set()
-for _c in list(OCCASIONS.values()) + list(MONTH_TAGS.values()):
+for _c in (list(OCCASIONS.values()) + list(MONTH_TAGS.values())
+           + list(MEVARCHIM_TAGS.values())):
     SEASON_TAGS.update(_c)
 SEASON_TAGS.update({"sukkos", "pesach", "chanukah", "purim", "shavuos",
                     "rosh-hashanah", "rosh-hashana", "yom-kippur",
@@ -303,7 +311,7 @@ SEASON_TAGS.update({"sukkos", "pesach", "chanukah", "purim", "shavuos",
                     "yud-shvat", "gimmel-tammuz", "yud-beis-tammuz",
                     "beis-nissan", "yud-alef-nissan", "basi-l-gani",
                     "chai-elul", "elul", "menachem-av", "tishrei", "selichos",
-                    "shabbos-shuva"})
+                    "shabbos-shuva", "shabbos-bereishis", "mar-cheshvan"})
 
 # Shabbos Shuva has no tag page — the archive files this material under
 # "teshuva", which is mostly baal-t'shuva stories and would read wrong under
@@ -430,7 +438,20 @@ def main():
                         if sl not in tags:
                             tags.append(sl)
         hsat = hd.to_heb()
-        for cands in [MONTH_TAGS.get(hsat.month)]:
+        # The Shabbos after Simchas Torah (Bereishis, 24-29 Tishrei) belongs to
+        # the year ahead, not to the month behind it: "V'Yaakov halach
+        # l'darko." It drops the Tishrei tag and, being Shabbos Mevarchim,
+        # takes Cheshvan's instead (MEVARCHIM_TAGS). Shabbos Mevarchim is the
+        # last Shabbos of the month, so the next one falls in the new month;
+        # 30 Tishrei is itself Shabbos Mevarchim, being still Tishrei.
+        month_c = [MONTH_TAGS.get(hsat.month)]
+        if hsat.month == 7 and hsat.day > 23:
+            month_c = []
+        n7 = sat + datetime.timedelta(days=7)
+        hn = dates.GregorianDate(n7.year, n7.month, n7.day).to_heb()
+        if hn.month != hsat.month and hsat.month != 6:
+            month_c.append(MEVARCHIM_TAGS.get(hn.month))
+        for cands in month_c:
             if cands:
                 sl = pick_slug(cands, tagmap)
                 if sl and sl not in tags:
@@ -939,7 +960,11 @@ MEMORIAL = {
     ],
 }
 
-FEATURE = [
+# The week of 29 Tishrei 5787 leads on "Looking for Light" by itself now that
+# the schedule gives Bereishis its tag, so the slot stands down rather than
+# run the lead twice.
+FEATURE = []
+_FEATURE_BEREISHIS_5787 = [
     {
         # Parshas Bereishis 5787 is Shabbos 29 Tishrei, 10 October 2026
         # (Mevarchim Cheshvan). Put up at the run of 5 October (24 Tishrei) in
