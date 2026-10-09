@@ -110,6 +110,39 @@
   .feature:hover h2{color:var(--royal)}
   .feature .dek{margin-bottom:.7rem}
   @media(max-width:820px){.feature{grid-template-columns:1fr}.feature figure{order:-1}}
+  /* A story in the news: a heading of its own and link-outs to the source. */
+  /* Set apart from the magazine's own pieces: a royal panel, smaller than
+     the editor's slot, thumbnails rather than photographs at width. */
+  .spot{--sp-bg:#0042AF;--sp-ink:#FEF1D0;--sp-soft:#FEF1D0b3;--sp-line:#FEF1D02e;
+        background:var(--sp-bg);color:var(--sp-ink);border-radius:4px;
+        border-top:4px solid var(--gold-bright);max-width:960px;
+        margin:clamp(2rem,5vw,3rem) auto;padding:clamp(1.2rem,3vw,1.9rem) clamp(1.1rem,3vw,2rem)}
+  @media (prefers-color-scheme:dark){.spot{--sp-bg:#0B1F4D}}
+  .spot header{display:grid;grid-template-columns:auto 1fr;column-gap:1.4rem;align-items:baseline;
+        padding-bottom:1rem;border-bottom:1px solid var(--sp-line)}
+  .spot .sk{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--gold-bright);margin:0;grid-column:1/-1}
+  .spot h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,2.6vw,1.8rem);
+        line-height:1.1;margin:.35rem 0 0;color:var(--sp-ink)}
+  .spot header p:not(.sk){font-size:.86rem;line-height:1.55;color:var(--sp-soft);margin:.35rem 0 0}
+  @media(max-width:700px){.spot header{grid-template-columns:1fr}}
+  .spot ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);
+        column-gap:1.6rem}
+  @media(max-width:700px){.spot ul{grid-template-columns:1fr}}
+  .spot li{border-bottom:1px solid var(--sp-line)}
+  .spot li:nth-last-child(-n+2){border-bottom:0}
+  @media(max-width:700px){.spot li:nth-last-child(2){border-bottom:1px solid var(--sp-line)}}
+  .spot li a{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 0;color:inherit}
+  .spot .th{flex:0 0 76px;height:76px;border-radius:3px;overflow:hidden;background:#FEF1D01a;
+        display:flex;align-items:center;justify-content:center}
+  .spot .th img{width:100%;height:100%;object-fit:cover;filter:saturate(.9)}
+  .spot .yr{font-family:var(--display);font-weight:900;font-size:1.05rem;color:var(--gold-bright)}
+  .spot .tx{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+  .spot strong{font-family:var(--display);font-weight:600;font-size:1rem;line-height:1.25}
+  .spot li a:hover strong{text-decoration:underline;text-decoration-color:var(--gold-bright);
+        text-underline-offset:3px}
+  .spot .mt{font-family:var(--mono);font-size:.62rem;letter-spacing:.03em;color:var(--sp-soft)}
+  .spot .cr{font-family:var(--mono);font-size:.56rem;color:var(--sp-soft);opacity:.8}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
@@ -124,10 +157,16 @@
   <nav><a href="/topics">Topics</a><a href="/parsha">Parsha</a><a href="/collections">Collections</a><a href="/science/">Convergence</a>
     <a href="/archives">Archives</a><a href="/search">Search</a><a class="langsw" href="/he/">עברית</a></nav>
 </div></header>
-<main class="wk" data-week="2026-10-10-0">
+<main class="wk" data-week="2026-10-10-1">
 
   <p class="kick" id="kick">This week · Parshas Bereishis · Shabbos 29 Tishrei 5787</p>
   <div id="lead"><a class="lead" href="articles/looking-for-light.html"><figure class="lead-shot"><img src="storage/landing/moshiach-geula.jpg" alt="" loading="eager" fetchpriority="high"></figure><div class="lead-txt"><span class="why">Parshas Bereishis</span><h1>Looking for Light</h1><p class="dek">Late one night, local villagers found Hershele, bent over in a dark corner under a streetlight, intensely looking for something…</p><p class="meta">Rena · Parsha of the Future · #1186</p></div></a></div>
+
+
+  <section class="spot reveal" aria-label="Light in France">
+    <header><p class="sk">France in Crisis</p><h2>Light in France</h2><p>On the evening of Simchas Torah 5734, the Rebbe taught the tune of “La Marseillaise” to the words of HaAderes VeHaEmunah. On Shabbos Parshas Vayeishev 5752, he opened his farbrengen with words of welcome to a group of Jews from France.</p></header>
+    <ul><li><a href="https://www.chabad.org/news/article_cdo/aid/6100450/jewish/The-Rebbes-French-Revolution.htm" target="_blank" rel="noopener"><span class="th"><img src="https://w2.chabad.org/media/images/1247/mrml12475185.jpg" alt="" loading="lazy" referrerpolicy="no-referrer"></span><span class="tx"><strong>The Rebbe’s French Revolution</strong><span class="mt">Chabad.org · Mordechai Lightstone · October 2023 ↗</span><span class="cr">The Rebbe in Paris in the 1930s. Photo: Kehot Publication Society</span></span></a></li><li><a href="https://www.chabad.org/therebbe/article_cdo/aid/2465274/jewish/The-Spiritual-French-Revolution-A-Miracle-in-Our-Times-5752-1992.htm" target="_blank" rel="noopener"><span class="th"><span class="yr">5752</span></span><span class="tx"><strong>The Spiritual French Revolution: A Miracle in Our Times, 5752 (1992)</strong><span class="mt">Chabad.org · The Rebbe · Sichos in English ↗</span></span></a></li><li><a href="https://www.chabad.org/news/article_cdo/aid/3156618/jewish/Eiffel-Tower-Menorah-Brightens-Paris-as-Worldwide-Chanukah-Celebrations-Begin.htm" target="_blank" rel="noopener"><span class="th"><img src="https://w2.chabad.org/media/images/924/RziG9242453.jpg" alt="" loading="lazy" referrerpolicy="no-referrer"></span><span class="tx"><strong>Eiffel Tower Menorah Brightens Paris, as Worldwide Chanukah Celebrations Begin</strong><span class="mt">Chabad.org · December 2015 ↗</span><span class="cr">Photo: Thierry Guez</span></span></a></li><li><a href="https://www.chabad.org/news/article_cdo/aid/3152869/jewish/Menorahs-in-France-to-Shed-Light-During-State-of-Emergency.htm" target="_blank" rel="noopener"><span class="th"><span class="yr">2015</span></span><span class="tx"><strong>Menorahs in France to Shed Light During State of Emergency</strong><span class="mt">Chabad.org · Faygie Levy Holt · December 2015 ↗</span></span></a></li></ul>
+  </section>
 
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards"><a class="card" href="articles/mar-cheshvan-a-month-of-geula.html"><figure><img src="storage/art/geula.jpg" alt="" loading="lazy"></figure><span class="why">Mar Cheshvan</span><h3>Mar-Cheshvan: A Month of Geula</h3><p class="blurb">At first glance it seems that the month of Cheshvan is a month that symbolizes exile. There are no official Jewish holidays and the darkness of winter begins to become apparent. Its Halachic name is “Mar-Cheshvan,” which means the bitter month of Cheshvan.</p><p class="meta">Rabbi Sholom Ber Avtzon · Moshiach &amp; Geula · #898</p></a><a class="card" href="articles/zero-hour-for-the-young-settlements.html"><figure><img src="storage/images/836/crossroads_836.jpg" alt="" loading="lazy"></figure><span class="why">Shleimus HaAretz</span><h3>Zero Hour for the Young Settlements</h3><p class="blurb">Grassroots protests at intersections around the country can and will produce powerful results, thereby initiating a real battle to put a halt to the current wave of destruction.</p><p class="meta">Sholom Ber Crombie · Crossroads · #836</p></a><a class="card txt" href="articles/asking-the-wrong-question.html"><span class="why">Parshas Bereishis</span><h3>Asking the Wrong Question</h3><p class="blurb">Someone wrote to the Rebbe that “if I have the hope to survive, and I will merit to make it here next year, 5744, to the Rebbe … I will then make arrangements with the Gabbai, Mr. Yehoshua Pinson to buy the Mitzvos [aliyos, kibbudim, and the like] before the Shabbos Bereishis auction”.</p><p class="meta">The Rebbe · From the Rebbe&#x27;s pen · #1170</p></a><a class="card" href="articles/hunker-down.html"><figure><img src="storage/images/Untitled-2 copy.JPG" alt="" loading="lazy"></figure><span class="why">Editorial</span><h3>Hunker Down</h3><p class="blurb">Is the concept of Armageddon, mass destruction, consistent with Torah? Should I take out a mortgage on an underground bunker? · “G-d’s compassion extends to all His works,” to all His creations! Why, in a world of revealed good and G-dliness, would there be any room for suffering and annihilation?</p><p class="meta">Rabbi Boruch Merkur · Editorial</p></a><a class="card" href="articles/how-is-the-rebbe-nassi-hador-if-not-accepted-by-all-as-nassi.html"><figure><img src="storage/images7/not accepted by all as Nassi.png" alt="" loading="lazy"></figure><span class="why plain">Stump the Rabbi</span><h3>How is the Rebbe “Nassi Hador” if not accepted by all as Nassi?</h3><p class="blurb">In the famous ma’amar of Ve’ata Tetzave 5741, the Rebbe explains that there are generally two types of leaders of the generation.</p><p class="meta">Beis Moshiach (staff) · Stump the Rabbi · #1181</p></a><a class="card" href="articles/how-deadly-cruise-missiles-became-the-lifesaving-cyberknife.html"><figure><img src="storage/images7/CyberKnife.png" alt="" loading="lazy"></figure><span class="why plain">Moshiach &amp; Science</span><h3>How Deadly Cruise Missiles Became the Lifesaving “CyberKnife”</h3><p class="blurb">Radiation and radioactive materials have been used in medical procedures for decades. Especially in the case of a brain tumor, radiation has the obvious advantage of eliminating the need to open the patient’s skull to operate on his brain —if it would work.</p><p class="meta">Prof. Shimon Silman · Moshiach &amp; Science · #1181</p></a></div>
@@ -298,10 +337,4 @@ addEventListener('DOMContentLoaded',function(){
 });
 </script>
 <script src="assets/poll.js" defer></script>
-<script src="https://dreamsitedesign.com/imago-dreamsite.js" defer
-        data-domain="DREAMSITEDESIGN.COM"
-        data-href="https://dreamsitedesign.com"
-        data-perch="DREAMSITEDESIGN.COM"
-        data-wing="#FDCB40" data-wing-deep="#8A5B00" data-spot="#0042AF"
-        data-paper="#FEF1D0" data-ink="#0A0A0B"></script>
 </body></html>

@@ -987,6 +987,61 @@ _FEATURE_BEREISHIS_5787 = [
     },
 ]
 
+# A section of link-outs for a story in the news, under the editor's slot. Each
+# item goes to its source on another site; no page of ours is made for it, so
+# nothing here touches the sitemap. Titles and deks are the source's own,
+# verbatim; every photo carries the credit its source gives it. Set
+# SPOTLIGHT = None to take the section down.
+#
+# Put up 9 October 2026 (Bereishis 5787) at the editor's request, relayed from
+# the Tree of Life desk: France in crisis. All four pages and all photos
+# checked loading that day. Item 2 has no photo of its own and item 4's was
+# not checked, so both are set as type rather than borrowing another piece's
+# picture.
+SPOTLIGHT = {
+    "kicker": "France in Crisis",
+    "title": "Light in France",
+    "intro": "On the evening of Simchas Torah 5734, the Rebbe taught the tune "
+             "of “La Marseillaise” to the words of HaAderes "
+             "VeHaEmunah. On Shabbos Parshas Vayeishev 5752, he opened his "
+             "farbrengen with words of welcome to a group of Jews from France.",
+    "items": [
+        {
+            "href": "https://www.chabad.org/news/article_cdo/aid/6100450/jewish/The-Rebbes-French-Revolution.htm",
+            "title": "The Rebbe’s French Revolution",
+            "dek": "Fifty years ago, the Rebbe transformed “La Marseillaise” "
+                   "into a Chassidic song",
+            "img": "https://w2.chabad.org/media/images/1247/mrml12475185.jpg",
+            "credit": "The Rebbe in Paris in the 1930s. Photo: Kehot Publication Society",
+            "meta": "Chabad.org · Mordechai Lightstone · October 2023",
+        },
+        {
+            "href": "https://www.chabad.org/therebbe/article_cdo/aid/2465274/jewish/The-Spiritual-French-Revolution-A-Miracle-in-Our-Times-5752-1992.htm",
+            "title": "The Spiritual French Revolution: A Miracle in Our Times, 5752 (1992)",
+            "dek": "Shabbos Parshas Vayeishev (Shabbos Mevarchim Teves), 5752. "
+                   "From the Sichos in English collection.",
+            "meta": "Chabad.org · The Rebbe · Sichos in English",
+            "mark": "5752",
+        },
+        {
+            "href": "https://www.chabad.org/news/article_cdo/aid/3156618/jewish/Eiffel-Tower-Menorah-Brightens-Paris-as-Worldwide-Chanukah-Celebrations-Begin.htm",
+            "title": "Eiffel Tower Menorah Brightens Paris, as Worldwide Chanukah Celebrations Begin",
+            "dek": "Adding light to a city that has seen significant darkness this year",
+            "img": "https://w2.chabad.org/media/images/924/RziG9242453.jpg",
+            "credit": "Photo: Thierry Guez",
+            "meta": "Chabad.org · December 2015",
+        },
+        {
+            "href": "https://www.chabad.org/news/article_cdo/aid/3152869/jewish/Menorahs-in-France-to-Shed-Light-During-State-of-Emergency.htm",
+            "title": "Menorahs in France to Shed Light During State of Emergency",
+            "dek": "Public lightings to continue in Paris and elsewhere, despite "
+                   "recent terror attacks",
+            "meta": "Chabad.org · Faygie Levy Holt · December 2015",
+            "mark": "2015",
+        },
+    ],
+}
+
 # Strands that never go out of date, given a standing place on the page beside
 # whatever the parsha happens to be. The chip says which strand it is, so a
 # reader can see why a piece about the Land is sitting under Ki Savo.
@@ -1262,6 +1317,33 @@ def _one_feature(f):
         t=' target="_blank" rel="noopener"' if off else "",
         i=esc(f["img"]), ti=esc(f["title"]), d=esc(f.get("dek", "")),
         m=esc(f.get("meta", "")))
+
+def spotlight_html():
+    """The news section. Empty markup when SPOTLIGHT is None."""
+    s = SPOTLIGHT
+    if not s or not s.get("items"):
+        return ""
+    items = []
+    for f in s["items"]:
+        if f.get("img"):
+            thumb = ('<img src="%s" alt="" loading="lazy" referrerpolicy="no-referrer">'
+                     % esc(f["img"]))
+        else:   # no photo of its own: the year, set as type, holds the place
+            thumb = '<span class="yr">%s</span>' % esc(f.get("mark", ""))
+        credit = ('<span class="cr">%s</span>' % esc(f["credit"])) if f.get("credit") else ""
+        items.append(
+            '<li><a href="%s" target="_blank" rel="noopener">'
+            '<span class="th">%s</span><span class="tx"><strong>%s</strong>'
+            '<span class="mt">%s ↗</span>%s</span></a></li>'
+            % (esc(f["href"]), thumb, esc(f["title"]), esc(f.get("meta", "")), credit))
+    return (
+        '\n  <section class="spot reveal" aria-label="{t}">\n'
+        '    <header><p class="sk">{k}</p><h2>{t}</h2>{i}</header>\n'
+        '    <ul>{c}</ul>\n'
+        '  </section>\n'
+    ).format(k=esc(s.get("kicker", "")), t=esc(s.get("title", "")),
+             i=('<p>%s</p>' % esc(s["intro"])) if s.get("intro") else "",
+             c="".join(items))
 
 def parts_html(a):
     """A card that opens a series says so, and says how long it is.
@@ -1544,6 +1626,7 @@ def render_landing(data):
     write_memorial_page()
     page = LANDING.replace("{{MEMORIAL}}", memorial_band()) \
                   .replace("{{FEATURE}}", feature_html()) \
+                  .replace("{{SPOTLIGHT}}", spotlight_html()) \
                   .replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
                   .replace("{{CARDS}}", "".join(card_html(dress(a), used=used) for a in rest)) \
@@ -1665,6 +1748,39 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .feature:hover h2{color:var(--royal)}
   .feature .dek{margin-bottom:.7rem}
   @media(max-width:820px){.feature{grid-template-columns:1fr}.feature figure{order:-1}}
+  /* A story in the news: a heading of its own and link-outs to the source. */
+  /* Set apart from the magazine's own pieces: a royal panel, smaller than
+     the editor's slot, thumbnails rather than photographs at width. */
+  .spot{--sp-bg:#0042AF;--sp-ink:#FEF1D0;--sp-soft:#FEF1D0b3;--sp-line:#FEF1D02e;
+        background:var(--sp-bg);color:var(--sp-ink);border-radius:4px;
+        border-top:4px solid var(--gold-bright);max-width:960px;
+        margin:clamp(2rem,5vw,3rem) auto;padding:clamp(1.2rem,3vw,1.9rem) clamp(1.1rem,3vw,2rem)}
+  @media (prefers-color-scheme:dark){.spot{--sp-bg:#0B1F4D}}
+  .spot header{display:grid;grid-template-columns:auto 1fr;column-gap:1.4rem;align-items:baseline;
+        padding-bottom:1rem;border-bottom:1px solid var(--sp-line)}
+  .spot .sk{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+        color:var(--gold-bright);margin:0;grid-column:1/-1}
+  .spot h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,2.6vw,1.8rem);
+        line-height:1.1;margin:.35rem 0 0;color:var(--sp-ink)}
+  .spot header p:not(.sk){font-size:.86rem;line-height:1.55;color:var(--sp-soft);margin:.35rem 0 0}
+  @media(max-width:700px){.spot header{grid-template-columns:1fr}}
+  .spot ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);
+        column-gap:1.6rem}
+  @media(max-width:700px){.spot ul{grid-template-columns:1fr}}
+  .spot li{border-bottom:1px solid var(--sp-line)}
+  .spot li:nth-last-child(-n+2){border-bottom:0}
+  @media(max-width:700px){.spot li:nth-last-child(2){border-bottom:1px solid var(--sp-line)}}
+  .spot li a{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 0;color:inherit}
+  .spot .th{flex:0 0 76px;height:76px;border-radius:3px;overflow:hidden;background:#FEF1D01a;
+        display:flex;align-items:center;justify-content:center}
+  .spot .th img{width:100%;height:100%;object-fit:cover;filter:saturate(.9)}
+  .spot .yr{font-family:var(--display);font-weight:900;font-size:1.05rem;color:var(--gold-bright)}
+  .spot .tx{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+  .spot strong{font-family:var(--display);font-weight:600;font-size:1rem;line-height:1.25}
+  .spot li a:hover strong{text-decoration:underline;text-decoration-color:var(--gold-bright);
+        text-underline-offset:3px}
+  .spot .mt{font-family:var(--mono);font-size:.62rem;letter-spacing:.03em;color:var(--sp-soft)}
+  .spot .cr{font-family:var(--mono);font-size:.56rem;color:var(--sp-soft);opacity:.8}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
@@ -1684,6 +1800,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   <p class="kick" id="kick">This week · {{KICKER}}</p>
   <div id="lead">{{LEAD}}</div>
 {{FEATURE}}
+{{SPOTLIGHT}}
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards">{{CARDS}}</div>
   <p class="kick" id="weekpoll-kick">The week&rsquo;s question</p>
@@ -1853,12 +1970,6 @@ addEventListener('DOMContentLoaded',function(){
 });
 </script>
 <script src="assets/poll.js" defer></script>
-<script src="https://dreamsitedesign.com/imago-dreamsite.js" defer
-        data-domain="DREAMSITEDESIGN.COM"
-        data-href="https://dreamsitedesign.com"
-        data-perch="DREAMSITEDESIGN.COM"
-        data-wing="#FDCB40" data-wing-deep="#8A5B00" data-spot="#0042AF"
-        data-paper="#FEF1D0" data-ink="#0A0A0B"></script>
 </body></html>"""
 
 if __name__ == "__main__":
