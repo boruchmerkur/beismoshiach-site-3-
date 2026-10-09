@@ -712,6 +712,118 @@ def pick(data, wk, n=7, half=0):
 def esc(s):
     return html.escape(str(s or ""), quote=True)
 
+# ------------------------------------------------------------------- our own
+# The landing is an archive: before this, the newest thing on it ran in #1186,
+# in 2019. These are the pieces he is writing now, on moshiach101, so the front
+# page has something from this week on it.
+#
+# Fetched HERE, at build time, and cached. The browser never calls Blogger: it
+# is cross-origin, and the public CORS proxies that moshiach101 itself leans on
+# were all failing on 9 October. A build-time fetch cannot fail for a reader,
+# and if the feed is down when we build, the cache from last time still shows.
+NOW_FEED  = "https://www.moshiach101.info/feeds/posts/default?alt=json&max-results=4"
+NOW_CACHE = os.path.join(ROOT, "assets", "moshiach101.json")
+NOW_HOME  = "https://www.moshiach101.info/"
+
+def _now_art(entry):
+    """Blogger writes whatever size the editor inserted — /w640-h416/ on the
+    France post. Ask for the original instead of stretching a thumbnail."""
+    body = (entry.get("content") or {}).get("$t", "")
+    m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', body, re.I)
+    u = m.group(1) if m else ((entry.get("media$thumbnail") or {}).get("url") or "")
+    if not u:
+        return ""
+    u = re.sub(r"/(?:s\d+|w\d+-h\d+)(?:-[a-z]+)?/", "/s1600/", u)
+    return re.sub(r"=[sw]\d+(?:-h\d+)?(?:-[a-z]+)?$", "=s1600", u)
+
+def _now_open(entry):
+    """The first paragraph is rarely the opening: Blogger leaves an &nbsp;
+    paragraph above the image and the caption table adds its own. Take the
+    first one that is actually a sentence, and never a photo credit."""
+    body = (entry.get("content") or {}).get("$t", "")
+    for raw in re.findall(r"<p[^>]*>(.*?)</p>", body, re.S | re.I):
+        txt = html.unescape(re.sub(r"<[^>]+>", " ", raw))
+        txt = re.sub(r"\s+", " ", txt).strip()
+        if len(txt) >= 60 and not re.match(r"(?i)^photo[\s:]", txt):
+            return txt
+    return ""
+
+def _now_trim(t, n=190):
+    if len(t) <= n:
+        return t
+    cut = t[:n]
+    sp = cut.rfind(" ")
+    return cut[:sp if sp > 0 else n].rstrip(",;:") + "…"
+
+def fetch_now(timeout=20):
+    """Return the newest posts, and keep a copy. Never raises: a front page
+    that fails to build because a blog was slow is a worse outcome than a
+    front page carrying last week's three pieces."""
+    import urllib.request
+    posts = []
+    try:
+        req = urllib.request.Request(NOW_FEED, headers={"User-Agent": "beismoshiach.org build"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            d = json.loads(r.read().decode("utf-8", "replace"))
+        for e in (d.get("feed", {}).get("entry") or []):
+            href = ""
+            for L in e.get("link", []):
+                if L.get("rel") == "alternate":
+                    href = L.get("href", "")
+            posts.append({
+                "t": (e.get("title") or {}).get("$t", "").strip(),
+                "h": href,
+                "d": (e.get("published") or {}).get("$t", "")[:10],
+                "img": _now_art(e),
+                "x": _now_trim(_now_open(e)),
+            })
+        posts = [p for p in posts if p["t"] and p["h"]]
+        if posts:
+            with open(NOW_CACHE, "w", encoding="utf-8") as f:
+                json.dump(posts, f, ensure_ascii=False, indent=1)
+            print("moshiach101: %d posts, newest %s" % (len(posts), posts[0]["d"]))
+            return posts
+    except Exception as e:
+        print("moshiach101: feed unreachable (%s)" % e)
+    try:
+        with open(NOW_CACHE, encoding="utf-8") as f:
+            posts = json.load(f)
+        print("moshiach101: using the cached %d" % len(posts))
+    except Exception:
+        posts = []
+        print("moshiach101: nothing cached either, band omitted")
+    return posts
+
+def now_html(posts):
+    """Lead piece with its picture and opening, the rest as titles beside it."""
+    if not posts:
+        return ""                      # say nothing rather than show a hole
+    a = posts[0]
+    def when(iso):
+        try:
+            return datetime.date.fromisoformat(iso).strftime("%-d %B %Y")
+        except Exception:
+            try:
+                return datetime.date.fromisoformat(iso).strftime("%d %B %Y").lstrip("0")
+            except Exception:
+                return iso
+    lead = (
+        '<a class="now-lead" href="{h}" target="_blank" rel="noopener">'
+        '{fig}<div class="now-txt"><h2>{t}</h2>{x}'
+        '<p class="now-when">{d} &middot; Moshiach 101</p></div></a>'
+    ).format(
+        h=esc(a["h"]), t=esc(a["t"]),
+        fig=('<figure><img src="%s" alt="" loading="lazy"></figure>' % esc(a["img"])) if a["img"] else "",
+        x=('<p class="now-open">%s</p>' % esc(a["x"])) if a["x"] else "",
+        d=esc(when(a["d"])))
+    rest = "".join(
+        '<a href="{h}" target="_blank" rel="noopener"><span class="nr-t">{t}</span>'
+        '<span class="nr-w">{d}</span></a>'.format(h=esc(p["h"]), t=esc(p["t"]), d=esc(when(p["d"])))
+        for p in posts[1:4])
+    return ('\n  <p class="kick">New writing</p>\n'
+            '  <section class="now reveal" aria-label="New writing">{lead}'
+            '<div class="now-rest">{rest}</div></section>\n').format(lead=lead, rest=rest)
+
 # ------------------------------------------------------------------- featured
 # One hand-picked piece, held under the lead until it is changed here. The rest
 # of the page re-picks itself every week from the archive; this does not, which
@@ -1627,6 +1739,7 @@ def render_landing(data):
     write_memorial_page()
     page = LANDING.replace("{{MEMORIAL}}", memorial_band()) \
                   .replace("{{FEATURE}}", feature_html()) \
+                  .replace("{{NOW}}", now_html(fetch_now())) \
                   .replace("{{SPOTLIGHT}}", spotlight_html()) \
                   .replace("{{SPLIT}}", " split" if spotlight_html() else "") \
                   .replace("{{KICKER}}", esc(kicker)) \
@@ -1653,15 +1766,15 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <link rel="icon" href="data:image/png;base64,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">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Beis Moshiach — Moshiach, Geula &amp; Chassidus</title>
-<meta name="description" content="A weekly reading from the Beis Moshiach archive — chosen for this week's parsha and the Chabad calendar, from 3,541 articles.">
+<title>Beis Moshiach Magazine · Moshiach, Geulah, the Rebbe &amp; Chassidus</title>
+<meta name="description" content="Beis Moshiach, the weekly Chabad magazine: Moshiach and Geulah, the Rebbe, Chassidus, the parsha and the stories of Chassidim, in 3,541 articles.">
 <!-- The imago badge holds the bottom-right corner (18px up, 37px tall), so the
      install chip sits above it and leaves it clear once the chip is gone. -->
 <meta name="pwa-install-offset" content="66">
 <link rel="canonical" href="https://beismoshiach.org/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="beismoshiach.org">
-<meta property="og:title" content="Beis Moshiach — Moshiach, Geula &amp; Chassidus">
-<meta property="og:description" content="A weekly reading from the archive, chosen for this week's parsha and the Chabad calendar.">
+<meta property="og:title" content="Beis Moshiach Magazine · Moshiach, Geulah, the Rebbe &amp; Chassidus">
+<meta property="og:description" content="Beis Moshiach, the weekly Chabad magazine: Moshiach and Geulah, the Rebbe, Chassidus, the parsha and the stories of Chassidim, in 3,541 articles.">
 <meta property="og:url" content="https://beismoshiach.org/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Geist:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1818,6 +1931,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   <div id="lead">{{LEAD}}</div>
   </div>{{SPOTLIGHT}}</div>
 {{FEATURE}}
+{{NOW}}
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards">{{CARDS}}</div>
   <p class="kick" id="weekpoll-kick">The week&rsquo;s question</p>

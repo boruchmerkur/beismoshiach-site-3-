@@ -485,6 +485,40 @@ html{scrollbar-gutter:stable;}
         letter-spacing:.04em;color:var(--ink-soft)}
   .memorial cite a{color:var(--royal);text-decoration:none}
   .memorial cite a:hover{border-bottom:1px solid var(--royal)}
+  /* ---- new writing: what he is publishing now, beside a 2019 archive ---- */
+  .now{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+        gap:clamp(1.2rem,3vw,2.4rem);align-items:start;
+        padding-bottom:clamp(1.2rem,3vw,2rem);border-bottom:1px solid var(--rule);
+        margin-bottom:clamp(1.2rem,3vw,2rem)}
+  .now-lead{display:block;text-decoration:none;color:inherit}
+  .now-lead figure{margin:0 0 .9rem;overflow:hidden;border-radius:3px;
+        background:var(--parchment-deep)}
+  /* The art runs from 500x325 to a portrait 864x1401, so only a comfortably
+     wide picture is cropped; anything squarer is shown whole and keeps its
+     faces. Same rule as the memorial portrait. */
+  .now-lead img{display:block;width:100%;height:auto;max-height:22rem;
+        object-fit:cover;object-position:center 35%;
+        transition:transform .7s var(--ease)}
+  .now-lead:hover img{transform:scale(1.02)}
+  .now-lead h2{font-family:var(--display);font-weight:700;
+        font-size:clamp(1.3rem,2.7vw,2rem);line-height:1.08;
+        margin:.1rem 0 .5rem;color:var(--ink)}
+  .now-lead:hover h2{color:var(--royal)}
+  .now-open{font-size:1rem;line-height:1.65;color:var(--ink-soft);margin:0 0 .6rem;
+        max-width:52ch}
+  .now-when{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;
+        text-transform:uppercase;color:var(--gold);margin:0}
+  .now-rest{display:flex;flex-direction:column}
+  .now-rest a{display:block;padding:.7rem 0;border-top:1px solid var(--rule);
+        text-decoration:none;color:inherit}
+  .now-rest a:first-child{border-top:0;padding-top:0}
+  .nr-t{display:block;font-family:var(--display);font-size:1.02rem;line-height:1.25;
+        color:var(--ink)}
+  .now-rest a:hover .nr-t{color:var(--royal)}
+  .nr-w{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;
+        text-transform:uppercase;color:var(--ink-soft);margin-top:.3rem}
+  @media(max-width:760px){.now{grid-template-columns:1fr}}
+
   /* A card that opens a series wears a quiet second chip beside the first. */
   .ofparts{display:inline-block;margin-left:.45rem;font-family:var(--mono);
         font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;
