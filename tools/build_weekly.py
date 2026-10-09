@@ -1011,7 +1011,8 @@ SPOTLIGHT = {
             "title": "The Rebbe’s French Revolution",
             "dek": "Fifty years ago, the Rebbe transformed “La Marseillaise” "
                    "into a Chassidic song",
-            "img": "https://w2.chabad.org/media/images/1247/mrml12475185.jpg",
+            # w2.chabad.org/media/images/1247/mrml12475185.jpg, held locally
+            "img": "storage/featured/france/rebbe-paris-1930s.jpg",
             "credit": "The Rebbe in Paris in the 1930s. Photo: Kehot Publication Society",
             "meta": "Chabad.org · Mordechai Lightstone · October 2023",
         },
@@ -1027,7 +1028,8 @@ SPOTLIGHT = {
             "href": "https://www.chabad.org/news/article_cdo/aid/3156618/jewish/Eiffel-Tower-Menorah-Brightens-Paris-as-Worldwide-Chanukah-Celebrations-Begin.htm",
             "title": "Eiffel Tower Menorah Brightens Paris, as Worldwide Chanukah Celebrations Begin",
             "dek": "Adding light to a city that has seen significant darkness this year",
-            "img": "https://w2.chabad.org/media/images/924/RziG9242453.jpg",
+            # w2.chabad.org/media/images/924/RziG9242453.jpg, held locally
+            "img": "storage/featured/france/eiffel-menorah-2015.jpg",
             "credit": "Photo: Thierry Guez",
             "meta": "Chabad.org · December 2015",
         },
@@ -1326,8 +1328,7 @@ def spotlight_html():
     items = []
     for f in s["items"]:
         if f.get("img"):
-            thumb = ('<img src="%s" alt="" loading="lazy" referrerpolicy="no-referrer">'
-                     % esc(f["img"]))
+            thumb = '<img src="%s" alt="" width="300" height="200">' % esc(f["img"])
         else:   # no photo of its own: the year, set as type, holds the place
             thumb = '<span class="yr">%s</span>' % esc(f.get("mark", ""))
         credit = ('<span class="cr">%s</span>' % esc(f["credit"])) if f.get("credit") else ""
@@ -1627,6 +1628,7 @@ def render_landing(data):
     page = LANDING.replace("{{MEMORIAL}}", memorial_band()) \
                   .replace("{{FEATURE}}", feature_html()) \
                   .replace("{{SPOTLIGHT}}", spotlight_html()) \
+                  .replace("{{SPLIT}}", " split" if spotlight_html() else "") \
                   .replace("{{KICKER}}", esc(kicker)) \
                   .replace("{{LEAD}}", card_html(dress(lead), big=True, used=used)) \
                   .replace("{{CARDS}}", "".join(card_html(dress(a), used=used) for a in rest)) \
@@ -1771,9 +1773,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .spot li:nth-last-child(-n+2){border-bottom:0}
   @media(max-width:700px){.spot li:nth-last-child(2){border-bottom:1px solid var(--sp-line)}}
   .spot li a{display:flex;gap:.9rem;align-items:flex-start;padding:.9rem 0;color:inherit}
-  .spot .th{flex:0 0 76px;height:76px;border-radius:3px;overflow:hidden;background:#FEF1D01a;
+  /* 3:2, the photos' own shape: the Rebbe's photograph is not cropped to fit */
+  .spot .th{flex:0 0 108px;aspect-ratio:3/2;border-radius:3px;overflow:hidden;background:#FEF1D01a;
         display:flex;align-items:center;justify-content:center}
-  .spot .th img{width:100%;height:100%;object-fit:cover;filter:saturate(.9)}
+  .spot .th img{width:100%;height:100%;object-fit:contain;filter:saturate(.9)}
   .spot .yr{font-family:var(--display);font-weight:900;font-size:1.05rem;color:var(--gold-bright)}
   .spot .tx{display:flex;flex-direction:column;gap:.3rem;min-width:0}
   .spot strong{font-family:var(--display);font-weight:600;font-size:1rem;line-height:1.25}
@@ -1781,6 +1784,19 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
         text-underline-offset:3px}
   .spot .mt{font-family:var(--mono);font-size:.62rem;letter-spacing:.03em;color:var(--sp-soft)}
   .spot .cr{font-family:var(--mono);font-size:.56rem;color:var(--sp-soft);opacity:.8}
+  /* Split opening: the week's lead and the news box share the top of the
+     page, half and half; the lead stacks its picture over its text. */
+  .top.split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,3.5vw,2.8rem);
+        align-items:start;padding-bottom:clamp(2rem,5vw,3.5rem);border-bottom:1px solid var(--rule)}
+  .top.split .lead{grid-template-columns:1fr;gap:1.3rem;padding-bottom:0;border-bottom:0}
+  .top.split .lead-shot{order:-1}
+  .top.split .lead h1{font-size:clamp(2rem,3.8vw,3.2rem)}
+  .top.split .spot{max-width:none;margin:clamp(2rem,5vw,3.5rem) 0 0}
+  .top.split .spot header{grid-template-columns:1fr}
+  .top.split .spot ul{grid-template-columns:1fr}
+  .top.split .spot li:nth-last-child(2){border-bottom:1px solid var(--sp-line)}
+  @media(max-width:900px){.top.split{grid-template-columns:1fr}
+    .top.split .spot{margin-top:0}}
   /* Motion narrates: sections arrive as you reach them. Native scroll-driven,
      no library; entirely absent when the visitor asks for less motion. */
   @media (prefers-reduced-motion:no-preference){
@@ -1797,10 +1813,11 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 </div></header>
 <main class="wk" data-week="{{WEEK}}">
 {{MEMORIAL}}
+  <div class="top{{SPLIT}}"><div class="top-a">
   <p class="kick" id="kick">This week · {{KICKER}}</p>
   <div id="lead">{{LEAD}}</div>
+  </div>{{SPOTLIGHT}}</div>
 {{FEATURE}}
-{{SPOTLIGHT}}
   <p class="kick">More for this week</p>
   <div class="row reveal" id="cards">{{CARDS}}</div>
   <p class="kick" id="weekpoll-kick">The week&rsquo;s question</p>
