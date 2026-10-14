@@ -655,12 +655,19 @@ def pick(data, wk, n=7, half=0):
     # the date tag wins either way.
     # A later part is folded onto its opening here, before anything is chosen,
     # so a series takes one slot rather than two and takes it in order.
+    # The same sicha was run more than once (#852 and again in #1042, under
+    # its own slug each time), and both reprints sat side by side on the Noach
+    # page under one headline. A headline already taken counts as seen.
+    def title_key(s):
+        return re.sub(r"\W+", "", (data["articles"].get(s, {}).get("t") or s).lower())
+    titles = set()
     lists = [[head_of.get(s, s) for s in data["tags"].get(t, []) if in_season(s)]
              for t in tags]
     for i in range(max((len(L) for L in lists), default=0)):
         for t, L in zip(tags, lists):
-            if i < len(L) and L[i] not in seen:
-                seen.add(L[i]); weekpicks.append(L[i]); why[L[i]] = t
+            if i < len(L) and L[i] not in seen and title_key(L[i]) not in titles:
+                seen.add(L[i]); titles.add(title_key(L[i]))
+                weekpicks.append(L[i]); why[L[i]] = t
 
     # A standing place for the strands that do not expire. The parsha turns
     # over every week; the magazine's argument about the Land, and its own
