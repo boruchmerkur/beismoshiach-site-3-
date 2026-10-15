@@ -40,8 +40,10 @@ def common_suffix(scenes):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("file")
-    ap.add_argument("--max", type=int, default=10,
-                    help="jobs per submission: Basic 4, Standard 10, Pro/Mega 40")
+    ap.add_argument("--max", type=int, default=6,
+                    help="jobs per submission. His account refused 12 with "
+                         "\"the limit is 10\" on 2026-10-15, so 10 is the ceiling "
+                         "here and 6 is the default that leaves room.")
     a = ap.parse_args()
 
     text = io.open(a.file, encoding="utf-8").read()
