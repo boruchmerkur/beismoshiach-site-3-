@@ -624,7 +624,27 @@ def week_tags(wk, today=None):
     past = [t for t in tags if on.get(t, "9999") < today.isoformat()]
     return [t for t in tags if t not in past]
 
-def pick(data, wk, n=7, half=0):
+SLUG_HREF = re.compile(r"^(?:/)?articles/([a-z0-9-]+)\.html$")
+
+def pinned_slugs():
+    """Articles the editor has placed by hand, in the feature slot or the
+    spotlight.
+
+    Nothing stopped the week's automatic picks from choosing one of these as
+    well, so a piece could lead the page and sit in the editor's slot at the
+    same time — which is how "Looking for Light" came to be on the landing
+    twice. External links contribute nothing here; only our own articles can
+    collide."""
+    out = set()
+    items = (FEATURE if isinstance(FEATURE, list) else ([FEATURE] if FEATURE else []))
+    sp = SPOTLIGHT or {}
+    for it in list(items) + list(sp.get("items", [])):
+        m = SLUG_HREF.match((it or {}).get("href", "") or "")
+        if m:
+            out.add(m.group(1))
+    return out
+
+def pick(data, wk, n=7, half=0, skip=()):
     """The week's own material first, topped up from the evergreen pool so a
     thin parsha week still fills the page.
 
@@ -643,7 +663,8 @@ def pick(data, wk, n=7, half=0):
         return (not tags) or bool(tags & here)
 
     head_of = data.get("series", {})
-    out, seen, why = [], set(), {}
+    # Anything the editor has already placed by hand counts as taken.
+    out, seen, why = [], set(skip), {}
     weekpicks = []
     # Take one from each of the week's tags in turn rather than emptying the
     # first. Ki Seitzei has more than seven pieces to itself, so a straight
@@ -1474,6 +1495,8 @@ def parts_html(a):
     n = len(a.get("_parts") or ())
     return '<span class="ofparts">In %s parts</span>' % ("two" if n == 2 else n) if n > 1 else ""
 
+ART_FOR_CARDS = False
+
 def card_html(a, big=False, used=None):
     used = used if used is not None else set()
     meta = " · ".join(x for x in [a.get("a"), a.get("c"), ("#%s" % a["i"]) if a.get("i") else ""] if x)
@@ -1511,15 +1534,23 @@ def card_html(a, big=False, used=None):
                 '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
             s=esc(a["s"]), img=esc(a["img"]), t=esc(a["t"]), m=esc(meta), why=tag,
             pc=portrait_class(a), b=blurb(a))
-    # a commissioned image for the season/department, if one exists yet
-    for art in art_for(a, a.get("_season", ())):
-        if art in used:
-            continue
-        used.add(art)
-        return ('<a class="card" href="articles/{s}.html">'
-                '<figure><img src="{img}" alt="" loading="lazy"></figure>'
-                '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
-            s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta), why=tag, b=blurb(a))
+    # No department art here any more. It put a generic parsha, sichah or
+    # editorial picture on an article it had nothing to do with: Noah's Ark
+    # and Haman's Gallows carried art/parsha.jpg, and a reader could not tell
+    # from the picture what any of those cards were about. Only 123 of the 635
+    # articles in the pool own a real photograph, so this leaves most cards as
+    # type — which says less, but says nothing untrue.
+    #
+    # ART_FOR_CARDS = True restores the old behaviour.
+    if ART_FOR_CARDS:
+        for art in art_for(a, a.get("_season", ())):
+            if art in used:
+                continue
+            used.add(art)
+            return ('<a class="card" href="articles/{s}.html">'
+                    '<figure><img src="{img}" alt="" loading="lazy"></figure>'
+                    '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
+                s=esc(a["s"]), img=esc(art), t=esc(a["t"]), m=esc(meta), why=tag, b=blurb(a))
     # otherwise let the type carry it
     return ('<a class="card txt" href="articles/{s}.html">'
             '{why}<h3>{t}</h3>{b}<p class="meta">{m}</p></a>').format(
@@ -1617,7 +1648,8 @@ def render_landing(data):
     # columnist still leaves real choices underneath rather than forcing a
     # third piece by the same writer
     half = half_of_week(wk)
-    slugs = pick(data, wk, 24, half=half)
+    pinned = pinned_slugs()
+    slugs = pick(data, wk, 24, half=half, skip=pinned)
     arts = [data["articles"][s] for s in slugs if s in data["articles"]]
     arts = spread(arts, cap=2)
     lead_first = arts[:1]
@@ -1670,7 +1702,8 @@ def render_landing(data):
     # The archive row runs through the same season gate as everything else —
     # it is where the Sukkos piece was turning up in Av — and never repeats
     # something already on the page.
-    shown = {lead["s"]} | {a["s"] for a in rest}
+    # the editor's own placements count as on the page already
+    shown = {lead["s"]} | {a["s"] for a in rest} | pinned
     season, here = data.get("season", {}), set(week_tags(wk))
     head_of = data.get("series", {})
     fam = lambda s: head_of.get(s, s)
@@ -1747,6 +1780,7 @@ def render_landing(data):
     page = LANDING.replace("{{MEMORIAL}}", memorial_band()) \
                   .replace("{{FEATURE}}", feature_html()) \
                   .replace("{{NOW}}", now_html(fetch_now())) \
+                  .replace("{{PINNED}}", esc(" ".join(sorted(pinned)))) \
                   .replace("{{SPOTLIGHT}}", spotlight_html()) \
                   .replace("{{SPLIT}}", " split" if spotlight_html() else "") \
                   .replace("{{KICKER}}", esc(kicker)) \
@@ -1931,7 +1965,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   <nav><a href="/topics">Topics</a><a href="/parsha">Parsha</a><a href="/collections">Collections</a><a href="/science/">Convergence</a>
     <a href="/archives">Archives</a><a href="/search">Search</a><a class="langsw" href="/he/">עברית</a></nav>
 </div></header>
-<main class="wk" data-week="{{WEEK}}">
+<main class="wk" data-week="{{WEEK}}" data-pinned="{{PINNED}}">
 {{MEMORIAL}}
   <div class="top{{SPLIT}}"><div class="top-a">
   <p class="kick" id="kick">This week · {{KICKER}}</p>
@@ -1989,17 +2023,21 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
     var inSeason=function(s){var st=(d.season||{})[s]||[];
       return !st.length||st.some(function(x){return here[x];});};
     var why={},SER=d.series||{},PRT=d.parts||{};
+    /* The feature slot and the spotlight are rendered server-side and this
+       script never sees them, so without this a piece the editor placed by
+       hand comes back as a card as well. */
+    var PIN={}; (main.dataset.pinned||'').split(/\s+/).forEach(function(s){ if(s) PIN[s]=1; });
     /* a later part folds onto its opening, so a series takes one slot and
        takes it in order — the same rule the builder applies */
     var headOf=function(s){return SER[s]||s;};
     TAGS.forEach(function(t){(d.tags[t]||[]).forEach(function(s0){
       var s=headOf(s0);
-      if(!seen[s]&&inSeason(s0)){seen[s]=1;list.push(s);why[s]=t;}});});
+      if(!seen[s]&&!PIN[s]&&inSeason(s0)){seen[s]=1;list.push(s);why[s]=t;}});});
     if(list.length<13&&d.evergreen.length){
       var off=Math.floor(Date.parse(wk.w)/6048e5)%d.evergreen.length;
       for(var j=0;j<d.evergreen.length&&list.length<13;j++){
         var s=headOf(d.evergreen[(off+j)%d.evergreen.length]);
-        if(seen[s]) continue;
+        if(seen[s]||PIN[s]) continue;
         if(!inSeason(s)) continue;               /* out of season? wait its turn */
         seen[s]=1;list.push(s);
       }
