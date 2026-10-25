@@ -284,6 +284,12 @@ PARSHA_ALIASES = {
 OCCASIONS = {
     (7, 1): ["rosh-hashanah", "rosh-hashana"], (7, 10): ["yom-kippur"],
     (7, 15): ["sukkos"], (7, 22): ["simchas-torah"],
+    # 20 Cheshvan, the Rebbe Rashab's birthday (5621). The archive keeps a tag
+    # page for it, articles/tag/20-mar-cheshvan.html, and the pieces on it say
+    # so themselves: #854 is "Presented for Chaf Cheshvan, the birthday of the
+    # Rebbe Rashab". Added 25 October 2026, the run for Vayeira 5787, which
+    # falls on the day.
+    (8, 20): ["20-mar-cheshvan"],
     (9, 19): ["yud-tes-kislev"], (9, 25): ["chanukah"],
     (11, 10): ["yud-shvat", "basi-l-gani"], (11, 15): ["tu-b-shvat"],
     (11, 22): ["chof-beis-shvat"],
@@ -393,6 +399,9 @@ def main():
                if os.path.isfile(os.path.join(ART, s + ".html"))]
     tagmap["shabbos-shuva"] = have_ss
     LABELS.setdefault("shabbos-shuva", "Shabbos Shuva")
+    # prettify() would make "20 Mar Cheshvan" of the tag slug; the chip reads
+    # the way the magazine writes the day.
+    LABELS.setdefault("20-mar-cheshvan", "Chof Cheshvan")
     print("shabbos-shuva: %d of %d slugs found" % (len(have_ss), len(SHABBOS_SHUVA)))
 
     # ---- schedule: every Shabbos for the next YEARS years
@@ -1100,10 +1109,31 @@ MEMORIAL = {
     ],
 }
 
-# The week of 29 Tishrei 5787 leads on "Looking for Light" by itself now that
-# the schedule gives Bereishis its tag, so the slot stands down rather than
-# run the lead twice.
-FEATURE = []
+# Shabbos Parshas Vayeira 5787 is 20 Cheshvan, the Rebbe Rashab's birthday.
+# The piece is from #993 (Chabad History, staff): the Rebbe Rayatz's own
+# account of his father's birth, told on this same Shabbos, Vayeira, Chaf
+# Cheshvan 5706. It is not on the archive's 20-mar-cheshvan tag page, so the
+# schedule cannot reach it; it goes in by hand. The dek is the article's own
+# standfirst, verbatim; the picture is the article's own. Put up at the run
+# of 25 October 2026 (14 Cheshvan).
+#
+# Comes down at the run after Vayeira (week of Chayei Sarah, 27 Cheshvan):
+# set FEATURE = [] again.
+FEATURE = [
+    {
+        "href": "articles/he-is-a-born-rebbe.html",
+        "kicker": "Chof Cheshvan",
+        "title": "He Is a Born Rebbe!",
+        "dek": "From the Rebbe Rayatz’s sichos from the night of Shabbos Parshas "
+               "VaYeira, Chaf Cheshvan 5706, in which he tells new details about "
+               "the birth and childhood of the Rebbe Rashab.",
+        "img": "storage/images2/993/rashab.jpg",
+        "meta": "Beis Moshiach #993 · Chabad History",
+    },
+]
+# The week of 29 Tishrei 5787 led on "Looking for Light" by itself once the
+# schedule gave Bereishis its tag, so the slot stood down rather than run the
+# lead twice; kept for the shape of an entry.
 _FEATURE_BEREISHIS_5787 = [
     {
         # Parshas Bereishis 5787 is Shabbos 29 Tishrei, 10 October 2026
