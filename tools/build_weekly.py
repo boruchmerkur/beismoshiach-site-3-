@@ -1117,9 +1117,10 @@ MEMORIAL = {
 # standfirst, verbatim; the picture is the article's own. Put up at the run
 # of 25 October 2026 (14 Cheshvan).
 #
-# Comes down at the run after Vayeira (week of Chayei Sarah, 27 Cheshvan):
-# set FEATURE = [] again.
-FEATURE = [
+# Came down at the run of 1 November 2026 (week of Chayei Sarah, 27 Cheshvan);
+# kept below for the shape of an entry.
+FEATURE = []
+_FEATURE_CHOF_CHESHVAN_5787 = [
     {
         "href": "articles/he-is-a-born-rebbe.html",
         "kicker": "Chof Cheshvan",
