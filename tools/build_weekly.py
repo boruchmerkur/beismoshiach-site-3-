@@ -1119,7 +1119,23 @@ MEMORIAL = {
 #
 # Came down at the run of 1 November 2026 (week of Chayei Sarah, 27 Cheshvan);
 # kept below for the shape of an entry.
-FEATURE = []
+FEATURE = [
+    {
+        # Put up 9 November 2026, the closing day of the 43rd Kinus. From
+        # #999: Israeli ambassadors around the world on what the shluchim
+        # they live beside actually do. The dek is the article's own,
+        # verbatim. No photograph of its own, and the department art is off,
+        # so the slot runs on the Kinus class photo we hold from #1096.
+        #
+        # Comes down when the Kinus spotlight does.
+        "href": "articles/ambassadors-to-the-world-salute-the-rebbes-shluchim-the-real.html",
+        "kicker": "The shluchim",
+        "title": "Ambassadors to the World Salute the Rebbe’s Shluchim, the Real Ambassadors",
+        "dek": "From the UN in New York to Addis Ababa in Ethiopia, from Bolivia in South America to Kiev in Ukraine, and from Eretz Yisroel to the embassy in Washington, Israeli ambassadors share their personal impressions of the shlichus revolution.",
+        "img": "storage/featured/kinus/group-770.jpg",
+        "meta": "Beis Moshiach #999",
+    },
+]
 _FEATURE_CHOF_CHESHVAN_5787 = [
     {
         "href": "articles/he-is-a-born-rebbe.html",
@@ -1170,47 +1186,50 @@ _FEATURE_BEREISHIS_5787 = [
 # not checked, so both are set as type rather than borrowing another piece's
 # picture.
 SPOTLIGHT = {
-    "kicker": "France in Crisis",
-    "title": "Light in France",
-    "intro": "On the evening of Simchas Torah 5734, the Rebbe taught the tune "
-             "of “La Marseillaise” to the words of HaAderes "
-             "VeHaEmunah. On Shabbos Parshas Vayeishev 5752, he opened his "
-             "farbrengen with words of welcome to a group of Jews from France.",
+    "kicker": "Kinus HaShluchim 5787",
+    "title": "The shluchim came in",
+    "intro": "The 43rd International Conference of Chabad-Lubavitch Emissaries "
+             "ran from 4 to 9 November. On Sunday morning the shluchim filled "
+             "the steps in front of 770 for the class photo, and that "
+             "afternoon close to seven thousand of them sat down together in "
+             "Edison, New Jersey.",
     "items": [
         {
-            "href": "https://www.chabad.org/news/article_cdo/aid/6100450/jewish/The-Rebbes-French-Revolution.htm",
-            "title": "The Rebbe’s French Revolution",
-            "dek": "Fifty years ago, the Rebbe transformed “La Marseillaise” "
-                   "into a Chassidic song",
-            # w2.chabad.org/media/images/1247/mrml12475185.jpg, held locally
-            "img": "storage/featured/france/rebbe-paris-1930s.jpg",
-            "credit": "The Rebbe in Paris in the 1930s. Photo: Kehot Publication Society",
-            "meta": "Chabad.org · Mordechai Lightstone · October 2023",
+            "href": "https://www.chabad.org/news/article_cdo/aid/7608846/jewish/At-Worlds-Largest-Gathering-of-Rabbis-Thousands-Pose-for-Annual-Photo.htm",
+            "title": "At World\u2019s Largest Gathering of Rabbis, Thousands Pose for Annual Photo",
+            "dek": "Chabad rabbis from more than 100 countries gather for 43rd "
+                   "Int\u2019l Conference of Chabad-Lubavitch Emissaries",
+            # ours: the right-hand panel of the strip that ran in #1096
+            "img": "storage/featured/kinus/group-770.jpg",
+            "credit": "The class photo in front of 770. Beis Moshiach #1096",
+            "meta": "Chabad.org \u00b7 Chabad.org Staff \u00b7 8 November 2026",
         },
         {
-            "href": "https://www.chabad.org/therebbe/article_cdo/aid/2465274/jewish/The-Spiritual-French-Revolution-A-Miracle-in-Our-Times-5752-1992.htm",
-            "title": "The Spiritual French Revolution: A Miracle in Our Times, 5752 (1992)",
-            "dek": "Shabbos Parshas Vayeishev (Shabbos Mevarchim Teves), 5752. "
-                   "From the Sichos in English collection.",
-            "meta": "Chabad.org · The Rebbe · Sichos in English",
-            "mark": "5752",
+            "href": "https://anash.org/live-international-kinus-hashluchim-banquet-5787/",
+            "title": "Live: International Kinus Hashluchim Banquet 5787",
+            "dek": "Nearly 7,000 shluchim and baalebatim gathered at the New "
+                   "Jersey Convention and Exposition Center in Edison for the "
+                   "closing gala, with the International Roll Call.",
+            # ours: the left-hand panel of the same strip
+            "img": "storage/featured/kinus/banquet.jpg",
+            "credit": "At the banquet. Beis Moshiach #1096",
+            "meta": "Anash.org \u00b7 8 November 2026",
         },
         {
-            "href": "https://www.chabad.org/news/article_cdo/aid/3156618/jewish/Eiffel-Tower-Menorah-Brightens-Paris-as-Worldwide-Chanukah-Celebrations-Begin.htm",
-            "title": "Eiffel Tower Menorah Brightens Paris, as Worldwide Chanukah Celebrations Begin",
-            "dek": "Adding light to a city that has seen significant darkness this year",
-            # w2.chabad.org/media/images/924/RziG9242453.jpg, held locally
-            "img": "storage/featured/france/eiffel-menorah-2015.jpg",
-            "credit": "Photo: Thierry Guez",
-            "meta": "Chabad.org · December 2015",
+            "href": "https://collive.com/live-gala-banquet-of-kinus-hashluchim-5787/",
+            "title": "Live: Gala Banquet of Kinus Hashluchim 5787",
+            "dek": "Israel\u2019s ambassador to the United States, Yechiel Leiter, "
+                   "gave the keynote: \u201cAcross Israel. For Every Jew.\u201d",
+            "meta": "COLlive \u00b7 8 November 2026",
+            "mark": "5787",
         },
         {
-            "href": "https://www.chabad.org/news/article_cdo/aid/3152869/jewish/Menorahs-in-France-to-Shed-Light-During-State-of-Emergency.htm",
-            "title": "Menorahs in France to Shed Light During State of Emergency",
-            "dek": "Public lightings to continue in Paris and elsewhere, despite "
-                   "recent terror attacks",
-            "meta": "Chabad.org · Faygie Levy Holt · December 2015",
-            "mark": "2015",
+            "href": "https://www.lubavitch.com/from-patagonia-to-brooklyn-chabad-shluchim-gather-for-annual-conference/",
+            "title": "From Patagonia to Brooklyn: Chabad Shluchim Gather for Annual Conference",
+            "dek": "Some 6,500 Chabad-Lubavitch representatives and lay leaders, "
+                   "in from their posts for the week.",
+            "meta": "Lubavitch.com \u00b7 Tzemach Feller \u00b7 5 November 2026",
+            "mark": "6,500",
         },
     ],
 }
