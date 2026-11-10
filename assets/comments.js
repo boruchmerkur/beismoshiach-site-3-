@@ -101,3 +101,6 @@
 
   load();
 })();
+
+// The article side column (assets/side.js), loaded from here because every article already loads this file.
+(function () { var s = document.createElement('script'); s.src = '/assets/side.js'; s.defer = true; document.head.appendChild(s); })();
