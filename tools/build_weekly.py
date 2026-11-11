@@ -1180,11 +1180,13 @@ _FEATURE_BEREISHIS_5787 = [
 # verbatim; every photo carries the credit its source gives it. Set
 # SPOTLIGHT = None to take the section down.
 #
-# Put up 9 October 2026 (Bereishis 5787) at the editor's request, relayed from
-# the Tree of Life desk: France in crisis. All four pages and all photos
-# checked loading that day. Item 2 has no photo of its own and item 4's was
-# not checked, so both are set as type rather than borrowing another piece's
-# picture.
+# Put up 9 November 2026, the closing day of the 43rd Kinus HaShluchim
+# (4-9 November), in place of the France band that had stood since 9 October.
+# Items 1 and 2 run on our own Kinus pictures from #1096; items 3 and 4 are
+# set as type.
+#
+# Comes down within a week of the Kinus ending: at the first run on or after
+# 16 November 2026. The Kinus FEATURE above comes down with it.
 SPOTLIGHT = {
     "kicker": "Kinus HaShluchim 5787",
     "title": "The shluchim came in",
