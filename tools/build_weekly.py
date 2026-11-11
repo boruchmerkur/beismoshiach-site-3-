@@ -1290,6 +1290,13 @@ def art_for(a, season_tags=()):
             if q not in out:
                 out.append(q)
     own = a.get("_whytag")
+    # A sidra of its own first: storage/art/parsha/toldos.jpg beats the one
+    # generic parsha.jpg, and is keyed by the same tag the badge shows, so the
+    # picture cannot contradict the label.
+    if own:
+        p = os.path.join(ROOT, "storage", "art", "parsha", own + ".jpg")
+        if os.path.isfile(p):
+            out.append("storage/art/parsha/" + own + ".jpg")
     add(SEASON_ART.get(own))                      # the date this piece is here for
     add(DEPT_ART.get((a.get("c") or "").strip())) # else what the piece is
     # deliberately NOT another date's art: a piece badged "Parshas Shoftim"
@@ -2146,8 +2153,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
       return o;};   /* never another date's art — it would contradict the badge */
     var card=function(a){
       if(art(a)&&!used[a.img]) return picCard(a,a.img);
-      var cand=artFor(a);
-      for(var i=0;i<cand.length;i++){ if(!used[cand[i]]) return picCard(a,cand[i]); }
+      /* No department art on cards. It put a generic parsha, sichah or
+         editorial picture on an article it had nothing to do with, and the
+         build stopped doing it (ART_FOR_CARDS); this is the same rule here,
+         or it all comes back the first time a week rolls over. */
       return '<a class="card txt" href="articles/'+esc(a.s)+'.html">'+
         chip(a)+'<h3>'+esc(a.t)+'</h3>'+blurb(a,1)+'<p class="meta">'+esc(meta(a))+'</p></a>';};
     /* lead on the strongest picture — headshots read poorly at hero size */
