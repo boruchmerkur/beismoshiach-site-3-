@@ -319,6 +319,15 @@ SEASON_TAGS.update({"sukkos", "pesach", "chanukah", "purim", "shavuos",
                     "chai-elul", "elul", "menachem-av", "tishrei", "selichos",
                     "shabbos-shuva", "shabbos-bereishis", "mar-cheshvan"})
 
+# Archive tags that are other spellings of a date-bound tag above. Without this
+# they pass the season gate as evergreen: on 15 November 2026 (11 Kislev) the
+# Shabbos Chazon editorial, "A House Full of Angels" (#1177, tag shabbos-chazo),
+# was standing on the landing as the week's Editorial card. Each maps to the tag
+# its week actually carries, so the piece still shows in its own week.
+SEASON_ALIAS = {"shabbos-chazo": "tisha-b-av", "tisha-bav": "tisha-b-av",
+                "9-av": "tisha-b-av", "chanuka": "chanukah",
+                "basi-lgani": "basi-l-gani"}
+
 # Shabbos Shuva has no tag page — the archive files this material under
 # "teshuva", which is mostly baal-t'shuva stories and would read wrong under
 # that chip. These are the pieces in the archive that are about the t'shuva of
@@ -520,9 +529,11 @@ def main():
     # which date-bound tags each article carries, so nothing shows out of season
     season = {}
     for t, slugs in keep.items():
-        if t in SEASON_TAGS:
+        c = SEASON_ALIAS.get(t, t)
+        if c in SEASON_TAGS:
             for s in slugs:
-                season.setdefault(s, []).append(t)
+                if c not in season.get(s, []):
+                    season.setdefault(s, []).append(c)
     def have(f):
         return os.path.isfile(os.path.join(ROOT, "storage", "art", f))
     artmap = {
@@ -1119,7 +1130,12 @@ MEMORIAL = {
 #
 # Came down at the run of 1 November 2026 (week of Chayei Sarah, 27 Cheshvan);
 # kept below for the shape of an entry.
-FEATURE = [
+# The Kinus slot came down at the run of 15 November 2026 with the Kinus
+# spotlight (one day ahead of its stated 16 November, since that run builds the
+# page for Shabbos Vayeitzei, 21 November). Kept below for the shape of an entry.
+# The 10 Kislev piece the week would want is already on the page as a card.
+FEATURE = None
+_FEATURE_KINUS_5787 = [
     {
         # Put up 9 November 2026, the closing day of the 43rd Kinus. From
         # #999: Israeli ambassadors around the world on what the shluchim
@@ -1187,7 +1203,11 @@ _FEATURE_BEREISHIS_5787 = [
 #
 # Comes down within a week of the Kinus ending: at the first run on or after
 # 16 November 2026. The Kinus FEATURE above comes down with it.
-SPOTLIGHT = {
+#
+# Came down at the run of 15 November 2026 (page for Shabbos Vayeitzei,
+# 11 Kislev); kept below for the shape of an entry.
+SPOTLIGHT = None
+_SPOTLIGHT_KINUS_5787 = {
     "kicker": "Kinus HaShluchim 5787",
     "title": "The shluchim came in",
     "intro": "The 43rd International Conference of Chabad-Lubavitch Emissaries "
