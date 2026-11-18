@@ -75,7 +75,9 @@ E = html.escape
 he = lambda s: '<span lang="he" dir="rtl">%s</span>' % E(s)
 
 BODY = """
-<p>The journey to prison took three days, and on two of them the Mitteler Rebbe said Chassidus. Word had come during Chol HaMoed Sukkos 5587 that he had been informed on. On Sunday of Parshas Noach, 28 Tishrei, he left Lubavitch in the company of government officials, to be taken to Vitebsk, the seat of Governor-General Nikolai Khovansky. At midday he reached Dobromysl and said Chassidus there, on the verse “{hy_mayim}.” On Monday he traveled by way of Liozna and said Chassidus there, on “{hy_resh}.” On Tuesday he came to Vitebsk, and he sat there under arrest until Sunday of Parshas Vayishlach, 10 Kislev (Hayom Yom, 10 Kislev).</p>
+<p>On the road to prison the Mitteler Rebbe said Chassidus on the verse “Many waters cannot extinguish the love.” Thirteen months later, in Niezhin, he passed away in the middle of another verse.</p>
+
+<p>Word had come during Chol HaMoed Sukkos 5587 that he had been informed on. On Sunday of Parshas Noach, 28 Tishrei, he left Lubavitch in the company of government officials, to be taken to Vitebsk, the seat of Governor-General Nikolai Khovansky. At midday he reached Dobromysl and said Chassidus there, on the verse “{hy_mayim}.” On Monday he traveled by way of Liozna and said Chassidus there, on “{hy_resh}.” On Tuesday he came to Vitebsk, and he sat there under arrest until Sunday of Parshas Vayishlach, 10 Kislev (Hayom Yom, 10 Kislev).</p>
 
 <p>The trip had been planned for two days, with one night in Liozna. The Mitteler Rebbe was not well. The road had gone bad, and his doctors had forbidden him to be out in that air, so the officials were asked to allow a night in Dobromysl and a night in Liozna. Late that night the messenger came back with their agreement (diary of the Rebbe Rayatz, 5666–5667).</p>
 
