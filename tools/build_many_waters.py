@@ -121,8 +121,30 @@ head = re.sub(r"<title>.*?</title>", "<title>%s · Beis Moshiach</title>" % E(TI
 head = re.sub(r'<link rel="canonical"[^>]*>\s*', "", head)
 head = re.sub(r'<meta (?:name|property)="(?:description|og:[a-z_:]+|twitter:[a-z:]+)"[^>]*>\s*', "", head)
 head = re.sub(r'<script type="application/ld\+json">.*?</script>\s*', "", head, flags=re.S)
-head = head.replace("</head>", '<meta name="robots" content="noindex,nofollow">\n'
-                    '<meta name="description" content="%s">\n</head>' % E(DEK))
+import json
+URL = "https://beismoshiach.org/articles/many-waters.html"
+PUBLISHED = "2026-11-19"          # 9 Kislev 5787
+ld = {"@context": "https://schema.org", "@type": "Article", "headline": TITLE,
+      "inLanguage": "en", "mainEntityOfPage": URL,
+      "publisher": {"@type": "Organization", "name": "Beis Moshiach"},
+      "isPartOf": "beismoshiach.org archive",
+      "author": {"@type": "Person", "name": "Rabbi Boruch Merkur"},
+      "datePublished": PUBLISHED, "description": DEK}
+head = head.replace("</head>", (
+    '<link rel="canonical" href="{u}">\n'
+    '<meta name="description" content="{d}">\n'
+    '<meta property="og:type" content="article">\n'
+    '<meta property="og:title" content="{t}">\n'
+    '<meta property="og:description" content="{d}">\n'
+    '<meta property="og:url" content="{u}">\n'
+    '<meta property="og:site_name" content="beismoshiach.org">\n'
+    '<meta name="twitter:card" content="summary">\n'
+    '<meta name="twitter:title" content="{t}">\n'
+    '<meta name="twitter:description" content="{d}">\n'
+    '<script type="application/ld+json">{ld}</script>\n</head>').format(
+        u=URL, d=E(DEK), t=E(TITLE), ld=json.dumps(ld, ensure_ascii=False)))
+if "noindex" in head:
+    raise SystemExit("the shell carries a noindex; not publishing over it")
 
 words = len(re.sub(r"<[^>]+>", " ", BODY).split())
 page = head + """<body>
@@ -140,7 +162,7 @@ page = head + """<body>
   </div>
 </header>
 <main class="wrap"><article class="entry">
-  <div class="entry-eyebrow"><span class="au">Rabbi Boruch Merkur</span> · <span>9 Kislev 5787</span></div>
+  <div class="entry-eyebrow"><span class="au">Rabbi Boruch Merkur</span> · <span>November 19, 2026</span></div>
   <h1 class="entry-title">%s</h1>
   <p class="entry-pull">%s</p>
   <div class="entry-body">%s</div>

@@ -1134,7 +1134,25 @@ MEMORIAL = {
 # spotlight (one day ahead of its stated 16 November, since that run builds the
 # page for Shabbos Vayeitzei, 21 November). Kept below for the shape of an entry.
 # The 10 Kislev piece the week would want is already on the page as a card.
-FEATURE = None
+#
+# Put up 19 November 2026, 9 Kislev 5787: "Many Waters", written for 9 and
+# 10 Kislev (tools/build_many_waters.py). It is new and sits on no tag page,
+# so the schedule cannot reach it; it goes in by hand. The dek is the
+# article's own. It has no picture yet and runs as type; when the picture is
+# set at storage/art/articles/many-waters.jpg, add "img" here.
+#
+# Comes down at the first run after 10 Kislev: Sunday 22 November 2026.
+FEATURE = [
+    {
+        "href": "articles/many-waters.html",
+        "kicker": "9 and 10 Kislev",
+        "title": "Many Waters",
+        "dek": "“Mayim rabim, many waters,” is the verse the Mitteler Rebbe "
+               "opened with in Dobromysl, on the first day of the journey to "
+               "his imprisonment in Vitebsk.",
+        "meta": "Rabbi Boruch Merkur",
+    },
+]
 _FEATURE_KINUS_5787 = [
     {
         # Put up 9 November 2026, the closing day of the 43rd Kinus. From
@@ -1524,19 +1542,37 @@ def _em(s):
     nothing else does, so exactly that one tag is let back through."""
     return esc(s).replace("&lt;em&gt;", "<em>").replace("&lt;/em&gt;", "</em>")
 
+def _feature_open(f):
+    m = SLUG_HREF.match(f["href"])
+    if f.get("img") or not m:
+        return ""
+    a = read_article(m.group(1))
+    if not a or not a.get("x"):
+        return ""
+    return '    <p class="feat-open">%s</p>\n' % esc(a["x"])
+
 def _one_feature(f):
     off = "://" in f["href"]
     return (
         '\n  <p class="kick">{k}</p>\n'
-        '  <a class="feature reveal" href="{h}"{t}>\n'
-        '    <figure><img src="{i}" alt="" loading="lazy"></figure>\n'
+        '  <a class="feature reveal{ty}" href="{h}"{t}>\n'
+        '{fig}'
         '    <div class="feat-txt"><h2>{ti}</h2><p class="dek">{d}</p>'
         '<p class="meta">{m}</p></div>\n'
+        '{op}'
         '  </a>\n'
     ).format(
+        # With no picture, the other half of the slot carries the piece's own
+        # opening lines, read off the article so the two cannot drift apart.
+        op=_feature_open(f),
         k=esc(f.get("kicker", "Featured")), h=esc(f["href"]),
         t=' target="_blank" rel="noopener"' if off else "",
-        i=esc(f["img"]), ti=esc(f["title"]), d=esc(f.get("dek", "")),
+        # A piece with no picture of its own runs as type, the full width of
+        # the slot, rather than borrow a picture that is about something else.
+        ty="" if f.get("img") else " type",
+        fig=('    <figure><img src="%s" alt="" loading="lazy"></figure>\n' % esc(f["img"]))
+            if f.get("img") else "",
+        ti=esc(f["title"]), d=esc(f.get("dek", "")),
         m=esc(f.get("meta", "")))
 
 def spotlight_html():
@@ -1982,6 +2018,10 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
         margin:0 0 .7rem;color:var(--ink)}
   .feature:hover h2{color:var(--royal)}
   .feature .dek{margin-bottom:.7rem}
+  .feature.type{grid-template-columns:1fr 1fr;align-items:start}
+  .feature .feat-open{margin:0;font-family:var(--display);font-size:1.18rem;line-height:1.5;
+    color:var(--ink);border-left:2px solid var(--royal);padding-left:1.1rem}
+  @media(max-width:820px){.feature.type{grid-template-columns:1fr}}
   @media(max-width:820px){.feature{grid-template-columns:1fr}.feature figure{order:-1}}
   /* A story in the news: a heading of its own and link-outs to the source. */
   /* Set apart from the magazine's own pieces: a royal panel, smaller than
