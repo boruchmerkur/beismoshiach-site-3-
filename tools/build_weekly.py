@@ -1142,7 +1142,11 @@ MEMORIAL = {
 # set at storage/art/articles/many-waters.jpg, add "img" here.
 #
 # Comes down at the first run after 10 Kislev: Sunday 22 November 2026.
-FEATURE = [
+#
+# Came down at the run of 22 November 2026 (page for Shabbos Vayishlach,
+# 18 Kislev); kept below for the shape of an entry.
+FEATURE = None
+_FEATURE_MANY_WATERS_5787 = [
     {
         "href": "articles/many-waters.html",
         "kicker": "9 and 10 Kislev",
