@@ -1,9 +1,10 @@
 // netlify/functions/lily-collect.js
-// Same-origin analytics collector. Deploys on EACH site at /api/lily.
+// Same-origin view collector. Deploys on EACH site at /api/lily.
 //
 // The edge function (lily-edge.js) on this same site POSTs its coarse,
 // already-anonymized event here — to this site's OWN origin. This collector's
 // only job is to relay that coarse count onward, server-to-server, to the
+// central dreamsite dashboard. Nothing raw ever reaches this point: the event
 // it receives has no IP and no full user-agent (only path, referrer host,
 // country, device class, and a daily-rotating one-way hash). So the only data
 // that ever crosses a domain boundary is aggregate, non-identifying counts —
@@ -13,6 +14,8 @@
 // RELAY_URL line and add your own store write instead.
 
 const RELAY_URL = 'https://dreamsitedesign.com/api/lily';
+// AI assistants' fetches (bots, never views) go to their own counter.
+const AI_URL = 'https://dash--the-dash.netlify.app/api/aifetch';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -34,6 +37,25 @@ export default async (req, context) => {
 
   let payload;
   try { payload = await req.json(); } catch { return new Response('Bad JSON', { status: 400, headers: CORS }); }
+
+  // An AI assistant's verified fetch (lily-edge.js v3): a bot, never a view, so
+  // it goes to its own counter, not the view counter. Only these fields go.
+  if (payload.event === 'aifetch') {
+    const ai = {
+      host: String(payload.host || '').slice(0, 128),
+      path: String(payload.path || '/').slice(0, 200),
+      bot:  String(payload.bot  || '').slice(0, 16),
+      kind: String(payload.kind || '').slice(0, 8),
+      country: String(payload.country || '').slice(0, 8)
+    };
+    const sent = fetch(AI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-lily-relay': '1' },
+      body: JSON.stringify(ai)
+    }).catch((e) => { console.error('lily-collect ai relay failed:', e); });
+    if (typeof context?.waitUntil === 'function') context.waitUntil(sent); else await sent;
+    return pixel();
+  }
 
   // Forward only the coarse fields — nothing else is accepted or added.
   const coarse = {
