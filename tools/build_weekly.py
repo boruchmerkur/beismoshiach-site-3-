@@ -455,6 +455,23 @@ def main():
                         on.setdefault(sl, d2.isoformat())
                         if sl not in tags:
                             tags.append(sl)
+        # An occasion on the Sunday after this Shabbos begins on Motzei
+        # Shabbos, and this Shabbos is its erev; but the page does not turn
+        # over to the next week until Sunday's date, so the farbrengen on
+        # Motzei Shabbos was being met by a page that did not know the day.
+        # Found at the run of 25 November 2026: Yud-Tes Kislev 5787 falls on
+        # Sunday 29 November and sat only on Vayeishev's week, out of reach
+        # all through Shabbos Vayishlach, 18 Kislev. It goes on both weeks;
+        # its `on` date keeps it from being treated as past on either.
+        d2 = sat + datetime.timedelta(days=1)
+        h2 = dates.GregorianDate(d2.year, d2.month, d2.day).to_heb()
+        cands = OCCASIONS.get((h2.month, h2.day))
+        if cands:
+            sl = pick_slug(cands, tagmap)
+            if sl:
+                on.setdefault(sl, d2.isoformat())
+                if sl not in tags:
+                    tags.append(sl)
         hsat = hd.to_heb()
         # The Shabbos after Simchas Torah (Bereishis, 24-29 Tishrei) belongs to
         # the year ahead, not to the month behind it: "V'Yaakov halach
