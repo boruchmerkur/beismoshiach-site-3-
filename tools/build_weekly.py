@@ -679,6 +679,8 @@ def pinned_slugs():
         m = SLUG_HREF.match((it or {}).get("href", "") or "")
         if m:
             out.add(m.group(1))
+    for a in reel_more():
+        out.add(a["s"])
     return out
 
 def pick(data, wk, n=7, half=0, skip=()):
@@ -1563,6 +1565,58 @@ def _em(s):
     nothing else does, so exactly that one tag is let back through."""
     return esc(s).replace("&lt;em&gt;", "<em>").replace("&lt;/em&gt;", "</em>")
 
+# A video at the head of the landing, above the week's lead. The player is the
+# owner's own embed, so the video stays his and plays from his page; beside it
+# go pieces of ours on the same subject, so the band is not a player standing
+# next to nothing. Set REEL = None to take it down.
+#
+# Put up 26 November 2026, Thanksgiving Day, at his request, to stand "until a
+# few days after Thanksgiving".
+#
+# Comes down at the run of Sunday 29 November 2026.
+REEL = {
+    "kicker": "Thanksgiving",
+    "title": "What the Rebbe taught about Thanksgiving",
+    "by": "R’ Mendel Duchman",
+    "href": "https://www.facebook.com/reel/2433892713686096",
+    "more_kicker": "On giving thanks, from the archive",
+    "more": ["to-give-thanks", "thanking-for-the-good",
+             "ultimate-gratitude-and-joy", "truly-grateful-for-lifes-challenges"],
+}
+
+def reel_more():
+    """The archive pieces listed beside the video that exist and read soundly."""
+    out = []
+    for slug in (REEL or {}).get("more", []):
+        a = read_article(slug)
+        if a and not looks_broken(a):
+            out.append(a)
+    return out
+
+def reel_html():
+    if not REEL:
+        return ""
+    from urllib.parse import quote
+    src = ("https://www.facebook.com/plugins/video.php?href=%s&show_text=false&width=640"
+           % quote(REEL["href"], safe=""))
+    items = "".join(
+        '<li><a href="articles/%s.html">%s</a>%s</li>' % (
+            a["s"], esc(a["t"]),
+            '<span class="by">%s</span>' % esc(a["a"]) if a.get("a") else "")
+        for a in reel_more())
+    more = ('<p class="kick">%s</p><ul class="reel-more">%s</ul>'
+            % (esc(REEL.get("more_kicker", "From the archive")), items)) if items else ""
+    return (
+        '  <section class="reel">\n'
+        '    <div class="reel-v"><iframe src="{src}" title="{ti}" scrolling="no" '
+        'allow="encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe></div>\n'
+        '    <div class="reel-t"><p class="kick">{k}</p><h2>{ti}</h2>'
+        '<p class="meta"><a href="{h}" target="_blank" rel="noopener">{by} · on Facebook</a></p>'
+        '{more}</div>\n'
+        '  </section>\n'
+    ).format(src=esc(src), ti=esc(REEL["title"]), k=esc(REEL.get("kicker", "Video")),
+             h=esc(REEL["href"]), by=esc(REEL.get("by", "")), more=more)
+
 def _feature_open(f):
     m = SLUG_HREF.match(f["href"])
     if f.get("img") or not m:
@@ -1915,6 +1969,7 @@ def render_landing(data):
     write_memorial_page()
     page = LANDING.replace("{{MEMORIAL}}", memorial_band()) \
                   .replace("{{FEATURE}}", feature_html()) \
+                  .replace("{{REEL}}", reel_html()) \
                   .replace("{{NOW}}", now_html(fetch_now())) \
                   .replace("{{PINNED}}", esc(" ".join(sorted(pinned)))) \
                   .replace("{{SPOTLIGHT}}", spotlight_html()) \
@@ -2040,6 +2095,23 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
   .feature:hover h2{color:var(--royal)}
   .feature .dek{margin-bottom:.7rem}
   .feature.type{grid-template-columns:1fr 1fr;align-items:start}
+  .reel{display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(1.2rem,3vw,2.4rem);align-items:start;
+        padding-bottom:1.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--rule)}
+  .reel-v{position:relative;aspect-ratio:4/3;background:#0a0a0b;border-radius:3px;overflow:hidden}
+  .reel-v iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .reel h2{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,2.6vw,2.2rem);
+        line-height:1.12;letter-spacing:-.01em;margin:0 0 .5rem;color:var(--ink)}
+  .reel .meta{margin-bottom:1.3rem}
+  .reel .meta a{color:inherit}
+  .reel-more{list-style:none;margin:0;padding:0}
+  .reel-more li{padding:.6rem 0;border-bottom:1px solid var(--rule)}
+  .reel-more li:last-child{border-bottom:0;padding-bottom:0}
+  .reel-more a{display:block;font-family:var(--display);font-weight:600;font-size:1.1rem;
+        line-height:1.25;color:var(--ink);text-decoration:none}
+  .reel-more a:hover{color:var(--royal)}
+  .reel-more .by{display:block;margin-top:.2rem;font-family:var(--mono);font-size:.7rem;
+        letter-spacing:.04em;color:var(--ink-soft)}
+  @media(max-width:820px){.reel{grid-template-columns:1fr}}
   .feature .feat-open{margin:0;font-family:var(--display);font-size:1.18rem;line-height:1.5;
     color:var(--ink);border-left:2px solid var(--royal);padding-left:1.1rem}
   @media(max-width:820px){.feature.type{grid-template-columns:1fr}}
@@ -2107,7 +2179,7 @@ LANDING = r"""<!DOCTYPE html><html lang="en"><head>
 </div></header>
 <main class="wk" data-week="{{WEEK}}" data-pinned="{{PINNED}}">
 {{MEMORIAL}}
-  <div class="top{{SPLIT}}"><div class="top-a">
+{{REEL}}  <div class="top{{SPLIT}}"><div class="top-a">
   <p class="kick" id="kick">This week · {{KICKER}}</p>
   <div id="lead">{{LEAD}}</div>
   </div>{{SPOTLIGHT}}</div>

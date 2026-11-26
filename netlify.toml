@@ -38,7 +38,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
-    Content-Security-Policy = "default-src 'self'; img-src 'self' https: data:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://dreamsitedesign.com https://cdnjs.cloudflare.com; connect-src 'self' https://dreamsitedesign.com; frame-src https://www.moshiach101.info https://moshiach101.info; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' https: data:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://dreamsitedesign.com https://cdnjs.cloudflare.com; connect-src 'self' https://dreamsitedesign.com; frame-src https://www.moshiach101.info https://moshiach101.info https://www.facebook.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
 
 # Netlify Image CDN, for /science/. The wire hands back pictures hosted by the
 # outlet that published them, and this page asks for each at the size its slot
